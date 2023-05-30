@@ -53,7 +53,18 @@ class Expression():
     def __rpow__(self, other):
         if isinstance(other, Num):
             return Pow(Number(other), self)
+        
+    def sin(other):
+        if isinstance(other, Num):
+            return Sin(Number(other))
 
+    def cos(other):
+        if isinstance(other, Num):
+            return Cos(Number(other))
+        
+    def exp(other):
+        if isinstance(other, Num):
+            return Exp(Number(other))
 
 class Terminal(Expression):
     """Symbols used in expression."""
@@ -143,7 +154,28 @@ class Pow(Operator):
     """Power operator."""
 
     symbol = "^"
+    precedence = 4
+
+
+class Sin(Operator):
+    """Sin operator/function."""
+
+    symbol = "Sin"
     precedence = 3
+
+
+class Cos(Operator):
+    """Cos operator/function."""
+
+    symbol = "Cos"
+    precedence = 3
+
+
+class Exp(Operator):
+    """Sin operator/function."""
+
+    symbol = "Exp"
+    precedence = 4
 
 
 def postvisitor(expr, fn, **kwargs):
@@ -151,18 +183,18 @@ def postvisitor(expr, fn, **kwargs):
     stack = [expr]
     visited = {}
     while stack:
-        e = stack.pop()
+        element = stack.pop()
         unvisited_children = []
-        for o in e.operands:
-            if o not in visited:
-                unvisited_children.append(o)
+        for operand in element.operands:
+            if operand not in visited:
+                unvisited_children.append(operand)
         if unvisited_children:
-            stack.append(e)
+            stack.append(element)
             for x in unvisited_children:
                 stack.append(x)
         else:
-            visited[e] = fn(e,
-                            *(visited[o] for o in e.operands),
+            visited[element] = fn(element,
+                            *(visited[operand] for operand in element.operands),
                             **kwargs)
     return visited[expr]
 
