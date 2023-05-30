@@ -17,6 +17,8 @@ class Expression():
     def __radd__(self, other):
         if isinstance(other, Num):
             return Add(Number(other), self)
+        else:
+            return NotImplemented
 
     def __sub__(self, other):
         if isinstance(other, Num):
@@ -26,6 +28,8 @@ class Expression():
     def __rsub__(self, other):
         if isinstance(other, Num):
             return Sub(Number(other), self)
+        else:
+            return NotImplemented
 
     def __mul__(self, other):
         if isinstance(other, Num):
@@ -35,6 +39,8 @@ class Expression():
     def __rmul__(self, other):
         if isinstance(other, Num):
             return Mul(Number(other), self)
+        else:
+            return NotImplemented
 
     def __truediv__(self, other):
         if isinstance(other, Num):
@@ -44,6 +50,8 @@ class Expression():
     def __rtruediv__(self, other):
         if isinstance(other, Num):
             return Div(Number(other), self)
+        else:
+            return NotImplemented
 
     def __pow__(self, other):
         if isinstance(other, Num):
@@ -53,18 +61,9 @@ class Expression():
     def __rpow__(self, other):
         if isinstance(other, Num):
             return Pow(Number(other), self)
-        
-    def sin(other):
-        if isinstance(other, Num):
-            return Sin(Number(other))
+        else:
+            return NotImplemented
 
-    def cos(other):
-        if isinstance(other, Num):
-            return Cos(Number(other))
-        
-    def exp(other):
-        if isinstance(other, Num):
-            return Exp(Number(other))
 
 class Terminal(Expression):
     """Symbols used in expression."""
@@ -126,56 +125,35 @@ class Add(Operator):
     """Addition operator."""
 
     symbol = "+"
-    precedence = 1
+    precedence = 0
 
 
 class Mul(Operator):
     """Multiplication operator."""
 
     symbol = "*"
-    precedence = 2
+    precedence = 1
 
 
 class Sub(Operator):
     """Subtraction operator."""
 
     symbol = "-"
-    precedence = 1
+    precedence = 0
 
 
 class Div(Operator):
     """Division operator."""
 
     symbol = "/"
-    precedence = 2
+    precedence = 1
 
 
 class Pow(Operator):
     """Power operator."""
 
     symbol = "^"
-    precedence = 4
-
-
-class Sin(Operator):
-    """Sin operator/function."""
-
-    symbol = "Sin"
-    precedence = 3
-
-
-class Cos(Operator):
-    """Cos operator/function."""
-
-    symbol = "Cos"
-    precedence = 3
-
-
-class Exp(Operator):
-    """Sin operator/function."""
-
-    symbol = "Exp"
-    precedence = 4
+    precedence = 2
 
 
 def postvisitor(expr, fn, **kwargs):

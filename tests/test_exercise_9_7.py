@@ -1,6 +1,6 @@
 import pytest
 from functools import singledispatch
-from expressions.expressions import Symbol, Number, \
+from rmad.expressions import Symbol, Number, \
     Add, Sub, Mul, Div, Pow
 
 
@@ -73,7 +73,7 @@ def _(expr, *o, **kwargs):
 
 @pytest.fixture
 def sample_expr_set():
-    from expressions.expressions import Symbol, Number
+    from rmad.expressions import Symbol, Number
     x = Symbol('x')
     y = Symbol('y')
     tests = [(3 * x + 2**(y / 5) - 1, 1.5, 10, 7.5),
@@ -91,7 +91,7 @@ def sample_expr_set():
     (3)
 ])
 def test_no_recursion_evaluate(sample_expr_set, idx):
-    from expressions.expressions import postvisitor
+    from rmad.expressions import postvisitor
     expr, x, y, val = sample_expr_set[idx]
     assert postvisitor(expr, evaluate_test,
                        symbol_map={'x': x, 'y': y}) == val, \

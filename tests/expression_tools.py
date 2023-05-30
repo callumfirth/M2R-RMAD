@@ -1,5 +1,5 @@
 from functools import singledispatch
-from expressions import *
+from rmad.expressions import *
 
 
 @singledispatch
@@ -26,37 +26,37 @@ def evaluate(expr, *o, **kwargs):
 
 
 
-@evaluate.register(expressions.Number)
+@evaluate.register(Number)
 def _(expr, *o, **kwargs):
     return expr.value
 
 
-@evaluate.register(expressions.Symbol)
+@evaluate.register(Symbol)
 def _(expr, *o, symbol_map, **kwargs):
     return symbol_map[expr.value]
 
 
-@evaluate.register(expressions.Add)
+@evaluate.register(Add)
 def _(expr, *o, **kwargs):
     return o[0] + o[1]
 
 
-@evaluate.register(expressions.Sub)
+@evaluate.register(Sub)
 def _(expr, *o, **kwargs):
     return o[0] - o[1]
 
 
-@evaluate.register(expressions.Mul)
+@evaluate.register(Mul)
 def _(expr, *o, **kwargs):
     return o[0] * o[1]
 
 
-@evaluate.register(expressions.Div)
+@evaluate.register(Div)
 def _(expr, *o, **kwargs):
     return o[0] / o[1]
 
 
-@evaluate.register(expressions.Pow)
+@evaluate.register(Pow)
 def _(expr, *o, **kwargs):
     return o[0] ** o[1]
 

@@ -1,13 +1,13 @@
 import pytest
 try:
-    from expressions.expressions import Symbol, Number, \
+    from rmad.expressions import Symbol, Number, \
         Add, Sub, Mul, Div, Pow
 except ImportError:
     pass
 
 
 def test_imports():
-    from expressions.expressions import Symbol, Number, \
+    from rmad.expressions import Symbol, Number, \
         Add, Sub, Mul, Div, Pow  # NoQA F401
 
 
