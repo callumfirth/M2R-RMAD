@@ -173,27 +173,27 @@ class Pow(Operator):
 
 
 class Sin(Function):
-    """Power operator."""
+    """Sine function."""
 
     symbol = "sin"
-
+    precedence = 3
 
 class Cos(Function):
-    """Power operator."""
+    """Cosine function."""
 
     symbol = "cos"
     precedence = 3
 
 
 class Exp(Function):
-    """Power operator."""
+    """Exponential function."""
 
     symbol = "exp"
     precedence = 4
 
 
 class Log(Function):
-    """Power operator."""
+    """Logarithmic function."""
 
     symbol = "log"
     precedence = 4
@@ -277,3 +277,17 @@ def _(expr, *o, **kwargs):
 @differentiate.register(Exp)
 def _(expr, *o, **kwargs):
     return o[0]*Exp(expr.operands[0])
+
+
+#Can run these to see output
+x = Symbol('x')
+y = Symbol('y')
+sin = Sin(x**2)
+print(repr((2 - 1) + x + 1 - x ** Sin(x**2)))
+print(repr((2 - 1) + x + 1 - x ** sin))
+print(repr((2 - 1) + x + 1 - x ** Cos(x)))
+print(str(Sin(x**2)), repr(Sin(x**2)))
+
+print(postvisitor(2 * x + Sin(x), differentiate, var='x'))
+print(postvisitor(2 * x + Cos(2 * x), differentiate, var='x'))
+print(postvisitor(2 * x + Exp(x ** 2), differentiate, var='x'))
