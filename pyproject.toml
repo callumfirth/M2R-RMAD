@@ -3,6 +3,5 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "M2R Project"
+name = "M2RProject"
 version = "0.1"
-dependencies = ["math", "numpy"]
