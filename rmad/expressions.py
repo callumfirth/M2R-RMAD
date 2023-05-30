@@ -1,6 +1,8 @@
 """Module to represent mathematical expressions."""
 from numbers import Number as Num
 from functools import singledispatch
+import math
+from token import OP
 
 
 class Expression():
@@ -63,12 +65,17 @@ class Expression():
             return Pow(Number(other), self)
         else:
             return NotImplemented
+        
+    def sin(self):
+        return Sin(self)
+
+
 
 
 class Terminal(Expression):
     """Symbols used in expression."""
 
-    precedence = 3
+    precedence = 5
 
     def __init__(self, value):
         self.value = value
@@ -121,6 +128,16 @@ class Operator(Expression):
                          parenth(self.operands[1])))
 
 
+class Function(Operator):
+
+    def __repr__(self):
+        return type(self).__name__ + "(" + repr(self.operands[0]) + ")"
+
+    def __str__(self):
+        return self.symbol + "(" + str(self.operands[0]) + ")"
+
+    precedence = 3
+
 class Add(Operator):
     """Addition operator."""
 
@@ -153,8 +170,30 @@ class Pow(Operator):
     """Power operator."""
 
     symbol = "^"
-    precedence = 2
+    precedence = 4
 
+class Sin(Function):
+    """Power operator."""
+
+    symbol = "sin"
+    
+class Cos(Function):
+    """Power operator."""
+
+    symbol = "cos"
+    precedence = 3
+
+class Exp(Function):
+    """Power operator."""
+
+    symbol = "exp"
+    precedence = 4
+
+class Log(Function):
+    """Power operator."""
+
+    symbol = "log"
+    precedence = 4
 
 def postvisitor(expr, fn, **kwargs):
     """Visit an expression in post-order applying a function."""
@@ -218,3 +257,17 @@ def _(expr, *o, **kwargs):
 def _(expr, *o, **kwargs):
     return expr.operands[1] * (expr.operands[0] **
                                (expr.operands[1] - 1)) * o[0]
+
+@differentiate.register(Sin)
+def _(expr, *o, **kwargs):
+    return o[0]*Cos(expr.operands[0])
+
+
+@differentiate.register(Cos)
+def _(expr, *o, **kwargs):
+    return o[0]*Sin(expr.operands[0])  # Negation doesnt work yet
+
+
+@differentiate.register(Exp)
+def _(expr, *o, **kwargs):
+    return o[0]*Exp(expr.operands[0])
