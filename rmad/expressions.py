@@ -65,11 +65,9 @@ class Expression():
             return Pow(Number(other), self)
         else:
             return NotImplemented
-        
+
     def sin(self):
         return Sin(self)
-
-
 
 
 class Terminal(Expression):
@@ -137,6 +135,7 @@ class Function(Operator):
         return self.symbol + "(" + str(self.operands[0]) + ")"
 
     precedence = 3
+
 
 class Add(Operator):
     """Addition operator."""
@@ -216,8 +215,9 @@ def postvisitor(expr, fn, **kwargs):
                 stack.append(x)
         else:
             visited[element] = fn(element,
-                            *(visited[operand] for operand in element.operands),
-                            **kwargs)
+                                  *(visited[operand] for operand in
+                                    element.operands),
+                                  **kwargs)
     return visited[expr]
 
 
@@ -262,6 +262,7 @@ def _(expr, *o, **kwargs):
 def _(expr, *o, **kwargs):
     return expr.operands[1] * (expr.operands[0] **
                                (expr.operands[1] - 1)) * o[0]
+
 
 @differentiate.register(Sin)
 def _(expr, *o, **kwargs):
