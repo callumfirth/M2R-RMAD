@@ -172,16 +172,19 @@ class Pow(Operator):
     symbol = "^"
     precedence = 4
 
+
 class Sin(Function):
     """Power operator."""
 
     symbol = "sin"
-    
+
+
 class Cos(Function):
     """Power operator."""
 
     symbol = "cos"
     precedence = 3
+
 
 class Exp(Function):
     """Power operator."""
@@ -189,11 +192,13 @@ class Exp(Function):
     symbol = "exp"
     precedence = 4
 
+
 class Log(Function):
     """Power operator."""
 
     symbol = "log"
     precedence = 4
+
 
 def postvisitor(expr, fn, **kwargs):
     """Visit an expression in post-order applying a function."""
