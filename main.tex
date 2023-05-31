@@ -1,14 +1,82 @@
 \documentclass{article}
 \usepackage{graphicx} % Required for inserting images
-
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage{amssymb}
 \title{M2R-RMAD}
-\author{cf1021, sam221, aml21, ms621}
+\author{cf1021, sam221, aml21, mf621}
 \date{May 2023}
 
 \begin{document}
-
 \maketitle
-
+\tableofcontents
+\newpage
 \section{Introduction}
+
+The calculation of derivatives effectively and quickly is essential in modern mathematics and computation. The use of derivatives in algorithms is increasingly important as artificial intelligence becomes more prevalent.
+\\\\
+When solving non-linear systems one method is Newton-Raphson in which iterates are calculated using
+\begin{equation}
+x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}
+\end{equation}
+given an initial $x_0$. Hence the computation of derivatives of functions is key in finding the solutions of non-linear systems.
+\\\\
+Computing algorithms like Newton-Raphson effectively is necessary to later carry out weight optimisation when working with neural nets. We see this when minimising things like the sum of residual squares, we must first compute a derivative with respect to our weight if we want to find the minimum.
+\\\\
+There are three common ways to differentiate a function on a computer: symbolically, numerically and by algorithmically. The latter of which we will be discussing in depth in this paper. Notably focusing on reverse mode algorithmic differentiation (AD).
+
+\section{Basics of Computing Derivatives}
+
+Symbolic differentiation involves taking an algebraic expression and computing its derivative with respect to a specified variable through repeated application of basic rules of calculus. It can be useful as, once the formula for the derivative is computed, finding the value of the derivative at certain points just requires substituting those values into the formula. However, it has the drawback that it can only be applied when the function to be differentiated exists in a closed form. 
+\\\\
+The most common example of numerical differentiation is the finite differences method. Using a truncated Taylor series around $x$ the derivative can be approximated as
+\begin{equation}
+    f'(x) \approx \frac{f(x+h)-f(x)}{h}
+\end{equation}
+This calculation for the derivative is approximate due to the error in the truncated Taylor series.
+
+\textbf{Reference from the Wiley thing DHAM sent us}
+\\\\
+There are two forms of algorithmic differentiation: forward-mode and reverse-mode. Both have similar computational cost but are suited to different types of function. Suppose 	$F: \mathbb{R}^n\rightarrow\mathbb{R}^m$, $F(u_1, \cdots, u_n) = (v_1, \cdots, v_m)$ and you want to compute 
+\begin{equation}
+\frac{\partial v_i}{\partial u_1}, \cdots, \frac{\partial v_i}{\partial u_n} \quad \quad i \in \{1, \ldots, m\}
+\end{equation}
+with forward-mode algorithmic differentiation, this has computational cost O(n) where n is the number of input variables. This means that it this method is more suited to functions with fewer input variables. In contrast, the computational cost for computing these partial derivatives with reverse-mode algorithmic differentiation is O(m) where m is the number of output variables. This means it is more suited to functions with fewer output variables.
+One drawback of reverse-mode algorithmic differentiation over forward-mode is that, as intermediary values are stored, it requires higher memory usage.
+\\\\
+\textbf{REFERENCE: https://rufflewind.com/2016-12-30/reverse-mode-automatic-differentiation}
+
+\section{Reverse Mode Algorithmic Differentiation}
+
+The key to AD is using the chain rule to split a complicated function into multiple elementary functions (We consider these to be +, -, *, /, \textasciicircum, sin, cos, exp, log) of which we know the derivatives of and are easy to compute. We use these partial derivatives obtained and used to calculate the derivative of the function.
+Suppose we had a functions $f:\mathbb{R}^m \rightarrow \mathbb{R}$, $g:\mathbb{R}^l \rightarrow \mathbb{R}^m$, $h:\mathbb{R}^p \rightarrow \mathbb{R}^l$ And $u \in \mathbb{R}^p$, $y \in \mathbb{R}$ And we let
+\begin{equation}
+    y = f(g(h(u))) = f(g(h(v_0))) = f(g(v_1)) = f(v_2) = v_3
+\end{equation}
+If we want to calculate the derivative of $y$ then by the chain rule we have to calculate:
+\begin{equation}
+    \frac{\partial{y}}{\partial{u}} = \frac{\partial{f(v_2)}}{\partial{v_2}}\frac{\partial{g(v_1)}}{\partial{v_1}}\frac{\partial{h(v_0)}}{\partial{v_0}}
+\end{equation}
+By forward mode AD we would calculate
+\begin{equation}
+    \frac{\partial{y}}{\partial{u}} = \left(\frac{\partial{f(v_2)}}{\partial{v_2}}\frac{\partial{g(v_1)}}{\partial{v_1}}\right)\frac{\partial{h(v_0)}}{\partial{v_0}}
+\end{equation}
+Where we calculate the product of the first two partial derivatives first and then work our way towards the end, hence the name forward mode.
+\\\\
+By reverse mode AD we would calculate
+\begin{equation}
+    \frac{\partial{y}}{\partial{u}} = \frac{\partial{f(v_2)}}{\partial{v_2}}\left(\frac{\partial{g(v_1)}}{\partial{v_1}}\frac{\partial{h(v_0)}}{\partial{v_0}}\right)
+\end{equation}
+Where we calculate the product of the last two partial derivatives first, and then we work backwards, hence the name reverse mode.
+
+Note if we have that
+
+
+
+\section{Implementation in Python}
+
+\section{Applications}
+
+\section{References}
+\textbf{For the moment once you write something put the references at the end on the section then later we can order/number them correctly at the end}
 
 \end{document}
