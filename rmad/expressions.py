@@ -137,7 +137,6 @@ class Function(Operator):
     precedence = 3
 
 
-
 class Add(Operator):
     """Addition operator."""
 
@@ -173,7 +172,6 @@ class Pow(Operator):
     precedence = 4
 
 
-
 class Sin(Function):
     """Sine function."""
 
@@ -193,7 +191,6 @@ class Exp(Function):
 
     symbol = "exp"
     precedence = 4
-
 
 
 class Log(Function):
