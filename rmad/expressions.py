@@ -66,9 +66,6 @@ class Expression():
         else:
             return NotImplemented
 
-    def sin(self):
-        return Sin(self)
-
 
 class Terminal(Expression):
     """Symbols used in expression."""
@@ -89,13 +86,22 @@ class Terminal(Expression):
 class Number(Terminal):
     """Numbers used in the expression."""
 
-    def __init__(self, value):
+    def __init__(self, value, adjoint=None):
         if not isinstance(value, Num):
             raise TypeError(
                 f"Number value must be number not {type(value)}"
             )
         super().__init__(value)
+        self.adjoint = adjoint
 
+    #def __add__(self, other):
+    #    return Number(self.value+other.value, [(self, 1), (other, 1)])
+    #def __sub__(self, other):
+    #    return Number(self.value-other.value, [(self, 1), (other, -1)])
+    #def __mul__(self, other):
+    #    return Number(self.value*other.value, [(self, other.value), (other, self.value)])
+    #def __truediv__(self, other):
+    #    return Number(self.value/other.value, [(self, 1/other.value), (other, -1*self.value/other.value**2)])
 
 class Symbol(Terminal):
     """Symbols used in the expression."""
@@ -137,6 +143,7 @@ class Function(Operator):
     precedence = 3
 
 
+
 class Add(Operator):
     """Addition operator."""
 
@@ -172,11 +179,13 @@ class Pow(Operator):
     precedence = 4
 
 
+
 class Sin(Function):
     """Sine function."""
 
     symbol = "sin"
     precedence = 3
+
 
 class Cos(Function):
     """Cosine function."""
@@ -192,11 +201,13 @@ class Exp(Function):
     precedence = 4
 
 
+
 class Log(Function):
     """Logarithmic function."""
 
     symbol = "log"
     precedence = 4
+
 
 
 def postvisitor(expr, fn, **kwargs):
@@ -213,7 +224,7 @@ def postvisitor(expr, fn, **kwargs):
             stack.append(element)
             for x in unvisited_children:
                 stack.append(x)
-        else:
+        else:  # Need to modify this to stores tuple? with val and adjoint
             visited[element] = fn(element,
                                   *(visited[operand] for operand in
                                     element.operands),
@@ -271,7 +282,7 @@ def _(expr, *o, **kwargs):
 
 @differentiate.register(Cos)
 def _(expr, *o, **kwargs):
-    return o[0]*Sin(expr.operands[0])  # Negation doesnt work yet
+    return -1.0*o[0]*Sin(expr.operands[0])  # Negation doesnt work yet
 
 
 @differentiate.register(Exp)
@@ -283,11 +294,21 @@ def _(expr, *o, **kwargs):
 x = Symbol('x')
 y = Symbol('y')
 sin = Sin(x**2)
-print(repr((2 - 1) + x + 1 - x ** Sin(x**2)))
-print(repr((2 - 1) + x + 1 - x ** sin))
-print(repr((2 - 1) + x + 1 - x ** Cos(x)))
+print(str((2 - 1) + x + 1 - x ** Sin(x**2)))
+print(str((2 - 1) + x + 1 - x ** sin))
+print(str((2 - 1) + x + 1 - x ** Cos(x)))
 print(str(Sin(x**2)), repr(Sin(x**2)))
 
-print(postvisitor(2 * x + Sin(x), differentiate, var='x'))
+#print(postvisitor(2 * x + Sin(x), differentiate, var='x'))
 print(postvisitor(2 * x + Cos(2 * x), differentiate, var='x'))
+print(repr(postvisitor(2 * x + Cos(2 * x), differentiate, var='x')))
 print(postvisitor(2 * x + Exp(x ** 2), differentiate, var='x'))
+
+#expr = 2 * x + Exp(x ** 2)
+
+#a = Number(4)
+#b = Number(8)
+#c = a / b
+#print(c,c.adjoint)
+
+print(repr((2 - 1) + x + y - x ** sin))
