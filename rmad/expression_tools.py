@@ -1,5 +1,6 @@
 from functools import singledispatch
 import expressions
+import math
 
 
 @singledispatch
@@ -54,28 +55,22 @@ def _(expr, *o, **kwargs):
 def _(expr, *o, **kwargs):
     return o[0] / o[1]
 
-
 @evaluate.register(expressions.Pow)
 def _(expr, *o, **kwargs):
     return o[0] ** o[1]
 
+@evaluate.register(expressions.Sin)
+def _(expr, *o, **kwargs):
+    return math.sin(o[0])
 
-def postvisitor(expr, fn, **kwargs):
-    '''Visit an Expression in postorder applying a function to every node.
+@evaluate.register(expressions.Cos)
+def _(expr, *o, **kwargs):
+    return math.cos(o[0])
 
-    Parameters
-    ----------
-    expr: Expression
-        The expression to be visited.
-    fn: `function(node, *o, **kwargs)`
-        A function to be applied at each node. The function should take
-        the node to be visited as its first argument, and the results of
-        visiting its operands as any further positional arguments. Any
-        additional information that the visitor requires can be passed in
-        as keyword arguments.
-    **kwargs:
-        Any additional keyword arguments to be passed to fn.
-    '''
-    return fn(expr,
-              *(postvisitor(c, fn, **kwargs) for c in expr.operands),
-              **kwargs)
+@evaluate.register(expressions.Exp)
+def _(expr, *o, **kwargs):
+    return math.exp(o[0])
+
+@evaluate.register(expressions.Log)
+def _(expr, *o, **kwargs):
+    return math.log(o[0])
