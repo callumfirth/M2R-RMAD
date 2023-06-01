@@ -112,7 +112,7 @@ print(evalpostvisitor(2 * x + expressions.Cos(2 * x), symbol_map={'x': 1.5, 'y':
 print(repr(evalpostvisitor(2 * x + expressions.Cos(2 * x), symbol_map={'x': 1.5, 'y': 10})))
 print(evalpostvisitor(2 * x + expressions.Exp(x ** 2), symbol_map={'x': 1.5, 'y': 10}))
 
-def previsitor(tree, fn_parent=None, **kwargs):
+def previsitor(expr, fn_parent=None, **kwargs):
     """Traverse tree in preorder applying a function to every node.
 
     Parameters
@@ -124,11 +124,25 @@ def previsitor(tree, fn_parent=None, **kwargs):
         the node to be visited as its first argument, and the result of
         visiting its parent as the second.
     """
-    fn_out = evaluate(tree, fn_parent, symbol_map=kwargs)[0]
 
+    # Initially we do postvisitor (forward traverse) the tree to get the value of the parent node
+    # This should be already run before previsitor
+    # fn_parent = evalpostvisitor(eval, **kwargs)
+    
+    stack = [expr]
+    element = expr.pop()
 
-    for child in tree.children:
-        previsitor(child, reverse_evaluate, fn_out, kwargs)
+    #Get the adjoint of the parent node (this is the seen and is set to 1)
+    element.adjoint = 1
+
+    #We then need to visit the children of the parent node
+
+    for counter, operand in enumerate(expr.operands):
+        operand.adjoint = evaluate(expr, )
+        fn_out = reverse_evaluate(expr, fn_parent, symbol_map=kwargs)[0]
+        previsitor(operand, fn, fn_out)
+    if expr.operands:
+
 
 expr = x**2 + 5*x
 
