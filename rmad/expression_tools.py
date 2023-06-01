@@ -74,3 +74,38 @@ def _(expr, *o, **kwargs):
 @evaluate.register(expressions.Log)
 def _(expr, *o, **kwargs):
     return math.log(o[0])
+
+def evalpostvisitor(expr, **kwargs):
+    """Visit an expression in post-order applying a function."""
+    stack = [expr]
+    visited = {}
+    while stack:
+        element = stack.pop()
+        unvisited_children = []
+        for operand in element.operands:
+            if operand not in visited:
+                unvisited_children.append(operand)
+        if unvisited_children:
+            stack.append(element)
+            for x in unvisited_children:
+                stack.append(x)
+        else:  # Need to modify this to stores tuple? with val and adjoint
+            visited[element] = evaluate(element,
+                                        *(visited[operand] for operand in
+                                          element.operands),
+                                        **kwargs)
+            element.storedvalue = visited[element]
+    return visited[expr]
+
+x = expressions.Symbol('x')
+
+y = expressions.Symbol('y')
+
+expr = 3*x + 2**(y/5) - 1
+
+evalpostvisitor(expr, symbol_map={'x': 1.5, 'y': 10})
+
+print(evalpostvisitor(expressions.Sin(x), symbol_map={'x': math.pi, 'y': 10}))
+print(evalpostvisitor(2 * x + expressions.Cos(2 * x), symbol_map={'x': 1.5, 'y': 10}))
+print(repr(evalpostvisitor(2 * x + expressions.Cos(2 * x), symbol_map={'x': 1.5, 'y': 10})))
+print(evalpostvisitor(2 * x + expressions.Exp(x ** 2), symbol_map={'x': 1.5, 'y': 10}))

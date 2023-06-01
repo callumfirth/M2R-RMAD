@@ -2,8 +2,6 @@
 from numbers import Number as Num
 from functools import singledispatch
 import math
-from token import OP
-from .expression_tools import evaluate
 
 
 class Expression():
@@ -11,7 +9,7 @@ class Expression():
 
     def __init__(self, *operands):
         self.operands = operands
-        self.value = 0
+        self.storedvalue = 0
         self.adjoint = math.nan
 
     def __add__(self, other):
@@ -200,29 +198,6 @@ class Log(Function):
     precedence = 4
 
 
-#Evaluate post visitor func
-def postvisitor(expr, **kwargs):
-    """Visit an expression in post-order applying a function."""
-    stack = [expr]
-    visited = {}
-    while stack:
-        element = stack.pop()
-        unvisited_children = []
-        for operand in element.operands:
-            if operand not in visited:
-                unvisited_children.append(operand)
-        if unvisited_children:
-            stack.append(element)
-            for x in unvisited_children:
-                stack.append(x)
-        else:  # Need to modify this to stores tuple? with val and adjoint
-            visited[element] = evaluate(element,
-                                        *(visited[operand] for operand in
-                                          element.operands),
-                                        **kwargs)
-    return visited[expr]
-
-
 @singledispatch
 def differentiate(expr, *o, **kwargs):
     """Differentiation implentation using postvisitor func."""
@@ -285,15 +260,15 @@ def _(expr, *o, **kwargs):
 x = Symbol('x')
 y = Symbol('y')
 sin = Sin(x**2)
-print(str((2 - 1) + x + 1 - x ** Sin(x**2)))
-print(str((2 - 1) + x + 1 - x ** sin))
-print(str((2 - 1) + x + 1 - x ** Cos(x)))
-print(str(Sin(x**2)), repr(Sin(x**2)))
+#print(str((2 - 1) + x + 1 - x ** Sin(x**2)))
+#print(str((2 - 1) + x + 1 - x ** sin))
+#print(str((2 - 1) + x + 1 - x ** Cos(x)))
+#print(str(Sin(x**2)), repr(Sin(x**2)))
 
 #print(postvisitor(2 * x + Sin(x), differentiate, var='x'))
-print(postvisitor(2 * x + Cos(2 * x), differentiate, var='x'))
-print(repr(postvisitor(2 * x + Cos(2 * x), differentiate, var='x')))
-print(postvisitor(2 * x + Exp(x ** 2), differentiate, var='x'))
+#print(postvisitor(2 * x + Cos(2 * x), var='x'))
+#print(repr(postvisitor(2 * x + Cos(2 * x), var='x')))
+#print(postvisitor(2 * x + Exp(x ** 2), var='x'))
 
 #expr = 2 * x + Exp(x ** 2)
 
@@ -302,4 +277,4 @@ print(postvisitor(2 * x + Exp(x ** 2), differentiate, var='x'))
 #c = a / b
 #print(c,c.adjoint)
 
-print(repr((2 - 1) + x + y - x ** sin))
+#print(repr((2 - 1) + x + y - x ** sin))
