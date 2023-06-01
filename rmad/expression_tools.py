@@ -95,6 +95,8 @@ def evalpostvisitor(expr, **kwargs):
                                           element.operands),
                                         **kwargs)
             element.storedvalue = visited[element]
+            if isinstance(element, expressions.Operator) or isinstance(element, expressions.Function):
+                element.adjoint = 0
     return visited[expr]
 
 x = expressions.Symbol('x')
