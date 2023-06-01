@@ -109,3 +109,24 @@ print(evalpostvisitor(expressions.Sin(x), symbol_map={'x': math.pi, 'y': 10}))
 print(evalpostvisitor(2 * x + expressions.Cos(2 * x), symbol_map={'x': 1.5, 'y': 10}))
 print(repr(evalpostvisitor(2 * x + expressions.Cos(2 * x), symbol_map={'x': 1.5, 'y': 10})))
 print(evalpostvisitor(2 * x + expressions.Exp(x ** 2), symbol_map={'x': 1.5, 'y': 10}))
+
+def previsitor(tree, **kwargs, fn_parent=None):
+    """Traverse tree in preorder applying a function to every node.
+
+    Parameters
+    ----------
+    tree: TreeNode
+        The tree to be visited.
+    fn: function(node, fn_parent)
+        A function to be applied at each node. The function should take
+        the node to be visited as its first argument, and the result of
+        visiting its parent as the second.
+    """
+    fn_out = evaluate(tree, fn_parent, symbol_map=kwargs)
+
+    for child in tree.children:
+        previsitor(child, evaluate, kwargs, fn_out)
+
+expr = x**2 + 5*x
+
+previsitor(expr, evaluate, symbol_map={'x':1.5})
