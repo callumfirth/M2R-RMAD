@@ -110,7 +110,7 @@ print(evalpostvisitor(2 * x + expressions.Cos(2 * x), symbol_map={'x': 1.5, 'y':
 print(repr(evalpostvisitor(2 * x + expressions.Cos(2 * x), symbol_map={'x': 1.5, 'y': 10})))
 print(evalpostvisitor(2 * x + expressions.Exp(x ** 2), symbol_map={'x': 1.5, 'y': 10}))
 
-def previsitor(tree, **kwargs, fn_parent=None):
+def previsitor(tree, fn_parent=None, **kwargs):
     """Traverse tree in preorder applying a function to every node.
 
     Parameters
@@ -122,11 +122,85 @@ def previsitor(tree, **kwargs, fn_parent=None):
         the node to be visited as its first argument, and the result of
         visiting its parent as the second.
     """
-    fn_out = evaluate(tree, fn_parent, symbol_map=kwargs)
+    fn_out = evaluate(tree, fn_parent, symbol_map=kwargs)[0]
+
 
     for child in tree.children:
-        previsitor(child, evaluate, kwargs, fn_out)
+        previsitor(child, reverse_evaluate, fn_out, kwargs)
 
 expr = x**2 + 5*x
 
-previsitor(expr, evaluate, symbol_map={'x':1.5})
+previsitor(expr, symbol_map={'x':1.5})
+
+@singledispatch
+def reverse_evaluate(expr, *o, **kwargs):
+    """Evaluate an expression node.
+
+    Parameters
+    ----------
+    expr: Expression
+        The expression node to be evaluated.
+    *o: numbers.Number
+        The results of evaluating the operands of expr.
+    **kwargs:
+        Any keyword arguments required to evaluate specific types of
+        expression.
+    symbol_map: dict
+        A dictionary mapping Symbol names to numerical values, for
+        example:
+
+        {'x': 1}
+    """
+    raise NotImplementedError(
+        f"Cannot evaluate a {type(expr).__name__}")
+
+
+@reverse_evaluate.register(expressions.Number)
+def _(expr, *o, **kwargs):
+    return expr.value
+
+
+@reverse_evaluate.register(expressions.Symbol)
+def _(expr, *o, symbol_map, **kwargs):
+    return symbol_map[expr.value]
+
+
+@reverse_evaluate.register(expressions.Add)
+def _(expr, *o, **kwargs):
+    return [o[0], o[0]]
+
+
+@reverse_evaluate.register(expressions.Sub)
+def _(expr, *o, **kwargs):
+    return [o[0], -o[0]]
+
+
+@reverse_evaluate.register(expressions.Mul)
+def _(expr, *o, **kwargs):
+    return [child[1], child[0]]
+
+
+@reverse_evaluate.register(expressions.Div)
+def _(expr, *o, **kwargs):
+    return o[0] / o[1]
+
+@reverse_evaluate.register(expressions.Pow)
+def _(expr, *o, **kwargs):
+    return [expr.operands[1] * o[0] ** expr.operands[1] * o[1], 0]
+
+@reverse_evaluate.register(expressions.Sin)
+def _(expr, *o, **kwargs):
+    return math.cos(o[0]) * o[1]
+
+@reverse_evaluate.register(expressions.Cos)
+def _(expr, *o, **kwargs):
+    return -math.sin(o[0]) * o[1]
+
+@reverse_evaluate.register(expressions.Exp)
+def _(expr, *o, **kwargs):
+    return math.exp(o[0]) * o[1]
+
+@reverse_evaluate.register(expressions.Log)
+def _(expr, *o, **kwargs):
+    return o[1] / o[0]
+
