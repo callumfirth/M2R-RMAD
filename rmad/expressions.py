@@ -3,6 +3,7 @@ from numbers import Number as Num
 from functools import singledispatch
 import math
 from token import OP
+from .expression_tools import evaluate
 
 
 class Expression():
@@ -10,6 +11,8 @@ class Expression():
 
     def __init__(self, *operands):
         self.operands = operands
+        self.value = 0
+        self.adjoint = math.nan
 
     def __add__(self, other):
         if isinstance(other, Num):
@@ -86,22 +89,13 @@ class Terminal(Expression):
 class Number(Terminal):
     """Numbers used in the expression."""
 
-    def __init__(self, value, adjoint=None):
+    def __init__(self, value):
         if not isinstance(value, Num):
             raise TypeError(
                 f"Number value must be number not {type(value)}"
             )
         super().__init__(value)
-        self.adjoint = adjoint
 
-    #def __add__(self, other):
-    #    return Number(self.value+other.value, [(self, 1), (other, 1)])
-    #def __sub__(self, other):
-    #    return Number(self.value-other.value, [(self, 1), (other, -1)])
-    #def __mul__(self, other):
-    #    return Number(self.value*other.value, [(self, other.value), (other, self.value)])
-    #def __truediv__(self, other):
-    #    return Number(self.value/other.value, [(self, 1/other.value), (other, -1*self.value/other.value**2)])
 
 class Symbol(Terminal):
     """Symbols used in the expression."""
@@ -209,8 +203,8 @@ class Log(Function):
     precedence = 4
 
 
-
-def postvisitor(expr, fn, **kwargs):
+#Evaluate post visitor func
+def postvisitor(expr, **kwargs):
     """Visit an expression in post-order applying a function."""
     stack = [expr]
     visited = {}
@@ -225,10 +219,10 @@ def postvisitor(expr, fn, **kwargs):
             for x in unvisited_children:
                 stack.append(x)
         else:  # Need to modify this to stores tuple? with val and adjoint
-            visited[element] = fn(element,
-                                  *(visited[operand] for operand in
-                                    element.operands),
-                                  **kwargs)
+            visited[element] = evaluate(element,
+                                        *(visited[operand] for operand in
+                                          element.operands),
+                                        **kwargs)
     return visited[expr]
 
 
