@@ -10,7 +10,7 @@ class Expression():
     def __init__(self, *operands):
         self.operands = operands
         self.storedvalue = 0
-        self.adjoint = math.nan
+        self.adjoint = 0
 
     def __add__(self, other):
         if isinstance(other, Num):
