@@ -1,22 +1,17 @@
 def previsitor(expr, fn, **kwargs):
     visited = {expr: None}
     current_level_nodes = [expr]
-    leaf_values = {}
 
     while current_level_nodes:
         new_level_nodes = []
 
         for node in current_level_nodes:
-            if not node.operands:
-                leaf_values[node] = visited[node]
-            else:
+            if node.operands:
                 for o in node.operands:
                     visited[o] = fn(o, visited[node], **kwargs)
                     new_level_nodes.append(o)
 
         current_level_nodes = new_level_nodes
-
-    return leaf_values
 
 
 x = Symbol("x")
