@@ -6,13 +6,11 @@ def previsitor(expr, fn, **kwargs):
         new_level_nodes = []
 
         for node in current_level_nodes:
-            if node.operands:
-                for o in node.operands:
-                    visited[o] = fn(o, visited[node], **kwargs)
-                    new_level_nodes.append(o)
+            for o in node.operands:
+                visited[o] = fn(o, visited[node], **kwargs)
+                new_level_nodes.append(o)
 
         current_level_nodes = new_level_nodes
-
 
 x = Symbol("x")
 y = Symbol("y")
@@ -28,4 +26,3 @@ def fn(node, p):
 
 
 hi = previsitor(expr, fn)
-print(hi)
