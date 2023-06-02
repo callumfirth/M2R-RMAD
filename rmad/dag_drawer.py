@@ -9,6 +9,9 @@ z = Symbol("z")
 expr = x*y/2 + y**2
 
 
+### This relies of my previsitor function and expressions
+
+
 class ExpressionGraph:  # There is a way to convert an nx graph to latex
     def __init__(self, expr):
         self.graph = nx.DiGraph()
