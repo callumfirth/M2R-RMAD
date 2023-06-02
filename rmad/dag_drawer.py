@@ -39,7 +39,7 @@ class ExpressionGraph:  # There is a way to convert an nx graph to latex
         pos = nx.multipartite_layout(self.graph, subset_key="layer", align='horizontal')
 
         fig, ax = plt.subplots()
-        nx.draw_networkx(self.graph, pos=pos, labels=labels, node_color="White")
+        nx.draw_networkx(self.graph, pos=pos, labels=labels, node_color="White", bbox = dict(facecolor = "skyblue", boxstyle = "round", ec = "silver", pad = 0.3))
         fig.tight_layout()
         plt.show()
 
