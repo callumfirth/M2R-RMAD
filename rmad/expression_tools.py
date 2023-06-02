@@ -2,6 +2,8 @@ from functools import singledispatch
 import expressions
 import math
 
+from rmad.adjointfloat import postvisitor
+
 
 @singledispatch
 def evaluate(expr, *o, **kwargs):
@@ -202,32 +204,19 @@ def previsitor(expr, fn_parent=None, **kwargs):
     # Initially we do postvisitor (forward traverse) the tree to get the value of the parent node
     # This should be already run before previsitor is ran
     # fn_parent = evalpostvisitor(eval, **kwargs)
-    
+
     #Get the adjoint of the parent node (this is the seed and is set to 1)
     if not fn_parent:
         expr.adjoint = 1
-    
+
     #We then need to visit the children of the parent node and set their adjoints
     for counter, operand in enumerate(expr.operands):
         operand.adjoint += reverse_evaluate(expr)[counter] * expr.adjoint
         previsitor(operand, operand.adjoint)
-    
 
-x = expressions.Symbol('x')
-expr = 0 - expressions.Sin(x)
 
 def adjoint(tree):
-    """Traverse tree in preorder applying a function to every node.
-
-    Parameters
-    ----------
-    tree: TreeNode
-        The tree to be visited.
-    fn: function(node, fn_parent)
-        A function to be applied at each node. The function should take
-        the node to be visited as its first argument, and the result of
-        visiting its parent as the second.
-    """
+    """Print adjoint values of all the nodes in the tree"""
     print(f"Adjoint: {tree}: {tree.adjoint}")
     for child in tree.operands:
         adjoint(child)
@@ -246,7 +235,7 @@ x = expressions.Symbol('x')
 y = expressions.Symbol('y')
 a = expressions.Symbol('a')
 conditions = {'x':2, 'y':1, 'a':2}
-expression = x**3 + expressions.Sin(x) - 5
+expression = x**3 + y**3 + x*y
 
 def reversemodeAD(expr, conditions):
     nodes = []
@@ -259,3 +248,35 @@ def reversemodeAD(expr, conditions):
     return symbols
 
 print(reversemodeAD(expression, conditions))
+
+eps = 10**-5
+x = expressions.Symbol('x')
+conditions = {'x':2}
+expression = x**3 + x
+exprdelta = (x+eps)**3 + x+eps
+Jx = evalpostvisitor(expression, symbol_map=conditions)
+Jdeltax = evalpostvisitor(exprdelta, symbol_map=conditions)
+dJx = reversemodeAD(expression, conditions)
+#Using taylor series expansion find O(eps^2)
+result = Jdeltax - Jx - dJx[x]*eps
+print(Jdeltax, Jx, dJx[x], result)
+print(result)
+
+#Similar finite difference method to get error from true derivative (we know is 13)
+x = 2
+fx = x**3 + x
+fxh = (x+eps)**3 + x+eps
+df = (fxh-fx)/eps
+accdif = 13
+print(df - accdif)
+
+#Will add a graph but at later date
+#import matplotlib.pyplot as plt
+#import numpy as np
+#x = np.linspace(0, 10, 100)
+#y = x**3 + x
+
+#fig, ax = plt.subplots()
+
+#ax.plot(x, y, linewidth=2.0)
+#plt.show
