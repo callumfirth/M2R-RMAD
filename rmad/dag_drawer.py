@@ -1,6 +1,7 @@
 import networkx as nx
 from expressions import *
 import matplotlib.pyplot as plt
+from previsitor import previsitor
 
 x = Symbol("x")
 y = Symbol("y")
@@ -8,8 +9,7 @@ z = Symbol("z")
 
 expr = x*y/2 + y**2
 
-
-### This relies of my previsitor function and expressions
+### This relies on my previsitor function
 
 
 class ExpressionGraph:  # There is a way to convert an nx graph to latex
@@ -39,7 +39,7 @@ class ExpressionGraph:  # There is a way to convert an nx graph to latex
         pos = nx.multipartite_layout(self.graph, subset_key="layer", align='horizontal')
 
         fig, ax = plt.subplots()
-        nx.draw_networkx(self.graph, pos=pos, labels=labels)
+        nx.draw_networkx(self.graph, pos=pos, labels=labels, node_color="White")
         fig.tight_layout()
         plt.show()
 

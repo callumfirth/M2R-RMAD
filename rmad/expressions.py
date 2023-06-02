@@ -4,7 +4,7 @@ from functools import singledispatch
 import math
 
 
-class Expression():
+class Expression:
     """Main expression class."""
 
     def __init__(self, *operands):
@@ -90,8 +90,8 @@ class Number(Terminal):
     def __init__(self, value):
         if not isinstance(value, Num):
             raise TypeError(
-                f"Number value must be number not {type(value)}"
-            )
+                f"Number value must be number not {type(value)}")
+        
         super().__init__(value)
 
 
@@ -101,8 +101,8 @@ class Symbol(Terminal):
     def __init__(self, value):
         if not isinstance(value, str):
             raise TypeError(
-                f"Symbol value must be string not {type(value)}"
-            )
+                f"Symbol value must be string not {type(value)}")
+        
         super().__init__(value)
 
 

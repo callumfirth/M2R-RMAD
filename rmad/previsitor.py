@@ -1,5 +1,5 @@
-def previsitor(expr, fn, **kwargs):
-    visited = {expr: None}
+def previsitor(expr, fn, fn_initial=None, **kwargs):
+    visited = {expr: fn_initial}
     current_level_nodes = [expr]
 
     while current_level_nodes:
@@ -12,17 +12,18 @@ def previsitor(expr, fn, **kwargs):
 
         current_level_nodes = new_level_nodes
 
-x = Symbol("x")
-y = Symbol("y")
+# x = Symbol("x")
+# y = Symbol("y")
 
-expr = x**2 + x*y + y**3
+# expr = x**2 + x*y + y**3
 
-print(expr)
+# print(expr)
 
-def fn(node, p):
-    depth = p + 1 if p else 1
-    print(f"{node}: {depth}")
-    return depth
+# def fn(node, p):
+#     depth = p + 1 if p else 1
+#     print(f"{node}: {depth}")
+#     return depth
 
 
-hi = previsitor(expr, fn)
+# hi = previsitor(expr, fn)
+# print(hi)
