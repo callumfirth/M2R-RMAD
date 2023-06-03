@@ -1,4 +1,4 @@
-from evaluate import evaluate, reverse_evaluate
+from evaluate import evaluate, adjoint_evaluate
 from expressions import Operator, Symbol, Function
 
 
@@ -42,7 +42,7 @@ def adjointprevisitor(expr, fn_adjoint=1, **kwargs):
     expr.adjoint = fn_adjoint
     # Then visit the children of the parent node and set their adjoints
     for counter, operand in enumerate(expr.operands):
-        operand.adjoint += reverse_evaluate(expr,
+        operand.adjoint += adjoint_evaluate(expr,
                                             *(o.storedvalue for o in expr.operands))[counter] * expr.adjoint
         adjointprevisitor(operand, operand.adjoint)
 

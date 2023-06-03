@@ -87,78 +87,72 @@ def _(expr, *o, **kwargs):
 
 
 @singledispatch
-def reverse_evaluate(expr, *o, **kwargs):
-    """Evaluate an expression node.
-
+def adjoint_evaluate(expr, *o, **kwargs):
+    """Return the adjoint, of the operands of an expression node.
+       This is similar to the partial derivative of the expression
+       with respect to the operand
+    
     Parameters
     ----------
     expr: Expression
-        The expression node to be evaluated.
+        The expression node to return the adjoint children of.
     *o: numbers.Number
-        The results of evaluating the operands of expr.
-    **kwargs:
-        Any keyword arguments required to evaluate specific types of
-        expression.
-    symbol_map: dict
-        A dictionary mapping Symbol names to numerical values, for
-        example:
-
-        {'x': 1}
+        The storedvalue of the expression operands.
     """
     raise NotImplementedError(
         f"Cannot evaluate a {type(expr).__name__}")
 
 
-@reverse_evaluate.register(expressions.Number)
+@adjoint_evaluate.register(expressions.Number)
 def _(expr, *o, **kwargs):
     return [1]
 
 
-@reverse_evaluate.register(expressions.Symbol)
+@adjoint_evaluate.register(expressions.Symbol)
 def _(expr, *o, symbol_map, **kwargs):
     return [1]
 
 
-@reverse_evaluate.register(expressions.Add)
+@adjoint_evaluate.register(expressions.Add)
 def _(expr, *o, **kwargs):
     return [1, 1]
 
 
-@reverse_evaluate.register(expressions.Sub)
+@adjoint_evaluate.register(expressions.Sub)
 def _(expr, *o, **kwargs):
     return [1, -1]
 
 
-@reverse_evaluate.register(expressions.Mul)
+@adjoint_evaluate.register(expressions.Mul)
 def _(expr, *o, **kwargs):
     return [o[1], o[0]]
 
 
-@reverse_evaluate.register(expressions.Div)
+@adjoint_evaluate.register(expressions.Div)
 def _(expr, *o, **kwargs):
     return [1/o[1], -o[0]/o[1]**2]
 
 
-@reverse_evaluate.register(expressions.Pow)
+@adjoint_evaluate.register(expressions.Pow)
 def _(expr, *o, **kwargs):
     return [o[1] * o[0]**(o[1]-1), o[0]**o[1] * math.log(o[0])]
 
 
-@reverse_evaluate.register(expressions.Sin)
+@adjoint_evaluate.register(expressions.Sin)
 def _(expr, *o, **kwargs):
     return [math.cos(o[0])]
 
 
-@reverse_evaluate.register(expressions.Cos)
+@adjoint_evaluate.register(expressions.Cos)
 def _(expr, *o, **kwargs):
     return [-math.sin(o[0])]
 
 
-@reverse_evaluate.register(expressions.Exp)
+@adjoint_evaluate.register(expressions.Exp)
 def _(expr, *o, **kwargs):
     return [math.exp(o[0])]
 
 
-@reverse_evaluate.register(expressions.Log)
+@adjoint_evaluate.register(expressions.Log)
 def _(expr, *o, **kwargs):
     return [1/o[0]]
