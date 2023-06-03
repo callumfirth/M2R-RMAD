@@ -3,11 +3,12 @@ from expressions import *
 import matplotlib.pyplot as plt
 from previsitor import previsitor
 
+
 x = Symbol("x")
 y = Symbol("y")
 z = Symbol("z")
 
-expr = x*y/2 + y**2
+expr = 2+Sin(x*y**2)
 
 ### This relies on my previsitor function
 
@@ -15,16 +16,18 @@ expr = x*y/2 + y**2
 class ExpressionGraph:  # There is a way to convert an nx graph to latex
     def __init__(self, expr):
         self.graph = nx.DiGraph()
-        initial_id = (str(expr), 1)
+        initial_id = (self.get_node_label(expr), 1)
         self.graph.add_node(initial_id)
 
         previsitor(expr, self.add_expression_node, fn_initial=initial_id)
 
     def add_expression_node(self, node, parent):
+        node_display_label = self.get_node_label(node)
         if parent is not None:
-            self.graph.add_edge(parent, (str(node), self.graph.number_of_nodes()))
+            self.graph.add_edge(parent, (node_display_label, self.graph.number_of_nodes()))
 
-        return str(node), self.graph.number_of_nodes()-1
+        return node_display_label, self.graph.number_of_nodes()-1
+    
 
     def display_graph(self):
         labels = {n: n[0] for n in self.graph.nodes()}
@@ -42,9 +45,17 @@ class ExpressionGraph:  # There is a way to convert an nx graph to latex
         nx.draw_networkx(self.graph, pos=pos, labels=labels,
                          node_color="White", bbox=dict(facecolor="skyblue",
                                                        boxstyle="round",
-                                                       ec="silver", pad=0.3))
+                                                       ec="silver", pad=0.3),
+                                                       arrows=False)
         fig.tight_layout()
         plt.show()
+
+    def get_node_label(self, node):
+        try:
+            return node.symbol
+        except AttributeError:
+            return str(node)
+
 
 graph = ExpressionGraph(expr)
 
