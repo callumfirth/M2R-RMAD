@@ -27,7 +27,6 @@ class ExpressionGraph:  # There is a way to convert an nx graph to latex
             self.graph.add_edge(parent, (node_display_label, self.graph.number_of_nodes()))
 
         return node_display_label, self.graph.number_of_nodes()-1
-    
 
     def display_graph(self):
         labels = {n: n[0] for n in self.graph.nodes()}
