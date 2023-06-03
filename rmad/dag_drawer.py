@@ -15,8 +15,9 @@ expr = 2+Sin(x*y**2)
 
 class ExpressionGraph:  # There is a way to convert an nx graph to latex
     def __init__(self, expr):
+        self.expr = expr
         self.graph = nx.DiGraph()
-        initial_id = (self.get_node_label(expr), 1)
+        initial_id = (self.get_node_label(self.expr), 1)
         self.graph.add_node(initial_id)
 
         previsitor(expr, self.add_expression_node, fn_initial=initial_id)
@@ -41,11 +42,12 @@ class ExpressionGraph:  # There is a way to convert an nx graph to latex
         pos = nx.multipartite_layout(self.graph, subset_key="layer", align='horizontal')
 
         fig, ax = plt.subplots()
+        plt.title(f'Expression Tree for: {self.expr}')
         nx.draw_networkx(self.graph, pos=pos, labels=labels,
                          node_color="White", bbox=dict(facecolor="skyblue",
                                                        boxstyle="round",
                                                        ec="silver", pad=0.3),
-                                                       arrows=False)
+                                                       arrows=False, ax=ax)
         fig.tight_layout()
         plt.show()
 
