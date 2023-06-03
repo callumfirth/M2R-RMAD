@@ -131,38 +131,34 @@ def _(expr, *o, **kwargs):
 
 @reverse_evaluate.register(expressions.Mul)
 def _(expr, *o, **kwargs):
-    return [expr.operands[1].storedvalue, expr.operands[0].storedvalue]
+    return [o[1], o[0]]
 
 
 @reverse_evaluate.register(expressions.Div)
 def _(expr, *o, **kwargs):
-    return [1/expr.operands[1].storedvalue,
-            -expr.operands[0].storedvalue/expr.operands[1].storedvalue**2]
+    return [1/o[1], -o[0]/o[1]**2]
 
 
 @reverse_evaluate.register(expressions.Pow)
 def _(expr, *o, **kwargs):
-    return [(expr.operands[1].storedvalue)
-            * expr.operands[0].storedvalue**(expr.operands[1].storedvalue-1),
-            expr.operands[0].storedvalue**expr.operands[1].storedvalue
-            * math.log(expr.operands[0].storedvalue)]
+    return [o[1] * o[0]**(o[1]-1), o[0]**o[1] * math.log(o[0])]
 
 
 @reverse_evaluate.register(expressions.Sin)
 def _(expr, *o, **kwargs):
-    return [math.cos(expr.operands[0].storedvalue)]
+    return [math.cos(o[0])]
 
 
 @reverse_evaluate.register(expressions.Cos)
 def _(expr, *o, **kwargs):
-    return [-math.sin(expr.operands[0].storedvalue)]
+    return [-math.sin(o[0])]
 
 
 @reverse_evaluate.register(expressions.Exp)
 def _(expr, *o, **kwargs):
-    return [math.exp(expr.operands[0].storedvalue)]
+    return [math.exp(o[0])]
 
 
 @reverse_evaluate.register(expressions.Log)
 def _(expr, *o, **kwargs):
-    return [1/expr.operands[0].storedvalue]
+    return [1/o[0]]
