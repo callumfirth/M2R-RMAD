@@ -130,6 +130,9 @@ class Function(Operator):
     def __str__(self):
         return self.symbol + "(" + str(self.operands[0]) + ")"
 
+    def __call__(self, value):
+        return type(self)(value)
+
     precedence = 3
 
 
