@@ -1,7 +1,5 @@
 """Module to represent mathematical expressions."""
 from numbers import Number as Num
-from functools import singledispatch
-import math
 
 
 class Expression:
@@ -90,8 +88,8 @@ class Number(Terminal):
     def __init__(self, value):
         if not isinstance(value, Num):
             raise TypeError(
-                f"Number value must be number not {type(value)}")
-        
+                f"Number value must be number not {type(value)}"
+            )
         super().__init__(value)
 
 
@@ -101,8 +99,8 @@ class Symbol(Terminal):
     def __init__(self, value):
         if not isinstance(value, str):
             raise TypeError(
-                f"Symbol value must be string not {type(value)}")
-        
+                f"Symbol value must be string not {type(value)}"
+            )
         super().__init__(value)
 
 
@@ -196,85 +194,3 @@ class Log(Function):
 
     symbol = "log"
     precedence = 4
-
-
-@singledispatch
-def differentiate(expr, *o, **kwargs):
-    """Differentiation implentation using postvisitor func."""
-    raise NotImplementedError
-
-
-@differentiate.register(Number)
-def _(expr, *o, **kwargs):
-    return 0.0
-
-
-@differentiate.register(Symbol)
-def _(expr, *o, **kwargs):
-    return 1.0 if kwargs['var'] == expr.value else 0.0
-
-
-@differentiate.register(Add)
-def _(expr, *o, **kwargs):
-    return o[0] + o[1]
-
-
-@differentiate.register(Sub)
-def _(expr, *o, **kwargs):
-    return o[0] - o[1]
-
-
-@differentiate.register(Mul)
-def _(expr, *o, **kwargs):
-    return o[0] * expr.operands[1] + o[1] * expr.operands[0]
-
-
-@differentiate.register(Div)
-def _(expr, *o, **kwargs):
-    return (o[0] * expr.operands[1] -
-            expr.operands[0] * o[1]) / (expr.operands[1] ** 2)
-
-
-@differentiate.register(Pow)
-def _(expr, *o, **kwargs):
-    return expr.operands[1] * (expr.operands[0] **
-                               (expr.operands[1] - 1)) * o[0]
-
-
-@differentiate.register(Sin)
-def _(expr, *o, **kwargs):
-    return o[0]*Cos(expr.operands[0])
-
-
-@differentiate.register(Cos)
-def _(expr, *o, **kwargs):
-    return -1.0*o[0]*Sin(expr.operands[0])  # Negation doesnt work yet
-
-
-@differentiate.register(Exp)
-def _(expr, *o, **kwargs):
-    return o[0]*Exp(expr.operands[0])
-
-
-#Can run these to see output
-x = Symbol('x')
-y = Symbol('y')
-sin = Sin(x**2)
-#print(str((2 - 1) + x + 1 - x ** Sin(x**2)))
-#print(str((2 - 1) + x + 1 - x ** sin))
-#print(str((2 - 1) + x + 1 - x ** Cos(x)))
-#print(str(Sin(x**2)), repr(Sin(x**2)))
-
-#print(postvisitor(2 * x + Sin(x), differentiate, var='x'))
-#print(postvisitor(2 * x + Cos(2 * x), var='x'))
-#print(repr(postvisitor(2 * x + Cos(2 * x), var='x')))
-#print(postvisitor(2 * x + Exp(x ** 2), var='x'))
-
-#expr = 2 * x + Exp(x ** 2)
-
-#a = Number(4)
-#b = Number(8)
-#c = a / b
-#print(c,c.adjoint)
-
-#print(repr((2 - 1) + x + y - x ** sin))
