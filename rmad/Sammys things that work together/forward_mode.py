@@ -20,7 +20,12 @@ def _(expr, *o, symbol_map, seed, **kwargs):
     #if seed[expr.value] == symbol_map[expr.value]:
     #    return [evaluate(expr, symbol_map=symbol_map), 1]
 
-    return [evaluate(expr, symbol_map=symbol_map), 1]
+    # return [evaluate(expr, symbol_map=symbol_map), 1]
+
+    if seed[expr.value] == 1:
+        return [evaluate(expr, symbol_map=symbol_map), 1]
+
+    return [evaluate(expr, symbol_map=symbol_map), 0]
 
 @forward_evaluate.register(expressions.Add)
 def _(expr, *o, **kwargs):
