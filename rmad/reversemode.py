@@ -25,11 +25,11 @@ cos = expressions.Cos()
 exp = expressions.Exp()
 log = expressions.Log()
 #Make sure arrays are float arrays to NaN is supported
-a = np.asarray([0., np.pi, -1])
-b = np.asarray([1., 2., 1])
+a = np.asarray([0., -1])
+b = np.asarray([1., 2])
 # Mess around with this to see what happens, write any expr and I.V.
 conditions = {'x': a, 'y': b}
-expression = cos(x)
+expression = sin(x**2) + cos(x**2) + exp(y)
 
 
 print(f"Derivative of {expression} at {conditions} is",
