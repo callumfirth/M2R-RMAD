@@ -17,11 +17,10 @@ def _(expr, *o, **kwargs):
 
 @forward_evaluate.register(expressions.Symbol)
 def _(expr, *o, symbol_map, seed, **kwargs):
-    if seed[expr.value] == symbol_map[expr.value]:
-        return [evaluate(expr, symbol_map=symbol_map), 1]
+    #if seed[expr.value] == symbol_map[expr.value]:
+    #    return [evaluate(expr, symbol_map=symbol_map), 1]
 
-    return [evaluate(expr, symbol_map=symbol_map), 0]
-
+    return [evaluate(expr, symbol_map=symbol_map), 1]
 
 @forward_evaluate.register(expressions.Add)
 def _(expr, *o, **kwargs):
@@ -70,7 +69,15 @@ def _(expr, *o, **kwargs):
 
 x = expressions.Symbol("x")
 y = expressions.Symbol("y")
+sin = expressions.Sin()
+cos = expressions.Cos()
+exp = expressions.Exp()
+expr = sin(x**2) + exp(x) + cos(x**4)
+np.random.seed(0)
+a = np.random.rand(1, 1000000)
+import time
 
-expr = expressions.Sin(x + y) * x
-
-print(expressions.postvisitor(expr, forward_evaluate, symbol_map={"x": 1, "y": 1}, seed={"x": 0, "y": 1}))
+start = time.time()
+print(expressions.postvisitor(expr, forward_evaluate, symbol_map={"x": a, "y": 2}, seed={"x": a, "y": 0}))
+end = time.time()
+print(end-start)
