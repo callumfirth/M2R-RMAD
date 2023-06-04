@@ -1,6 +1,6 @@
 from functools import singledispatch
 import expressions
-import math
+import numpy as np
 
 
 @singledispatch
@@ -68,30 +68,37 @@ def _(expr, *o, **kwargs):
 
 @evaluate.register(expressions.Sin)
 def _(expr, *o, **kwargs):
-    return math.sin(o[0])
+    return _closeto0(np.sin(o[0]))
 
 
 @evaluate.register(expressions.Cos)
 def _(expr, *o, **kwargs):
-    return math.cos(o[0])
+    return _closeto0(np.cos(o[0]))
 
 
 @evaluate.register(expressions.Exp)
 def _(expr, *o, **kwargs):
-    return math.exp(o[0])
+    return _closeto0(np.exp(o[0]))
 
 
 @evaluate.register(expressions.Log)
 def _(expr, *o, **kwargs):
-    return math.log(o[0])
+    return np.log(o[0])
 
+
+def _closeto0(value):
+    if isinstance(value, np.ndarray):
+        value[np.isclose(value, 0, atol=1e-12)] = 0
+    elif isinstance(value, int) and np.isclose(value, 0, atol=1e-15):
+        value = 0
+    return value
 
 @singledispatch
 def adjoint_evaluate(expr, *o, **kwargs):
     """Return the adjoint, of the operands of an expression node.
        This is similar to the partial derivative of the expression
        with respect to the operand
-    
+
     Parameters
     ----------
     expr: Expression
@@ -135,22 +142,22 @@ def _(expr, *o, **kwargs):
 
 @adjoint_evaluate.register(expressions.Pow)
 def _(expr, *o, **kwargs):
-    return [o[1] * o[0]**(o[1]-1), o[0]**o[1] * math.log(o[0])]
+    return [o[1] * o[0]**(o[1]-1), o[0]**o[1] * np.log(o[0])]
 
 
 @adjoint_evaluate.register(expressions.Sin)
 def _(expr, *o, **kwargs):
-    return [math.cos(o[0])]
+    return [_closeto0(np.cos(o[0]))]
 
 
 @adjoint_evaluate.register(expressions.Cos)
 def _(expr, *o, **kwargs):
-    return [-math.sin(o[0])]
+    return [_closeto0(-np.sin(o[0]))]
 
 
 @adjoint_evaluate.register(expressions.Exp)
 def _(expr, *o, **kwargs):
-    return [math.exp(o[0])]
+    return [np.exp(o[0])]
 
 
 @adjoint_evaluate.register(expressions.Log)

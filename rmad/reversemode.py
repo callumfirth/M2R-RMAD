@@ -1,5 +1,6 @@
 import expressions
 from traversal import evalpostvisitor, adjointprevisitor, symbolnodes, adjoint
+import numpy as np
 
 
 def reversemodeAD(expr, conditions):
@@ -23,10 +24,12 @@ sin = expressions.Sin()
 cos = expressions.Cos()
 exp = expressions.Exp()
 log = expressions.Log()
-
+#Make sure arrays are float arrays to NaN is supported
+a = np.asarray([0., np.pi, -1])
+b = np.asarray([1., 2., 1])
 # Mess around with this to see what happens, write any expr and I.V.
-conditions = {'x': 1, 'y': 1}
-expression = sin(x**2) + cos(x**2) + exp(x)
+conditions = {'x': a, 'y': b}
+expression = cos(x)
 
 
 print(f"Derivative of {expression} at {conditions} is",
@@ -34,7 +37,7 @@ print(f"Derivative of {expression} at {conditions} is",
 
 #adjoint(expression)
 
-eps = 10**-5
+eps = 10**-12
 x = expressions.Symbol('x')
 conditions = {'x': 2}
 expression = x**3 + x
@@ -46,7 +49,8 @@ dJx = reversemodeAD(expression, conditions)
 print(f"\nDerivative of {expression} at {conditions} is {dJx}")
 result = Jdeltax - Jx - dJx[x]*eps
 #print(Jdeltax, Jx, dJx[x], result)
-print("Taylor series error:", result)
+import math
+print("Taylor series error:", math.sqrt(result))
 
 # Finite difference method to get error from true derivative (we know is 13)
 x = 2
