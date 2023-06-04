@@ -30,11 +30,11 @@ cos = expressions.Cos()
 exp = expressions.Exp()
 log = expressions.Log()
 #Make sure arrays are float arrays to NaN is supported
-a = np.random.rand(1,10000000)
+a = np.random.rand(1, 1000000)
 b = np.asarray([1., 2])
 # Mess around with this to see what happens, write any expr and I.V.
 conditions = {'x': a, 'y': b}
-expression = sin(x*2) + sin(x*4)
+expression = sin(x*2) + exp(cos(x**4))
 
 
 start = time.time()
@@ -51,7 +51,7 @@ sin = expressions.Sin()
 cos = expressions.Cos()
 exp = expressions.Exp()
 log = expressions.Log()
-expression = sin(x*2) + sin(x**2)
+expression = sin(x*2) + exp(cos(x**4))
 
 start = time.time()
 forward = forwardmodevisitor(expression, conditions)
