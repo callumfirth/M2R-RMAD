@@ -1,7 +1,7 @@
 import networkx as nx
 from expressions import *
 import matplotlib.pyplot as plt
-from previsitor import previsitor
+from visitors import previsitor
 
 
 x = Symbol("x")
