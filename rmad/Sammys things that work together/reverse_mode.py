@@ -1,4 +1,4 @@
-from previsitor import postvisitor, previsitor
+from visitor import postvisitor, previsitor
 from evaluate import evaluate, _closeto0
 import expressions
 from functools import singledispatchmethod
