@@ -99,12 +99,14 @@ def _(expr, *o, **kwargs):
 @forwardevaluate.register(expressions.Div)
 def _(expr, *o, **kwargs):
     value = o[0].storedvalue / o[1].storedvalue
+    expr.adjoint = (o[0].adjoint*o[1].storedvalue - o[1].adjoint*o[0].storedvalue) / (o[1].storedvalue ** 2)
     return value
 
 
 @forwardevaluate.register(expressions.Pow)
 def _(expr, *o, **kwargs):
     value = o[0].storedvalue ** o[1].storedvalue
+    expr.adjoint = o[1].storedvalue * o[0].storedvalue ** (o[1].storedvalue - 1)
     return value
 
 
