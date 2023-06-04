@@ -49,7 +49,7 @@ def adjointprevisitor(expr, fn_adjoint=1, **kwargs):
 
 def adjoint(tree):
     """Print adjoint values of all the nodes in the tree"""
-    print(f"Adjoint: {tree}: {tree.adjoint}")
+    print(f"Value,adjoint: {tree}: {tree.storedvalue}, {tree.adjoint}")
     for child in tree.operands:
         adjoint(child)
 

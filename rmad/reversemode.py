@@ -1,17 +1,22 @@
 import expressions
+from forwardmode import forwardmodevisitor
 from traversal import evalpostvisitor, adjointprevisitor, symbolnodes, adjoint
 import numpy as np
+import time
 
 
 def reversemodeAD(expr, conditions):
     """Return dict of the derivatives of expr w.r.t symbols"""
     nodes = []
-    symbolnodes(expr, nodes)
+    symbolnodes(expr, nodes)  # Modifies nodes to contain all symbols in expr
+
     try:
-        evalpostvisitor(expr, symbol_map=conditions)
-    except ZeroDivisionError:
+        evalpostvisitor(expr, symbol_map=conditions)  # Forward traverse
+    except ZeroDivisionError:  # Not currently used i dont think
         raise Exception("Function not valid at initial condition")
-    adjointprevisitor(expr)
+    adjointprevisitor(expr)  # Backwards traverse through the tree
+
+    # For each symbol, return the dict of the repsective adjoint
     symbols = dict()
     for node in nodes:
         symbols[node] = node.adjoint
@@ -25,16 +30,34 @@ cos = expressions.Cos()
 exp = expressions.Exp()
 log = expressions.Log()
 #Make sure arrays are float arrays to NaN is supported
-a = np.asarray([0., -1])
+a = np.random.rand(1,10000000)
 b = np.asarray([1., 2])
 # Mess around with this to see what happens, write any expr and I.V.
 conditions = {'x': a, 'y': b}
-expression = sin(x**2) + cos(x**2) + exp(y)
+expression = sin(x*2) + sin(x*4)
 
 
-print(f"Derivative of {expression} at {conditions} is",
-      reversemodeAD(expression, conditions))
+start = time.time()
+reverse = reversemodeAD(expression, conditions)
+#print(f"Derivative of {expression} at {conditions} in RM: {reverse}")
+end = time.time()
+print(f"Time for RM AD:{end-start}")
 
+#adjoint(expression)
+
+x = expressions.Symbol('x')
+y = expressions.Symbol('y')
+sin = expressions.Sin()
+cos = expressions.Cos()
+exp = expressions.Exp()
+log = expressions.Log()
+expression = sin(x*2) + sin(x**2)
+
+start = time.time()
+forward = forwardmodevisitor(expression, conditions)
+#print(f"Derivative of {expression} at {conditions} in RM: {forward}")
+end = time.time()
+print(f"Time for FM AD:{end-start}")
 #adjoint(expression)
 
 eps = 10**-12
