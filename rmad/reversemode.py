@@ -31,15 +31,15 @@ exp = expressions.Exp()
 log = expressions.Log()
 #Make sure arrays are float arrays to NaN is supported
 np.random.seed(0)
-a = np.random.rand(1, 1000000)
-b = np.asarray([2., 2])
+a = 1
+b = 2
 # Mess around with this to see what happens, write any expr and I.V.
 conditions = {'x': a, 'y': b}
-expression = sin(x**2) + exp(x) + cos(x**4)
+expression = sin(x**2)
 
 start = time.time()
 reverse = reversemodeAD(expression, conditions)
-#print(f"Derivative of {expression} at {conditions} in RM: {reverse}")
+print(f"Derivative of {expression} at {conditions} in FM: {reverse}")
 end = time.time()
 print(f"Time for RM AD:{end-start}")
 
@@ -51,11 +51,11 @@ sin = expressions.Sin()
 cos = expressions.Cos()
 exp = expressions.Exp()
 log = expressions.Log()
-expression = sin(x**2) + exp(x) + cos(x**4)
+expression = sin(x**2)
 
 start = time.time()
 forward = forwardmodevisitor(expression, conditions)
-#print(f"Derivative of {expression} at {conditions} in RM: {forward}")
+print(f"Derivative of {expression} at {conditions} in FM: {forward}")
 end = time.time()
 print(f"Time for FM AD:{end-start}")
 #adjoint(expression)
