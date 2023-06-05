@@ -98,7 +98,8 @@ class ExpressionGraph:  # There is a way to convert an nx graph to latex
             self.graph.add_edge(parent, node_display_label)
 
         return node_display_label
-
+    import networkx as nx
+    import graphviz
     def display_graph(self):
         for layer, nodes in enumerate(reversed(tuple(nx.topological_generations(self.graph)))):
             # `multipartite_layout` expects the layer as a node attribute, so add the
@@ -107,8 +108,8 @@ class ExpressionGraph:  # There is a way to convert an nx graph to latex
                 self.graph.nodes[node]["layer"] = layer
 
         # Compute the multipartite_layout using the "layer" node attribute
-
-        pos = graphviz_layout(self.graph, prog="dot")
+        
+        pos = graphviz.graphviz_layout(self.graph, prog="dot")
         nx.draw(self.graph, pos)
 
     def get_node_label(self, node):
