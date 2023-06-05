@@ -12,6 +12,7 @@ def forwardmodevisitor(expr, conditions):
         visited = {}
         while stack:
             element = stack.pop()
+            element.adjoint = 0
             unvisited_children = []
             for operand in element.operands:
                 if operand not in visited:
@@ -21,14 +22,13 @@ def forwardmodevisitor(expr, conditions):
                 for x in unvisited_children:
                     stack.append(x)
             else:
+                element.adjoint = 0
                 visited[element] = forwardevaluate(element, symbol,
                                                 *(operand for operand in
                                                 element.operands),
                                             symbol_map=conditions)
                 element.storedvalue = visited[element]
         adjoints[symbol] = expr.adjoint
-        print(type(expr.adjoint))
-        adjoint(expr)
     return adjoints
 
 
@@ -75,8 +75,6 @@ def _(expr, seed, *o, symbol_map, **kwargs):
     value = symbol_map[expr.value]
     expr.storedvalue = value
     expr.adjoint = 0
-    print(type(expr))
-    print(expr,seed)
     if seed == expr.value:
         expr.adjoint = 1
     return value
@@ -116,7 +114,7 @@ def _(expr, seed, *o, **kwargs):
 @forwardevaluate.register(expressions.Pow)
 def _(expr, seed, *o, **kwargs):
     value = o[0].storedvalue ** o[1].storedvalue
-    expr.adjoint = o[1].storedvalue * o[0].storedvalue ** (o[1].storedvalue - 1)
+    expr.adjoint = o[0].adjoint * o[1].storedvalue * o[0].storedvalue ** (o[1].storedvalue - 1)
     return value
 
 
