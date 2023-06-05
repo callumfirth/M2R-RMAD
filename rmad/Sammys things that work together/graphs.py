@@ -1,11 +1,12 @@
 import graphviz
 dot = graphviz.Digraph(comment='The Round Table')
-dot.node('A', 'King Arthur')  
-dot.node('B', 'Sir Bedevere the Wise')
-dot.node('L', 'Sir Lancelot the Brave')
+dot.node('1', '*')  
+dot.node('2', 'Sin()')
+dot.node('3', '4')
+dot.node('4', 'Sir Lancelot the Brave')
 
-dot.edges(['AB', 'AL'])
-dot.edge('B', 'L', constraint='false')
+dot.edges(['31', '31', '12'])
+#dot.edge('1', '2', constraint='frue')
 print(dot.source)
 dot.render('doctest-output/round-table.gv').replace('\\', '/')
 dot.render('doctest-output/round-table.gv', view=True)
