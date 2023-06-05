@@ -25,6 +25,7 @@ def reversemodeAD(expr, conditions):
 
 x = expressions.Symbol('x')
 y = expressions.Symbol('y')
+z = expressions.Symbol('z')
 sin = expressions.Sin()
 cos = expressions.Cos()
 exp = expressions.Exp()
@@ -33,25 +34,26 @@ log = expressions.Log()
 np.random.seed(0)
 a = 1
 b = 2
+c = 3
 # Mess around with this to see what happens, write any expr and I.V.
-conditions = {'x': a, 'y': b}
-expression = sin(x**2)
+conditions = {'x': a, 'y': b, 'z': c}
+expression = sin(x**2) + exp(z) + cos(y**2)
 
 start = time.time()
 reverse = reversemodeAD(expression, conditions)
-print(f"Derivative of {expression} at {conditions} in FM: {reverse}")
+print(f"Derivative of {expression} at {conditions} in RM: {reverse}")
 end = time.time()
 print(f"Time for RM AD:{end-start}")
-
 #adjoint(expression)
 
 x = expressions.Symbol('x')
 y = expressions.Symbol('y')
+z = expressions.Symbol('z')
 sin = expressions.Sin()
 cos = expressions.Cos()
 exp = expressions.Exp()
 log = expressions.Log()
-expression = sin(x**2)
+expression = sin(x**2) + exp(z) + cos(y**2)
 
 start = time.time()
 forward = forwardmodevisitor(expression, conditions)
