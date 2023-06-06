@@ -116,7 +116,7 @@ def _(expr, *o, **kwargs):
 
 
 @adjoint_evaluate.register(expressions.Symbol)
-def _(expr, *o, symbol_map, **kwargs):
+def _(expr, *o, **kwargs):
     return [1]
 
 
@@ -147,12 +147,12 @@ def _(expr, *o, **kwargs):
 
 @adjoint_evaluate.register(expressions.Sin)
 def _(expr, *o, **kwargs):
-    return [_closeto0(np.cos(o[0]))]
+    return [np.cos(o[0])]
 
 
 @adjoint_evaluate.register(expressions.Cos)
 def _(expr, *o, **kwargs):
-    return [_closeto0(-np.sin(o[0]))]
+    return [-np.sin(o[0])]
 
 
 @adjoint_evaluate.register(expressions.Exp)
