@@ -25,7 +25,7 @@ class ReverseMode:
     def reverse_pass(self):
         """Perform the reverse pass appling the previsitor function."""
         self.node_av_pairs[self.expr][1] = 1
-        self.previsitor(self.expr, self.set_child_adjoint_values, fn_initial=[self.node_av_pairs[expr]])
+        self.previsitor(self.expr, self.set_child_adjoint_values)
 
         return self.node_av_pairs
 
@@ -98,7 +98,7 @@ class ReverseMode:
     def _(self, expr, *cv):
         return np.array([1/(cv[0])])
 
-    def previsitor(self, expr, fn, fn_initial=None):
+    def previsitor(self, expr, fn):
         """Visit an expression in pre-order applying a function."""
         current_level_nodes = [expr]
 
