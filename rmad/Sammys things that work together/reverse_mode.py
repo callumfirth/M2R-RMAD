@@ -29,11 +29,14 @@ class ReverseMode:
 
         return self.node_av_pairs
 
-    def compute_derivatives(self):
+    def compute_partial_derivatives(self):
         """Calculate the av pairs."""
         self.forward_pass()
+        self.reverse_pass()
 
-        return self.reverse_pass()
+        p_d = {node: self.node_av_pairs[node][1] for node in self.node_av_pairs if type(node) == expressions.Symbol}
+
+        return p_d
 
     def set_child_adjoint_values(self, expr):
         """Set the ajoint values of the children of a node."""
@@ -80,7 +83,7 @@ class ReverseMode:
 
     @reverse_evaluate.register(expressions.Pow)
     def _(self, expr, *cv):
-        return np.array([cv[0]**cv[1] * np.log(cv[0], cv[1] * cv[0]**(cv[1]-1))])  # This is the other way around to callum's
+        return np.array([ cv[1] * cv[0]**(cv[1]-1), cv[0]**cv[1] * np.log(cv[0])])
 
     @reverse_evaluate.register(expressions.Sin)
     def _(self, expr, *cv):
@@ -117,10 +120,8 @@ class ReverseMode:
 x = expressions.Symbol("x")
 y = expressions.Symbol("y")
 
-expr = x * expressions.Sin(x+y)
+expr = 2*x*(y/2)**2
+reverse = ReverseMode(expr, {"x": 10, "y": 1})
+partial_derivatives = reverse.compute_partial_derivatives()
 
-hi = ReverseMode(expr, {"x": 1, "y": 1})
-
-hi.compute_derivatives()
-
-print(hi.node_av_pairs)
+print(partial_derivatives)
