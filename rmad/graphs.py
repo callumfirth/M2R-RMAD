@@ -71,5 +71,5 @@ dotall.format = 'pdf'
 # Note this location is the same images folder that we use for overleaf
 # make sure to pull changes in overleaf editor to see them if adding
 # any here (also make sure to give unique file name each time)
-dotall.render('images/Clustergraph.gv').replace('\\', '/')
+#dotall.render('images/Clustergraph.gv').replace('\\', '/')
 dotall.render('images/Clustergraph.gv', view=True)
