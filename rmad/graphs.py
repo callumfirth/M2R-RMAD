@@ -65,10 +65,11 @@ with dotall.subgraph(name="cluster_Tree") as d:
     d.edge('w_16', 'w_17', constraint='true', minlen='1.5')
     d.edge('w_16', 'w_14', constraint='true', minlen='1.5')
 
+dotall.attr(margin="0")
 
 dotall.format = 'pdf'
 # Note this location is the same images folder that we use for overleaf
 # make sure to pull changes in overleaf editor to see them if adding
 # any here (also make sure to give unique file name each time)
-dotall.render('images/graph.gv').replace('\\', '/')
-dotall.render('images/graph.gv', view=True)
+dotall.render('images/Clustergraph.gv').replace('\\', '/')
+dotall.render('images/Clustergraph.gv', view=True)
