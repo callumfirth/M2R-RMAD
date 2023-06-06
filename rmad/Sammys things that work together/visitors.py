@@ -36,7 +36,7 @@ def postvisitor(expr, fn, **kwargs):
             visited[e] = fn(e,
                             *(visited[o] for o in e.operands),
                             **kwargs)
-    return visited[expr]
+    return visited
 
 
 # x = Symbol("x")
