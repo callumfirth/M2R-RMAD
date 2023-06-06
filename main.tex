@@ -31,7 +31,7 @@ This method is called the Finite Differences method. This can give us good appro
 
 In this paper, we will be discussing algorithmic or automatic differentiation, this method breaks down a function into all its elementary operations and applies the chain rule to compute the derivative. Specifically, we will be looking at the reverse mode of algorithmic differentiation as it computes the derivates an order n faster than the forward mode, with n being the number of inputs to the function.
 
-The use of derivatives in algorithms is increasingly clear as artificial intelligence develops and proves its own uses. This is because of backpropagation which is a method used to train neural nets. On these neural nets, one has many nodes connected by a series of weights, such that the change in one value affects the change in another, to optimise these weights we must 
+The use of derivatives in algorithms is increasingly clear as artificial intelligence develops and proves its own uses. This is because of backpropagation which is a method used to train neural nets. On these neural nets, one has many nodes connected by a series of weights, such that the change in one value affects the change in another, to optimise these weights we must use a method called gradient descent which requires us to find a derivative.
 
 When solving non-linear systems one method is Newton-Raphson in which iterates are calculated, given an initial $x_0$, using
 \begin{equation}
