@@ -22,6 +22,7 @@ def evalpostvisitor(expr, **kwargs):
                                           element.operands),
                                         **kwargs)
             element.storedvalue = visited[element]
+            print("storedval",element,element.storedvalue)
             if isinstance(element, (Operator, Function)):
                 element.adjoint = 0
     return visited[expr]
@@ -41,9 +42,9 @@ def adjointprevisitor(expr, fn_adjoint=1, **kwargs):
     # Set the adjoint of the parent node (initially this is the seed = 1)
     expr.adjoint = fn_adjoint
     # Then visit the children of the parent node and set their adjoints
+    adjoint = adjoint_evaluate(expr, *(o.storedvalue for o in expr.operands))
     for counter, operand in enumerate(expr.operands):
-        operand.adjoint += adjoint_evaluate(expr,
-                                            *(o.storedvalue for o in expr.operands))[counter] * expr.adjoint
+        operand.adjoint += adjoint[counter] * expr.adjoint
         adjointprevisitor(operand, operand.adjoint)
 
 
