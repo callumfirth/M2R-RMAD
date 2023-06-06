@@ -22,7 +22,6 @@ def forwardmodevisitor(expr, conditions):
                 for x in unvisited_children:
                     stack.append(x)
             else:
-                element.adjoint = 0
                 visited[element] = forwardevaluate(element, symbol,
                                                 *(operand for operand in
                                                 element.operands),
@@ -59,14 +58,14 @@ def forwardevaluate(expr, seed, *o, **kwargs):
 def _(expr, seed, *o, **kwargs):
     value = expr.value
     expr.storedvalue = value
-    expr.adjoint = 0
+    expr.adjoint += 0
     return value
 
 @forwardevaluate.register(int)
 def _(expr, seed, *o, **kwargs):
     value = expr
     expr.storedvalue = value
-    expr.adjoint = 0
+    expr.adjoint += 0
     return value
 
 
@@ -74,9 +73,9 @@ def _(expr, seed, *o, **kwargs):
 def _(expr, seed, *o, symbol_map, **kwargs):
     value = symbol_map[expr.value]
     expr.storedvalue = value
-    expr.adjoint = 0
+    expr.adjoint += 0
     if seed == expr.value:
-        expr.adjoint = 1
+        expr.adjoint += 1
     return value
 
 
@@ -84,7 +83,7 @@ def _(expr, seed, *o, symbol_map, **kwargs):
 def _(expr, seed, *o, **kwargs):
     value = o[0].storedvalue + o[1].storedvalue
     expr.storedvalue = value
-    expr.adjoint = o[0].adjoint + o[1].adjoint
+    expr.adjoint += o[0].adjoint + o[1].adjoint
     return value
 
 
@@ -92,7 +91,7 @@ def _(expr, seed, *o, **kwargs):
 def _(expr, seed, *o, **kwargs):
     value = o[0].storedvalue - o[1].storedvalue
     expr.storedvalue = value
-    expr.adjoint = o[0].adjoint - o[1].adjoint
+    expr.adjoint += o[0].adjoint - o[1].adjoint
     return value
 
 
@@ -100,21 +99,21 @@ def _(expr, seed, *o, **kwargs):
 def _(expr, seed, *o, **kwargs):
     value = o[0].storedvalue * o[1].storedvalue
     expr.storedvalue = value
-    expr.adjoint = o[0].storedvalue*o[1].adjoint + o[1].storedvalue*o[0].adjoint
+    expr.adjoint += o[0].storedvalue*o[1].adjoint + o[1].storedvalue*o[0].adjoint
     return value
 
 
 @forwardevaluate.register(expressions.Div)
 def _(expr, seed, *o, **kwargs):
     value = o[0].storedvalue / o[1].storedvalue
-    expr.adjoint = (o[0].adjoint*o[1].storedvalue - o[1].adjoint*o[0].storedvalue) / (o[1].storedvalue ** 2)
+    expr.adjoint += (o[0].adjoint*o[1].storedvalue - o[1].adjoint*o[0].storedvalue) / (o[1].storedvalue ** 2)
     return value
 
 
 @forwardevaluate.register(expressions.Pow)
 def _(expr, seed, *o, **kwargs):
     value = o[0].storedvalue ** o[1].storedvalue
-    expr.adjoint = o[0].adjoint * o[1].storedvalue * o[0].storedvalue ** (o[1].storedvalue - 1)
+    expr.adjoint += o[0].adjoint * o[1].storedvalue * o[0].storedvalue ** (o[1].storedvalue - 1)
     return value
 
 
@@ -122,7 +121,7 @@ def _(expr, seed, *o, **kwargs):
 def _(expr, seed, *o, **kwargs):
     value = np.sin(o[0].storedvalue)
     expr.storedvalue = value
-    expr.adjoint = np.cos(o[0].storedvalue) * o[0].adjoint
+    expr.adjoint += np.cos(o[0].storedvalue) * o[0].adjoint
     return value
 
 
@@ -130,7 +129,7 @@ def _(expr, seed, *o, **kwargs):
 def _(expr, symbol, *o, **kwargs):
     value = np.cos(o[0].storedvalue)
     expr.storedvalue = value
-    expr.adjoint = -np.sin(o[0].storedvalue) * o[0].adjoint
+    expr.adjoint += -np.sin(o[0].storedvalue) * o[0].adjoint
     return value
 
 
@@ -138,12 +137,12 @@ def _(expr, symbol, *o, **kwargs):
 def _(expr, symbol, *o, **kwargs):
     value = np.exp(o[0].storedvalue)
     expr.storedvalue = value
-    expr.adjoint = np.exp(o[0].storedvalue) * o[0].adjoint
+    expr.adjoint += np.exp(o[0].storedvalue) * o[0].adjoint
     return value
 
 @forwardevaluate.register(expressions.Log)
 def _(expr, symbol, *o, **kwargs):
     value = np.log(o[0].storedvalue)
     expr.storedvalue = value
-    expr.adjoint = (1/o[0].storedvalue) * o[0].adjoint
+    expr.adjoint += (1/o[0].storedvalue) * o[0].adjoint
     return value

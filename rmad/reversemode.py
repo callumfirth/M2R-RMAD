@@ -32,12 +32,12 @@ exp = expressions.Exp()
 log = expressions.Log()
 #Make sure arrays are float arrays to NaN is supported
 np.random.seed(0)
-a = 1
+a = 2
 b = 2
 c = 3
 # Mess around with this to see what happens, write any expr and I.V.
-conditions = {'x': a, 'y': b, 'z': c}
-expression = sin(x**2) + exp(z) + cos(y**2)
+conditions = {'x': a, 'y': b}
+expression = sin(y*x**2)+exp(x**2)
 
 start = time.time()
 reverse = reversemodeAD(expression, conditions)
@@ -53,7 +53,7 @@ sin = expressions.Sin()
 cos = expressions.Cos()
 exp = expressions.Exp()
 log = expressions.Log()
-expression = sin(x**2) + exp(z) + cos(y**2)
+expression = sin(y*x**2)+exp(x**2)
 
 start = time.time()
 forward = forwardmodevisitor(expression, conditions)
