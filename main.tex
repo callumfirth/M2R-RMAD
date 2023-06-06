@@ -18,10 +18,20 @@
 
 \maketitle
 \tableofcontents
-
+\newpage
 \section{Introduction}
 
-The calculation of derivatives effectively and quickly is essential in modern mathematics and computation. The use of derivatives in algorithms is increasingly important as artificial intelligence becomes more prevalent.
+Possibly the broadest issue we have with applying mathematical theory on a computer is that computers can only work with discrete values and since the very essence of a derivative includes $\lim_{x \to 0}$ we immediately run into issues. Immediately when trying to solve this problem one considers first principles where we set a small value $\epsilon$ and then compute the equation:
+
+\begin{equation*}
+    \frac{f(x+\epsilon) - f(x)}{\epsilon}
+\end{equation*}
+
+This method is called the Finite Differences method. This can give us good approximations however has some drawbacks, the first of all being we have to set $\epsilon$, and an optimal value for this may change depending on our function and our value $x$ and another being that we will never be exact and always have an error, sometimes many orders higher than machine epsilon. Another common method that is used is symbolic differentiation, which takes mathematical expressions and finds their derivatives from a set of rules much like you or I would do on paper. This method although very accurate is tricky to implement, especially with larger functions, and will slow on multivariate functions when trying to compute all the partial derivatives.
+
+In this paper, we will be discussing algorithmic or automatic differentiation, this method breaks down a function into all its elementary operations and applies the chain rule to compute the derivative. Specifically, we will be looking at the reverse mode of algorithmic differentiation as it computes the derivates an order n faster than the forward mode, with n being the number of inputs to the function.
+
+The use of derivatives in algorithms is increasingly clear as artificial intelligence develops and proves its own uses. This is because of backpropagation which is a method used to train neural nets. On these neural nets, one has many nodes connected by a series of weights, such that the change in one value affects the change in another, to optimise these weights we must 
 
 When solving non-linear systems one method is Newton-Raphson in which iterates are calculated, given an initial $x_0$, using
 \begin{equation}
@@ -42,7 +52,7 @@ Computing algorithms like Newton-Raphson effectively is necessary to later carry
 
 There are three common ways to differentiate a function on a computer: numerically, symbolically, and algorithmically. The latter which we will be discussing in depth in this paper. Notably focusing on reverse mode algorithmic differentiation (AD). In contrast to symbolic and algorithmic differentiation, numerical differentiation results in an approximation for the derivative.
 
-The most common example of numerical differentiation is the finite differences method. For \\ $f: \mathbb{R}^n \longrightarrow \mathbb{R}^m$ a derivative can be approximated using a truncated Taylor series around $p \in \mathbb{R}^n$. From \cite{chem}
+The most common example of numerical differentiation is the finite differences method. For \\ $f: \mathbb{R}^n \longrightarrow \mathbb{R}^m$ a partial derivative can be approximated using a truncated Taylor series around $p \in \mathbb{R}^n$. From \cite{chem}
 \begin{equation*}
     \frac{\partial f_i (p)}{\partial x_j} \approx \frac{f_i(p+he_j) - f_i(p)}{h}
 \end{equation*}
@@ -58,7 +68,7 @@ There are two forms of algorithmic differentiation: forward mode and reverse mod
         \frac{\partial y_m}{\partial x_1} & \cdots & \frac{\partial y_m}{\partial x_n}
     \end{bmatrix} \in \mathbb{R}^{m \times n}
 \end{equation*}
-with forward mode algorithmic differentiation, this has computational cost $\mathcal{O}(n)$ \cite{falisse}. In contrast, the computational cost with reverse mode algorithmic differentiation is $\mathcal{O}(m)$ \cite{falisse}. Hence, reverse mode is suited for functions $F$ with fewer output variables or when calculating 
+with forward mode algorithmic differentiation, this has computational cost $\mathcal{O}(n)$. In contrast, the computational cost with reverse mode algorithmic differentiation is $\mathcal{O}(m)$ \cite{falisse}. Hence, reverse mode is suited for functions $F$ with fewer output variables or when calculating 
 \begin{equation*}
     \frac{\partial y_i}{\partial x_1}, \cdots, \frac{\partial y_i}{\partial x_n}
 \end{equation*}
@@ -68,10 +78,9 @@ One drawback of reverse mode algorithmic differentiation over forward-mode is th
 \section{Directed Acylic Graphs to Represent Expressions}
 
 \begin{figure}[h]
-    \includegraphics[width=8cm]{images/Treegraph.gv.pdf}
-    \includegraphics[width=8cm]{images/DAGgraph.gv.pdf}
-    \caption{A Tree, left, and DAG, right, representation of expression $Sin(x^2y) + e^{x^2}$. The DAG allows us to avoid unnecessary recursion in the $x^2$ term}
-    \label{fig:DAGgraph}
+    \includegraphics[width=16cm]{images/Clustergraph.gv.pdf}
+    \caption{A DAG and Expression Tree representation of Equation \ref{example1}}
+    \label{fig:DAGgraph2}
 \end{figure}
 
 Below is an example for $F: \mathbb{R}^3 \rightarrow \mathbb{R}^2$ defined by
@@ -83,18 +92,32 @@ Below is an example for $F: \mathbb{R}^3 \rightarrow \mathbb{R}^2$ defined by
     \end{pmatrix}
 \end{equation}
 
-\begin{figure}[h]
-    \includegraphics[width=16cm]{images/Clustergraph.gv.pdf}
-    \caption{A DAG and Expression Tree representation of Equation \ref{example1}}
-    \label{fig:DAGgraph2}
-\end{figure}
-
-
-As in \cite{PoPBook}, we can represent an arithmetic expression as an expression tree. Here we represent each operator, symbol and number in an given expression as nodes in a graph, we denote these as elements. The operands of each element are the children of the node. Notation wise we will represent links out of a node indicating the children of the node, even though expression wise the children are "inputs" to such parent. We can also write an expression as a directed acylic graph which allows us to represent expressions with more than one operators to avoid recursion. An example of the difference between the two can be see in Figure \ref{fig:DAGgraph} and Figure \ref{fig:DAGgraph2}. We from now on will use DAG's to represent expressions as this is essential in lowering runtime and allowing fast computation of complicated expressions. We will presume that ordering of each child is important.
+As in \cite{PoPBook}, we can represent an arithmetic expression as an expression tree. Here we represent each operator, symbol and number in an given expression as nodes in a graph, we denote these as elements. The operands of each element are the children of the node. Notation wise we will represent links out of a node indicating the children of the node, even though expression wise the children are "inputs" to such parent. We can also write an expression as a directed acylic graph which allows us to represent expressions with more than one operators to avoid recursion. An example of the difference between the two can be see in Figure \ref{fig:DAGgraph2}. We from now on will use DAG's to represent expressions as this is essential in lowering runtime and allowing fast computation of complicated expressions. We will presume that ordering of each child is important.
 
 \section{Fundamentals of Algorithmic Differentiation}
 
-Using notation from  \cite{evald}, let $F: \mathbb{R}^n \rightarrow \mathbb{R}^m$ and $F(x) = y$ as in Section 2. Assume $F$ is the composition of a sequence of continuously differentiable elemental functions $(\varphi_i)_{i=1,\ldots, l}$, the derivatives of which can be easily calculated. Hence, $F$ can be represented as a DAG. The quantities calculated at each node of the graph during the function evaluation are numbered such that
+Using notation from  \cite{evald}, let $F: \mathbb{R}^n \rightarrow \mathbb{R}^m$ and $F(x) = y$ as in Section 2. Assume $F$ is the composition of a sequence of continuously differentiable elemental functions $(\varphi_i)_{i=1,\ldots, l}$, the derivatives of which can be easily calculated. Hence, $F$ can be represented as a DAG. In our case we will use the elemental functions provided below.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+        Function & Derivative \\
+        \hline
+        $\sin(u)$ & $\cos(u)$ \\
+        $\cos(u)$ & $-\sin(u)$ \\
+        $\exp(u) $ & $\exp(u)$ \\
+        $\log(u)$ & $1/u$ \\
+        $u^k$ & $k u^{k-1}$ \\
+        $f(u)g(u)$ & $f'(u)g(u) + f(u)g'(u)$ \\
+        $f(u) + g(u)$ & $f'(u) + g'(u)$ \\
+        \hline
+    \end{tabular}
+    \caption{Derivatives of Elemental Functions}
+    \label{tab:elemental}
+\end{table}
+
+The quantities calculated at each node of the graph during the function evaluation are numbered such that
 \begin{equation*}
     [ \underbrace{v_{1-n}, \ldots, v_0}_{x} , v_1, \ldots, v_{l-m}, \underbrace{v_{l-m+1}, \ldots, v_l}_{y}]
 \end{equation*}
@@ -107,20 +130,21 @@ Using $j \prec i$ to show $v_i$ depends directly on $v_j$ and $j \prec i \Longri
 
 We will use the interpretation of forward mode AD given in \cite{dhamarticle}. Assume $x$ is equal to the value a time-dependent $x(t)$ takes at $t=0$. Then define the tangent 
 \begin{equation*}
-    \Dot{x} = \frac{\partial x}{\partial t} \Bigg|_{t=0}
+    \dot{x} = \frac{\partial x}{\partial t} \Big|_{t=0}
 \end{equation*}
-As $y = F(x)$ we calculate the tangent $\Dot{y}$ as
+As $y = F(x)$ we calculate the tangent $\dot{y}$ as
 \begin{equation*}
-    \Dot{y} = \frac{\partial}{\partial t} F(x (t)) \Bigg|_{t=0} 
-    = F'(x (t)) \frac{\partial x}{\partial t} \Bigg|_{t=0}
+    \Dot{y} = \frac{\partial}{\partial t} F(x (t)) \Big|_{t=0} 
+    = F'(x (t)) \frac{\partial x}{\partial t} \Big|_{t=0}
     = F'(x) \Dot{x}
     \equiv \Dot{F}(x, \Dot{x})
 \end{equation*}
 Using the additional notation $u_i = (v_j)_{j \prec i}$ and $\Dot{u}_i = (\Dot{v}_j)_{j \prec i}$, the idea can be applied to an elemental function $\varphi_i : \mathbb{R}^{n_i} \longrightarrow \mathbb{R}$, $v_i = \varphi_i (u_i)$ to get the result
-\begin{equation*}
+\begin{equation}
+    \label{tangentequ}
     \Dot{v_i} = \sum_{j \prec i} \left\{ \Dot{v}_j \cdot \frac{\partial}{\partial v_j} \varphi_i (u_i) \right\} 
     \equiv \Dot{\varphi}_i(u_i, \Dot{u}_i)
-\end{equation*}
+\end{equation}
 
 This can be summarised as the general evaluation procedure given in \cite{evald} and given in Table \ref{tab:gep}.
 
@@ -161,16 +185,151 @@ When represented on a DAG, forward mode AD begins at the inputs and moves throug
 
 \subsection{Reverse Mode Algorithmic Differentiation}
 
-\section{The Algorithm}
+As in \cite{dhamarticle}, consider for the image of $F$ the hyperplane $\{ y \in \mathbb{R}^m | \Bar{y}^\top y = c\}$ for a given vector $\Bar{y} \in \mathbb{R}^m$ and a given value $c \in \mathbb{R}$. The inverse image of this hyperplane is given by the set $\{ x \in \mathbb{R}^n | \Bar{y}^\top F(x) = c\}$. We can apply the implicit function theorem to this set to calculate the normal to this hyperplane at $x$ as
+\begin{equation}
+    \Bar{x}^\top = \Bar{y}^\top F'(x) \equiv \Bar{F}(x, \Bar{y})
+\end{equation}
+This calculation is provided $\Bar{x}^\top$ does not vanish.
 
-Pseudocode Implementation
+Using the additional notation $\Bar{u}_i = (\Bar{v}_j)_{j \prec i}$, we calculate the adjoint function for each elemental function $\varphi : \mathbb{R}^{n_i} \longrightarrow \mathbb{R}$ as
+\begin{equation}
+    \Bar{u}_i += \Bar{v}_i \nabla \varphi_i (u_i)
+\end{equation}
+
+In reverse mode, the tree is first traversed beginning at the inputs and finishing at the outputs, storing the value the elemental function takes at each node. Then, the tree is traversed in the other direction storing the value the adjoint function takes at each node. This produces a the adjoint procedure for computing the first derivative from \cite{dhamarticle}, given below.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|lcll|}
+        \hline
+        $v_{i}$ & $=$ & $0$ & $i = 1, \ldots, l$ \\
+        \hline
+        $[v_{i-1}, \Bar{v}_{i-1}]$ & $=$ & $[x_{i}, \Bar{x}_{i}]$ & $i = 1, \ldots, n$ \\
+        \hline
+        push$(v_i)$ & & & \\
+        $v_{i}$ & $=$ & $v_i = \varphi_i (u_i)$ & $i = 1, \ldots, l$ \\
+        \hline
+        $v_{l-i}$ & $=$ & $y_{m-1}$ & $i = 1, \ldots, m-1$ \\
+        $\Bar{v}_{l-i}$ & $=$ & $\bar{y}_{m-1}$ & $i = 1, \ldots, m-1$ \\
+        \hline
+        $v_i \leftarrow$ pop$()$ & & & \\
+        $\Bar{u}_i$ & $+=$ & $\Bar{v}_i \nabla \varphi_i (u_i)$ & $i = l, \ldots, 1$ \\
+        $v_i$ & $=$ & $0$ & \\
+        \hline
+        $\Bar{v}_{i-n}$ & $=$ & $\Bar{x}_i$ & $i = 1, \ldots, n$ \\
+        \hline
+    \end{tabular}
+    \caption{Adjoint Procedure}
+    \label{tab:ap}
+\end{table}
+
+\section{Applying Algorithmic Differentiation on DAG's}
+
+If we consider an expression represented by a DAG, then it is very easy to apply the concept of Forward and Reverse mode algorithmic differentiation. Here we can represent each Element/Node denoted $v_i$ as our elementary function $v_i = \varphi_i (v_j)_{j \prec i}$ where now we can view $j \prec i$ to mean that $v_i$ is an operand of $v_j$. Then we can compute our tangents in Equation \ref{tangentequ} by traversing this graph with post-order traversal, calculating both the values, $v_i$, and the tangent values, $\Dot{v_i}$ with respect to a single input variable as we go along
+
+\subsection{Example of Forward Mode Algorithmic Differentiation on a DAG}
+Consider an equation
+
+\begin{equation}
+    \label{example2}
+    f(x,y) = Sin(yx^2) + e^{x^2}
+\end{equation}
+Say we want to apply our algorithm to the \ref{example2} represented by the DAG in Figure \ref{fig:DAGgraph} evaluating at $x=200$, $y=3$. Here we label the nodes according to the notation used above as seen in Table \ref{example1}. We then traverse the graph in postorder traversal, computing the value of each node as we go along. The results after this pass are seen in Table \ref{example1FM}. Now we will traverse the tree with preorder traversal. We know that first $\dot{v_6} \equiv 1$ and we have all our values calculated from the previous pass, so we get the adjoints as listed in Table \ref{tab:example1RM}
+
+\begin{algorithm}[h]
+\caption{ForwardmodeAD algorithm}\label{forwardAD}
+\begin{algorithmic}[1]
+\Procedure{ForwardmodeAD}{$expression,conditions$}
+\State dict = dict()\Comment{}
+\For{ each $symbol$ in conditions}
+\State Traverse through $expression$, visiting $element$ after its $operands$
+    \For{ each node i in expression}
+    \State Calculate $v_i$ and $\Dot{v_i}$.t. its $\varphi_i(v_j)_{j \prec i}$ \verb|operands| and \verb|symbol|
+    \State dict[symbol] = \verb|expression.adjoint|\Comment{Store the adjoint w.r.t the symbol}
+    \EndFor
+\EndFor
+\State \textbf{return} a dictionary of symbols and their respective \verb|adjoints|
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+\begin{figure}[h!]
+    \includegraphics[width=8cm]{images/DAGgraph.gv.pdf}
+    \caption{A Tree, left, and DAG, right, representation of expression $Sin(x^2y) + e^{x^2}$. The DAG allows us to avoid unnecessary recursion in the $x^2$ term}
+    \label{fig:DAGgraph}
+\end{figure}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|lcl|lclll|}
+        \hline
+        $v_{-1}$ & $\equiv$ & $x$ & $\Bar{v}_{-1}$ & $\equiv$ & $\Bar{v_2}\frac{\partial{v_2}}{\partial{v_{-1}}}$ & $=$ & $\Bar{v_2}v_1 {v_{-1}}^{(v_{1}-1)}$\\
+        $v_{0}$ & $\equiv$ & $y$ & $\Bar{v}_{0}$ & $\equiv$ & $\Bar{v_3}\frac{\partial{v_3}}{\partial{v_0}}$ & $=$ & $\Bar{v_3}v_2$\\
+        \hline
+        $v_{1}$ & $\equiv$ & $2$ & $\Bar{v}_{1}$ & $\equiv$ & $\Bar{v_2}\frac{\partial{v_2}}{\partial{v_1}}$ & $=$ & $\Bar{v}_{2}{v_{-1}}^{v_{1}}ln(v_{-1})$\\
+        $v_{2}$ & $\equiv$ & ${v_{-1}}^{v_{1}}$ & $\Bar{v}_{2}$ & $\equiv$ & $\Bar{v_3}\frac{\partial{v_3}}{\partial{v_2}} + \Bar{v_5}\frac{\partial{v_5}}{\partial{v_2}}$ & $=$ & $\Bar{v}_{3}v_0 + \Bar{v_5}e^{v_2}$\\
+        $v_{3}$ & $\equiv$ & ${v_{0}}*{v_{2}}$ & $\Bar{v}_{3}$ & $\equiv$ & $\Bar{v_4}\frac{\partial{v_4}}{\partial{v_3}}$ & $=$ & $\Bar{v_4}cos(v_2)$\\
+        $v_{4}$ & $\equiv$ & $sin(v_3)$ & $\Bar{v}_{4}$ & $\equiv$ & $\Bar{v_6}\frac{\partial{v_6}}{\partial{v_4}}$ & $=$ & $\Bar{v_6}$\\
+        $v_{5}$ & $\equiv$ & $e^{v_2}$ & $\Bar{v}_{5}$ & $\equiv$ & $\Bar{v_6}\frac{\partial{v_6}}{\partial{v_5}}$ & $=$ & $\Bar{v_6}$\\
+        \hline
+        $v_{6}$ & $\equiv$ & $v_5 + v_4$ & $\Bar{v}_{6}$ & $\equiv$ & $\frac{\partial{v_6}}{\partial{v_6}}$ & $=$ & $1$\\
+        \hline
+    \end{tabular}
+    \caption{Table of nodes in Figure \ref{fig:DAGgraph} of Equation \ref{example2}}
+    \label{tab:example1}
+\end{table}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|lclll|}
+        \hline
+        $v_{-1}$ & $\equiv$ & $x$ & $\equiv$ & 2\\
+        $v_{0}$ & $\equiv$ & $y$ & $\equiv$ & 2\\
+        \hline
+        $v_{1}$ & $\equiv$ & $2$ & $\equiv$ & 2\\
+        $v_{2}$ & $\equiv$ & ${v_{-1}}^{v_{1}}$ & $=$ & $ 2^2 = 4$\\
+        $v_{3}$ & $\equiv$ & $v_0 * v_2$ & $=$ & $ 2 * 4 = 8$\\
+        $v_{4}$ & $\equiv$ & $sin(v_3)$ & $=$ & $ sin(8) \approx 0.989358247$\\
+        $v_{5}$ & $\equiv$ & $e^{v_2}$ & $=$ & $ e^4 \approx 54.5982$\\
+        \hline
+        $v_{6}$ & $\equiv$ & $v_5 + v_4$ & $=$ & $e^4 + sin(8) \approx 55.5875$\\
+        \hline
+    \end{tabular}
+    \caption{Values of Figure \ref{fig:DAGgraph}}
+    \label{tab:example1FM}
+\end{table}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|lclllll|}
+        \hline
+        $\Bar{v}_{-1}$ & $=$ & $\Bar{v_2}v_1 {v_{-1}}^{(v_{1}-1)}$ & $=$ & $(2cos(8)+e^4) \cdot 2 \cdot 2^{2-1} = 8cos(8)+4e^4$ & $\approx$ & $217.2286$\\
+        $\Bar{v}_{0}$ & $=$ & $\Bar{v_3}v_2$ & $=$ & $cos(8)\cdot4 = 4cos(8)$ & $\approx$ & $-0.5820$\\
+        \hline
+        $\Bar{v}_{1}$ & $=$ & $\Bar{v}_{2}{v_{-1}}^{v_{1}}ln(v_{-1})$ & $=$ & $(2cos(8)+e^4) \cdot 2^2 \cdot ln(2) = 8cos(8)ln(2) +4e^4ln(2)$ & $\approx$ & $63.1932$\\
+        $\Bar{v}_{2}$ & $=$ & $\Bar{v}_{3}v_0 + \Bar{v_5}e^{v_2}$ & $=$ & $cos(8) \cdot 2 + 1 \cdot e^{4} = 2cos(8)+e^4$ & $\approx$ & $54.3071$\\
+        $\Bar{v}_{3}$ & $=$ & $\Bar{v_4}cos(v_3)$ & $=$ & $1 \cdot cos(8) = cos(8)$ & $\approx$ & $-0.1455$\\
+        $\Bar{v}_{4}$ & $=$ & $\Bar{v_6}$ & $=$ & $1$ & $=$ & $1$\\
+        $\Bar{v}_{5}$ & $=$ & $\Bar{v_6}$ & $=$ & $1$ & $=$ & $1$\\
+        \hline
+        $\Bar{v}_{6}$ & $=$ & $1$ & $=$ & $1$ & $=$ & $1$\\
+        \hline
+    \end{tabular}
+    \caption{Adjoints of Figure \ref{fig:DAGgraph}}
+    \label{tab:example1RM}
+\end{table}
+
+\subsection{Example of Reverse Mode Algorithmic Differentiation on a DAG}
+
+
 
 Reverse mode AD consists of a forward pass over the expression tree followed by a reverse pass. The forward pass starts by substituting values into the independent variable(s) and then using these to evaluate the expressions of their parent node(s). This process propagates up the tree to the dependent variable(s). At each node, the evaluation is stored to be used in the reverse pass.
 
 During the reverse pass, the adjoint values of each node, $\bar{w_i} = \frac{\partial{y}}{\partial{w_i}}$, are calculated using the expression:
 
 \begin{equation}
-\bar{w_i} = \sum_{j\in\{\mbox{successors of i}\}} \bar{w_j}\frac{\partial{w_j}}{\partial{w_i}}
+\Bar{v_i} = \sum_{j\in\{\mbox{parent of i}\}} \Bar{v_j}\frac{\partial{v_j}}{\partial{v_i}}
 \end{equation}
 
 In the following example, we find the derivative of the function $J = xsin(x+y)$ with respect to the variables $x$ and $y$ when $(x, y) = (1, 1)$.
@@ -211,6 +370,8 @@ For the reverse pass, we seed the value of $\bar{w_5}$ as 1 then, using the form
 Therefore, we have computed $\frac{\partial{J}}{\partial{x}}\vert_{(1, 1)} = sin(2) + cos(2)$ and $\frac{\partial{J}}{\partial{y}}\vert_{(1, 1)} = cos(2)$.
 
 \section{Implementation of 1D reverse mode AD in Python}
+
+
 
 We first had to define an expressions class that would take the form of a function say:
 \begin{equation}
@@ -423,26 +584,5 @@ where $\xi \in (x, x+h)$.
 
 \textbf{REFERENCE: https://rufflewind.com/2016-12-30/reverse-mode-automatic-differentiation}
 
-The key to AD is using the chain rule to split a complicated function into multiple elementary functions (We consider these to be +, -, *, /, \textasciicircum, sin(), cos(), exp(), log()) of which we know the derivatives of and are easy to compute. We use these partial derivatives obtained and used to calculate the function's derivative.
-Suppose we had a functions $f:\mathbb{R}^m \rightarrow \mathbb{R}$, $g:\mathbb{R}^l \rightarrow \mathbb{R}^m$, $h:\mathbb{R}^p \rightarrow \mathbb{R}^l$ And $u \in \mathbb{R}^p$, $y \in \mathbb{R}$ And we let
-\begin{equation}
-    y = f(g(h(u))) = f(g(h(v_0))) = f(g(v_1)) = f(v_2) = v_3
-\end{equation}
-If we want to calculate the derivative of $y$ then by the chain rule we have to calculate:
-\begin{equation}
-    \frac{\partial{y}}{\partial{u}} = \frac{\partial{f(v_2)}}{\partial{v_2}}\frac{\partial{g(v_1)}}{\partial{v_1}}\frac{\partial{h(v_0)}}{\partial{v_0}}
-\end{equation}
-By forward mode AD we would calculate
-\begin{equation}
-    \frac{\partial{y}}{\partial{u}} = \left(\frac{\partial{f(v_2)}}{\partial{v_2}}\frac{\partial{g(v_1)}}{\partial{v_1}}\right)\frac{\partial{h(v_0)}}{\partial{v_0}}
-\end{equation}
-Where we calculate the product of the first two partial derivatives first and then work our way towards the end, hence the name forward mode.
-
-By reverse mode AD we would calculate
-\begin{equation}
-    \frac{\partial{y}}{\partial{u}} = \frac{\partial{f(v_2)}}{\partial{v_2}}\left(\frac{\partial{g(v_1)}}{\partial{v_1}}\frac{\partial{h(v_0)}}{\partial{v_0}}\right)
-\end{equation}
-We calculate the product of the last two partial derivatives first, then work backward, hence the name reverse mode. \cite{dhamarticle}
 
 \end{document}
-
