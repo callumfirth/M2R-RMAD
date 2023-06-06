@@ -67,5 +67,8 @@ with dotall.subgraph(name="cluster_Tree") as d:
 
 
 dotall.format = 'pdf'
-dotall.render('doctest-output/graph.gv').replace('\\', '/')
-dotall.render('doctest-output/graph.gv', view=True)
+# Note this location is the same images folder that we use for overleaf
+# make sure to pull changes in overleaf editor to see them if adding
+# any here (also make sure to give unique file name each time)
+dotall.render('images/graph.gv').replace('\\', '/')
+dotall.render('images/graph.gv', view=True)
