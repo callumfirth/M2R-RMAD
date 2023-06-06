@@ -46,12 +46,8 @@ class ReverseMode:
                     self.node_av_pairs[o][1] += adjoints[i]
                 except TypeError:
                     self.node_av_pairs[o][1] = adjoints[i]
-            
             else:
                 self.node_av_pairs[o][1] = adjoints[i]
-
-
-        #self.node_av_pairs |= dict((e, [self.node_av_pairs[e][0], a]) for e, a in zip(expr.operands, adjoints))
 
     @singledispatchmethod
     def reverse_evaluate(self, expr, *cv):
