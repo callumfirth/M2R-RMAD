@@ -4,28 +4,43 @@ import expressions
 from functools import singledispatchmethod
 import numpy as np
 
+class VectorReverseMode:
+    """Implementation of Reverse-Mode Algorithmic Differentiation for Vector Expressions"""
+
+    def __init__(self, expr_vec, symbol_map):
+        self.expr_vec = expr_vec
+        self.symbol_map = symbol_map
+
+    def compute_partial_derivatives(self):
+        partial_derivatives = []
+
+        for expr in self.expr_vec.flat:
+            partial_derivatives.append(ReverseMode(expr, symbol_map=self.symbol_map).compute_partial_derivatives())
+
+        return partial_derivatives
+
 
 class ReverseMode:
     """Implementation of Reverse-Mode Algorithmic Differentiation."""
 
     def __init__(self, expr, symbol_map):
         """Initialise R-M AD."""
-        self.expr = expr
+        self.expr_vec = expr
         self.symbol_map = symbol_map
 
         self.node_av_pairs = {}
 
     def forward_pass(self):
         """Perform the forward pass appling the postvisitor function."""
-        node_value_dict = postvisitor(self.expr, evaluate, symbol_map=self.symbol_map)
+        node_value_dict = postvisitor(self.expr_vec, evaluate, symbol_map=self.symbol_map)
 
         for node in node_value_dict.items():
             self.node_av_pairs[node[0]] = [node[1], None]
 
     def reverse_pass(self):
         """Perform the reverse pass appling the previsitor function."""
-        self.node_av_pairs[self.expr][1] = 1
-        self.previsitor(self.expr, self.set_child_adjoint_values)
+        self.node_av_pairs[self.expr_vec][1] = 1
+        self.previsitor(self.expr_vec, self.set_child_adjoint_values)
 
         return self.node_av_pairs
 
@@ -117,11 +132,24 @@ class ReverseMode:
             current_level_nodes = new_level_nodes
 
 
+# x = expressions.Symbol("x")
+# y = expressions.Symbol("y")
+
+# expr = expressions.Sin(2*x*(y/2)**2)
+# reverse = ReverseMode(expr, {"x": 10, "y": 1})
+# partial_derivatives = reverse.compute_partial_derivatives()
+
+# print(partial_derivatives)
+
+
+
 x = expressions.Symbol("x")
 y = expressions.Symbol("y")
 
-expr = 2*x*(y/2)**2
-reverse = ReverseMode(expr, {"x": 10, "y": 1})
-partial_derivatives = reverse.compute_partial_derivatives()
+matrix = np.array([[x, 1], [1, 0]])
 
-print(partial_derivatives)
+vec = np.array([x**2 + y, x])
+
+vec_expr = matrix@vec
+
+print(VectorReverseMode(vec_expr, {"x": 1, "y": 2}).compute_partial_derivatives())
