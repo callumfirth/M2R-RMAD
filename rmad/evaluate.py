@@ -68,17 +68,17 @@ def _(expr, *o, **kwargs):
 
 @evaluate.register(expressions.Sin)
 def _(expr, *o, **kwargs):
-    return _closeto0(np.sin(o[0]))
+    return np.sin(o[0])
 
 
 @evaluate.register(expressions.Cos)
 def _(expr, *o, **kwargs):
-    return _closeto0(np.cos(o[0]))
+    return np.cos(o[0])
 
 
 @evaluate.register(expressions.Exp)
 def _(expr, *o, **kwargs):
-    return _closeto0(np.exp(o[0]))
+    return np.exp(o[0])
 
 
 @evaluate.register(expressions.Log)
