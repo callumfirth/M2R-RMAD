@@ -11,7 +11,5 @@ Paper:
 7. Move taylor stuff to later on, perhaps after implementation. 
 
 Implementation:
-1. Check/Fix to work properly with NumPy arrays (Probably would need to modify reversemode for each output arr)
-2. Check to see if traversal of shared expr works properly (As in does x^2 + sin(x^2) have the same operand and only viewed once)
-3. Check if the calling Sin() and Cos() wont mess up this 
-4. If all previous done and enough time, start to try and implement Matrix multiplication as Ax. Would be like sin and only take one operand which is x. And the operator will have a value A that it applies to? Can do this as we dont care about the adjoint of A?
+1. Check/Fix to work properly with NumPy arrays (Probably would need to modify reversemode for each output arr, issues so far are setting adjoints of the expr back to 0 so that the next reversepass doesnt use these
+2. If all previous done and enough time, start to try and implement Matrix multiplication as Ax. Would be like sin and only take one operand which is x. And the operator will have a value A that it applies to? Can do this as we dont care about the adjoint of A?
