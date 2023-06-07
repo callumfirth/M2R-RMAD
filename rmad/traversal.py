@@ -22,7 +22,6 @@ def evalpostvisitor(expr, **kwargs):
                                           element.operands),
                                         **kwargs)
             element.storedvalue = visited[element]
-            print("storedval",element,element.storedvalue)
             if isinstance(element, (Operator, Function)):
                 element.adjoint = 0
     return visited[expr]

@@ -1,5 +1,5 @@
 import graphviz
-dotall = graphviz.Digraph(comment='', engine='dot')
+dotall = graphviz.Digraph(engine='dot')
 
 with dotall.subgraph(name="cluster_DAG") as dot:
     #dot.node('v', 'Node', xlabel="(StoredValue, Adjoint)")
@@ -67,9 +67,13 @@ with dotall.subgraph(name="cluster_Tree") as d:
 
 dotall.attr(margin="0")
 
-dotall.format = 'pdf'
+dotall.format = 'pdf' #Best for importing into TeX i found
+
 # Note this location is the same images folder that we use for overleaf
 # make sure to pull changes in overleaf editor to see them if adding
 # any here (also make sure to give unique file name each time)
-#dotall.render('images/Clustergraph.gv').replace('\\', '/')
-dotall.render('images/Clustergraph.gv', view=True)
+# dotall.render('images/Clustergraph.gv').replace('\\', '/')
+
+filename='ClusterGraph'
+
+dotall.render(f'images/Graph_{filename}', view=True)

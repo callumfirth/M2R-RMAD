@@ -39,6 +39,8 @@ c = 3
 conditions = {'x': a, 'y': b}
 expression = sin(y*x**2)+exp(x**2)
 
+# Need to fix to allow np arrays in expr instead of just in the conditions
+
 start = time.time()
 reverse = reversemodeAD(expression, conditions)
 print(f"Derivative of {expression} at {conditions} in RM: {reverse}")
@@ -62,29 +64,31 @@ end = time.time()
 print(f"Time for FM AD:{end-start}")
 #adjoint(expression)
 
-eps = 10**-12
-x = expressions.Symbol('x')
-conditions = {'x': 2}
-expression = x**3 + x
-exprdelta = (x + eps)**3 + x + eps
-Jx = evalpostvisitor(expression, symbol_map=conditions)
-Jdeltax = evalpostvisitor(exprdelta, symbol_map=conditions)
-dJx = reversemodeAD(expression, conditions)
+
+
+# eps = 10**-12
+# x = expressions.Symbol('x')
+# conditions = {'x': 2}
+# expression = x**3 + x
+# exprdelta = (x + eps)**3 + x + eps
+# Jx = evalpostvisitor(expression, symbol_map=conditions)
+# Jdeltax = evalpostvisitor(exprdelta, symbol_map=conditions)
+# dJx = reversemodeAD(expression, conditions)
 # Using taylor series expansion find O(eps^2)
-print(f"\nDerivative of {expression} at {conditions} is {dJx}")
-result = Jdeltax - Jx - dJx[x]*eps
-#print(Jdeltax, Jx, dJx[x], result)
-import math
-print("Taylor series error:", math.sqrt(result))
+# print(f"\nDerivative of {expression} at {conditions} is {dJx}")
+# result = Jdeltax - Jx - dJx[x]*eps
+# print(Jdeltax, Jx, dJx[x], result)
+# import math
+# print("Taylor series error:", math.sqrt(result))
 
 # Finite difference method to get error from true derivative (we know is 13)
-x = 2
-fx = x**3 + x
-fxh = (x+eps)**3 + x+eps
-df = (fxh-fx)/eps
-accdif = 13
-print("Finite difference error:", df - accdif)
-
+# x = 2
+# fx = x**3 + x
+# fxh = (x+eps)**3 + x+eps
+# df = (fxh-fx)/eps
+# accdif = 13
+# print("Finite difference error:", df - accdif)
+#
 # Will add a graph but at later date
 # import matplotlib.pyplot as plt
 # import numpy as np
