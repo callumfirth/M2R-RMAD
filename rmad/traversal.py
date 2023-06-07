@@ -24,8 +24,6 @@ def evalpostvisitor(expr, **kwargs):
             element.storedvalue = visited[element]
             if isinstance(element, (Operator, Function)):
                 element.adjoint = 0
-    return visited[expr]
-
 
 def adjointprevisitor(expr, fn_adjoint=1, **kwargs):
     """Traverse tree in preorder applying the adjoint to each node.
