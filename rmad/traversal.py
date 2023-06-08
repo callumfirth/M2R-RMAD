@@ -1,10 +1,15 @@
 from evaluate import evaluate, adjoint_evaluate
 from expressions import Operator, Symbol, Function
-
+import numpy as np
 
 def evalpostvisitor(expr, **kwargs):
     """Visit an expression in post-order applying a function."""
-    stack = [expr]
+    stack = []
+    if isinstance(expr, np.ndarray):
+        for expression in expr:
+            stack.append(expression)
+    else:
+        stack = [expr]
     visited = {}
     while stack:
         element = stack.pop()
@@ -22,8 +27,6 @@ def evalpostvisitor(expr, **kwargs):
                                           element.operands),
                                         **kwargs)
             element.storedvalue = visited[element]
-            if isinstance(element, (Operator, Function)):
-                element.adjoint = 0
 
 def adjointprevisitor(expr, fn_adjoint=1, **kwargs):
     """Traverse tree in preorder applying the adjoint to each node.
@@ -43,6 +46,8 @@ def adjointprevisitor(expr, fn_adjoint=1, **kwargs):
     for counter, operand in enumerate(expr.operands):
         operand.adjoint += adjoint[counter] * expr.adjoint
         adjointprevisitor(operand, operand.adjoint)
+        if not isinstance(operand, Symbol):
+            operand.adjoint = 0  # So that next pass the adjoints are set back to 0
 
 
 def adjoint(tree):

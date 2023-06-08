@@ -71,10 +71,10 @@ def _(expr, seed, *o, **kwargs):
 
 @forwardevaluate.register(expressions.Symbol)
 def _(expr, seed, *o, symbol_map, **kwargs):
-    value = symbol_map[expr.value]
+    value = symbol_map[expr]
     expr.storedvalue = value
     expr.adjoint += 0
-    if seed == expr.value:
+    if seed == expr:
         expr.adjoint += 1
     return value
 

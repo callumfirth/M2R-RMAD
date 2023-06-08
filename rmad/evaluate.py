@@ -38,7 +38,7 @@ def _(expr, *o, **kwargs):
 
 @evaluate.register(expressions.Symbol)
 def _(expr, *o, symbol_map, **kwargs):
-    return symbol_map[expr.value]
+    return symbol_map[expr]
 
 
 @evaluate.register(expressions.Add)
@@ -112,12 +112,12 @@ def adjoint_evaluate(expr, *o, **kwargs):
 
 @adjoint_evaluate.register(expressions.Number)
 def _(expr, *o, **kwargs):
-    return [1]
+    return [1]  # Essentially redundant as numbers have no operands
 
 
 @adjoint_evaluate.register(expressions.Symbol)
 def _(expr, *o, **kwargs):
-    return [1]
+    return [1]  # Essentially redundant as symbols have no operands
 
 
 @adjoint_evaluate.register(expressions.Add)
