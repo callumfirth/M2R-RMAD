@@ -8,7 +8,16 @@ def forwardmodevisitor(expr, conditions):
     """Visit an expression in post-order applying a function."""
     adjoints = dict()
     for symbol in conditions.keys():
-        stack = [expr]
+
+        # Returns stack of output expr (so works for arrays)
+        stack = []
+        if isinstance(expr, np.ndarray):
+            for expression in expr:
+                stack.append(expression)
+        else:
+            stack = [expr]
+
+        # The actual forwardmode func
         visited = {}
         while stack:
             element = stack.pop()
@@ -27,7 +36,15 @@ def forwardmodevisitor(expr, conditions):
                                                 element.operands),
                                             symbol_map=conditions)
                 element.storedvalue = visited[element]
-        adjoints[symbol] = expr.adjoint
+
+        #Returns adjoint of each expression in our expr (so works for arrays)
+        adjointlist = []
+        if isinstance(expr, np.ndarray):
+            for expression in expr:
+                adjointlist.append(expression.adjoint)
+        else:
+            adjointlist = [expr]
+        adjoints[symbol] = adjointlist
     return adjoints
 
 

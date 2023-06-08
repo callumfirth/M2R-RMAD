@@ -64,7 +64,7 @@ exp = expressions.Exp()
 log = expressions.Log()
 
 #Need to fix fm to work with np arrays
-expression = sin(x)
+expression = np.asarray([x**2 + 2*x*y, sin(x**2)])
 
 start = time.time()
 conditions = {x: a, y: b}
