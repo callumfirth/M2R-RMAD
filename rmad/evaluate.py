@@ -1,5 +1,5 @@
 from functools import singledispatch
-import expressions
+import rmad.expressions as expressions
 import numpy as np
 
 

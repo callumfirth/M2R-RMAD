@@ -1,7 +1,5 @@
-from evaluate import _closeto0
-import expressions
+import rmad.expressions as expressions
 import numpy as np
-from traversal import adjoint, symbolnodes
 from functools import singledispatch
 
 def forwardmodevisitor(expr, conditions):

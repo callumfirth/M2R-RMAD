@@ -4,4 +4,5 @@ build-backend = "hatchling.build"
 
 [project]
 name = "M2RProject"
-version = "0.1"
+version = "0.2"
+dependencies = ["numpy"]
