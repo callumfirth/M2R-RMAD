@@ -76,14 +76,16 @@ One drawback of reverse mode algorithmic differentiation over forward-mode is th
 
 \section{Directed Acylic Graphs to Represent Expressions}
 
-\begin{figure}[h]
+\begin{figure}[t]
     \centering
     \includegraphics[width=12cm]{images/Clustergraph.gv.pdf}
     \caption{A DAG and Expression Tree representation of Equation \ref{example1}}
     \label{fig:DAGgraph2}
 \end{figure}
 
-Below is an example for $F: \mathbb{R}^3 \rightarrow \mathbb{R}^2$ defined by
+As in \cite{PoPBook}, we can represent an arithmetic expression as an expression tree. Here we represent each operator, symbol and number in an given expression as nodes in a graph, we denote these as elements. The operands of each element are the children of the node. Notation wise we will represent links out of a node indicating the children of the node, even though expression wise the children are "inputs" to such parent. We can also write an expression as a directed acylic graph which allows us to represent expressions with more than one operators to avoid recursion. An example of the difference between the two can be see in Figure \ref{fig:DAGgraph2}. We from now on will use DAG's to represent expressions as this is essential in lowering runtime and allowing fast computation of complicated expressions. We will presume that ordering of each child is important.
+
+For a function $F: \mathbb{R}^3 \rightarrow \mathbb{R}^2$ defined by
 \begin{equation} \label{example1}
     F \begin{pmatrix}
         x \\ y \\ z
@@ -91,8 +93,7 @@ Below is an example for $F: \mathbb{R}^3 \rightarrow \mathbb{R}^2$ defined by
         \sin (x^2 y) + e^{x^2} \\ e^{x^2} \log z
     \end{pmatrix}
 \end{equation}
-
-As in \cite{PoPBook}, we can represent an arithmetic expression as an expression tree. Here we represent each operator, symbol and number in an given expression as nodes in a graph, we denote these as elements. The operands of each element are the children of the node. Notation wise we will represent links out of a node indicating the children of the node, even though expression wise the children are "inputs" to such parent. We can also write an expression as a directed acylic graph which allows us to represent expressions with more than one operators to avoid recursion. An example of the difference between the two can be see in Figure \ref{fig:DAGgraph2}. We from now on will use DAG's to represent expressions as this is essential in lowering runtime and allowing fast computation of complicated expressions. We will presume that ordering of each child is important.
+the representation as a DAG and an expression tree can be seen in Figure \ref{fig:DAGgraph2}.
 
 \section{Fundamentals of Algorithmic Differentiation}
 
@@ -225,9 +226,9 @@ In reverse mode, the tree is first traversed beginning at the inputs and finishi
 
 \section{Applying Algorithmic Differentiation on DAG's}
 
-If we consider an expression represented by a DAG, then it is very easy to apply the concept of Forward and Reverse mode algorithmic differentiation. Here we can represent each Element/Node denoted $v_i$ as our elementary function $v_i = \varphi_i (v_j)_{j \prec i}$ where now we can view $j \prec i$ to mean that $v_i$ is an operand of $v_j$. Then we can compute our tangents in Equation \ref{tangentequ} by traversing this graph with post-order traversal, calculating both the values, $v_i$, and the tangent values, $\Dot{v_i}$ with respect to a single input variable as we go along
+If we consider an expression represented by a DAG, then it is very easy to apply the concept of Forward and Reverse mode algorithmic differentiation. Here we can represent each Element/Node denoted $v_i$ as our elementary function $v_i = \varphi_i (v_j)_{j \prec i}$ where now we can view $j \prec i$ to mean that $v_i$ is an operand of $v_j$. Then to apply forward mode differentiation we can compute our tangents in Equation \ref{tangentequ} by traversing this graph with post-order traversal, calculating both the values, $v_i$, and the tangent values, $\Dot{v_i}$ as we go along. So we can calculate the derivatives of all the output variables with respect to each input variable on each pass. Alternatively we can do reverse mode algorithmic differentiation by first traversing postorder traversal on the graph, computing all the values, $v_i$. Then we can preorder traverse the graph to compute the derivative of each output variable with respect to every input variable on each pass.
 
-\subsection{Example of Forward Mode Algorithmic Differentiation on a DAG}
+This gives us an insight to why forward mode has a computational cost of $\mathcal{O}(n)$. As we require to have $n$ forward passes to compute the derivative. Similary we can see that reverse mode has a computational cost of $\mathcal{O}(m)$. As we require to have $m$ reverse passes into order to calculate the derivative. Here we refer to a forward pass as the postorder traversal on a expression and a reverse pass as the preorder traversal on a expression.
 
 For the next two sections we will be considering the equation given by
 \begin{equation}
@@ -235,16 +236,16 @@ For the next two sections we will be considering the equation given by
     f(x,y) = \sin(yx^2) + e^{x^2}
 \end{equation}
 
-Say we want to apply our algorithm to the \ref{example2} represented by the DAG in Figure \ref{fig:DAGgraph} evaluating at $x=2$, $y=2$. Here we label the nodes according to the notation used above as seen in Table \ref{example1}. 
-
-
-
 
 \begin{figure}[h!]
     \includegraphics[width=4cm]{images/Graph_DAGExample.pdf}
     \caption{The DAG of Equation \ref{example2}}
     \label{fig:DAGgraph}
 \end{figure}
+
+\subsection{Example of Forward Mode Algorithmic Differentiation on a DAG}
+
+Say we want to apply our algorithm to Equation \ref{example2} represented by the DAG in Figure \ref{fig:DAGgraph} evaluating at $x=2$, $y=2$. Here we label the nodes according to the notation used above as seen in Table \ref{example1}. 
 
 
 
@@ -255,7 +256,7 @@ Say we want to apply our algorithm to the \ref{example2} represented by the DAG 
 \State dict = dict()\Comment{}
 \For{ each $symbol$ in conditions}
     \For{ each node i in expression}\Comment{By postorder traversal, operands before element}
-    \State Calculate $v_i$ and $\Dot{v_i}$.t. its $\varphi_i(v_j)_{j \prec i}$ \verb|operands| and \verb|symbol|
+    \State Calculate $v_i$ and $\Dot{v_i}$ w.r.t its $\varphi_i(v_j)_{j \prec i}$ \verb|operands| and \verb|symbol|
     \State dict[symbol] = \verb|expression.adjoint|\Comment{Store the adjoint w.r.t the symbol}
     \EndFor
 \EndFor
@@ -267,46 +268,46 @@ Say we want to apply our algorithm to the \ref{example2} represented by the DAG 
 \subsection{Example of Reverse Mode Algorithmic Differentiation on a DAG}
 
 
-We then traverse the graph in postorder traversal, computing the value of each node as we go along. The results after this pass are seen in Table \ref{example1FM}. Now we will traverse the tree with preorder traversal. We know that first $\dot{v_6} \equiv 1$ and we have all our values calculated from the previous pass, so we get the adjoints as listed in Table \ref{tab:example1RM}
+We then traverse the graph in postorder traversal, computing the value of each node as we go along. The results after this pass are seen in Table \ref{tab:example1FP}. Now we will traverse the tree with preorder traversal. We know that first $\dot{v_6} \equiv 1$ and we have all our values calculated from the previous pass, so we get the adjoints as listed in Table \ref{tab:example1RP}
 
 
 \begin{table}[h!]
     \centering
     \begin{tabular}{|lcl|lclll|}
         \hline
-        $v_{-1}$ & $\equiv$ & $x$ & $\Bar{v}_{-1}$ & $\equiv$ & $\Bar{v_2}\frac{\partial{v_2}}{\partial{v_{-1}}}$ & $=$ & $\Bar{v_2}v_1 {v_{-1}}^{(v_{1}-1)}$\\
-        $v_{0}$ & $\equiv$ & $y$ & $\Bar{v}_{0}$ & $\equiv$ & $\Bar{v_3}\frac{\partial{v_3}}{\partial{v_0}}$ & $=$ & $\Bar{v_3}v_2$\\
+        $v_{-1}$ & $\equiv$ & $x$ & $\Bar{v}_{-1}$ & $=$ & $\Bar{v_2}\frac{\partial{v_2}}{\partial{v_{-1}}}$ & $=$ & $\Bar{v_2}v_1 {v_{-1}}^{(v_{1}-1)}$\\
+        $v_{0}$ & $\equiv$ & $y$ & $\Bar{v}_{0}$ & $=$ & $\Bar{v_3}\frac{\partial{v_3}}{\partial{v_0}}$ & $=$ & $\Bar{v_3}v_2$\\
         \hline
-        $v_{1}$ & $\equiv$ & $2$ & $\Bar{v}_{1}$ & $\equiv$ & $\Bar{v_2}\frac{\partial{v_2}}{\partial{v_1}}$ & $=$ & $\Bar{v}_{2}{v_{-1}}^{v_{1}}ln(v_{-1})$\\
-        $v_{2}$ & $\equiv$ & ${v_{-1}}^{v_{1}}$ & $\Bar{v}_{2}$ & $\equiv$ & $\Bar{v_3}\frac{\partial{v_3}}{\partial{v_2}} + \Bar{v_5}\frac{\partial{v_5}}{\partial{v_2}}$ & $=$ & $\Bar{v}_{3}v_0 + \Bar{v_5}e^{v_2}$\\
-        $v_{3}$ & $\equiv$ & ${v_{0}}*{v_{2}}$ & $\Bar{v}_{3}$ & $\equiv$ & $\Bar{v_4}\frac{\partial{v_4}}{\partial{v_3}}$ & $=$ & $\Bar{v_4}cos(v_2)$\\
-        $v_{4}$ & $\equiv$ & $sin(v_3)$ & $\Bar{v}_{4}$ & $\equiv$ & $\Bar{v_6}\frac{\partial{v_6}}{\partial{v_4}}$ & $=$ & $\Bar{v_6}$\\
-        $v_{5}$ & $\equiv$ & $e^{v_2}$ & $\Bar{v}_{5}$ & $\equiv$ & $\Bar{v_6}\frac{\partial{v_6}}{\partial{v_5}}$ & $=$ & $\Bar{v_6}$\\
+        $v_{1}$ & $=$ & $2$ & $\Bar{v}_{1}$ & $=$ & $\Bar{v_2}\frac{\partial{v_2}}{\partial{v_1}}$ & $=$ & $\Bar{v}_{2}{v_{-1}}^{v_{1}}ln(v_{-1})$\\
+        $v_{2}$ & $=$ & ${v_{-1}}^{v_{1}}$ & $\Bar{v}_{2}$ & $=$ & $\Bar{v_3}\frac{\partial{v_3}}{\partial{v_2}} + \Bar{v_5}\frac{\partial{v_5}}{\partial{v_2}}$ & $=$ & $\Bar{v}_{3}v_0 + \Bar{v_5}e^{v_2}$\\
+        $v_{3}$ & $=$ & ${v_{0}}*{v_{2}}$ & $\Bar{v}_{3}$ & $=$ & $\Bar{v_4}\frac{\partial{v_4}}{\partial{v_3}}$ & $=$ & $\Bar{v_4}cos(v_2)$\\
+        $v_{4}$ & $=$ & $sin(v_3)$ & $\Bar{v}_{4}$ & $=$ & $\Bar{v_6}\frac{\partial{v_6}}{\partial{v_4}}$ & $=$ & $\Bar{v_6}$\\
+        $v_{5}$ & $=$ & $e^{v_2}$ & $\Bar{v}_{5}$ & $=$ & $\Bar{v_6}\frac{\partial{v_6}}{\partial{v_5}}$ & $=$ & $\Bar{v_6}$\\
         \hline
-        $v_{6}$ & $\equiv$ & $v_5 + v_4$ & $\Bar{v}_{6}$ & $\equiv$ & $\frac{\partial{v_6}}{\partial{v_6}}$ & $=$ & $1$\\
+        $v_{6}$ & $=$ & $v_5 + v_4$ & $\Bar{v}_{6}$ & $=$ & $\frac{\partial{v_6}}{\partial{v_6}}$ & $=$ & $1$\\
         \hline
     \end{tabular}
-    \caption{Table of node values and adjoints in Figure \ref{fig:DAGgraph} of Equation \ref{example2}}
+    \caption{Table of Node Values and Adjoints in Figure \ref{fig:DAGgraph} of Equation \ref{example2}}
     \label{tab:example1}
 \end{table}
 
 \begin{table}[h!]
     \centering
-    \begin{tabular}{|lclll|}
+    \begin{tabular}{|lclllcl|}
         \hline
-        $v_{-1}$ & $\equiv$ & $x$ & $\equiv$ & 2\\
-        $v_{0}$ & $\equiv$ & $y$ & $\equiv$ & 2\\
+        $v_{-1}$ & $=$ & $x$ & $\equiv$ & 2 & $=$ & 2\\
+        $v_{0}$ & $\equiv$ & $y$ & $\equiv$ & 2 & $=$ & 2\\
         \hline
-        $v_{1}$ & $\equiv$ & $2$ & $\equiv$ & 2\\
-        $v_{2}$ & $\equiv$ & ${v_{-1}}^{v_{1}}$ & $=$ & $ 2^2 = 4$\\
-        $v_{3}$ & $\equiv$ & $v_0 * v_2$ & $=$ & $ 2 * 4 = 8$\\
-        $v_{4}$ & $\equiv$ & $sin(v_3)$ & $=$ & $ sin(8) \approx 0.989358247$\\
-        $v_{5}$ & $\equiv$ & $e^{v_2}$ & $=$ & $ e^4 \approx 54.5982$\\
+        $v_{1}$ & $\equiv$ & $2$ & $=$ & 2 & $=$ & 2\\
+        $v_{2}$ & $\equiv$ & ${v_{-1}}^{v_{1}}$ & $=$ & $ 2^2$ & $=$ & $4$\\
+        $v_{3}$ & $\equiv$ & $v_0 * v_2$ & $=$ & $ 2 * 4$ & $=$ & $8$\\
+        $v_{4}$ & $\equiv$ & $sin(v_3)$ & $=$ & $sin(8)$ & $\approx$ & $0.9894$\\
+        $v_{5}$ & $\equiv$ & $e^{v_2}$ & $=$ & $ e^4$ & $\approx$ & $54.5982$\\
         \hline
-        $v_{6}$ & $\equiv$ & $v_5 + v_4$ & $=$ & $e^4 + sin(8) \approx 55.5875$\\
+        $v_{6}$ & $\equiv$ & $v_5 + v_4$ & $=$ & $e^4 + sin(8)$ & $\approx$ & $55.5875$\\
         \hline
     \end{tabular}
-    \caption{Values of Figure \ref{fig:DAGgraph} after forward pass}
+    \caption{Values of Figure \ref{fig:DAGgraph} After Forward Pass}
     \label{tab:example1FP}
 \end{table}
 
@@ -327,13 +328,14 @@ We then traverse the graph in postorder traversal, computing the value of each n
         $\Bar{v}_{6}$ & $=$ & $1$ & $=$ & $1$ & $=$ & $1$\\
         \hline
     \end{tabular}
-    \caption{Adjoints of Figure \ref{fig:DAGgraph} after reverse pass}
+    \caption{Adjoints of Figure \ref{fig:DAGgraph} After Reverse Pass}
     \label{tab:example1RP}
 \end{table}
 
-\section{Implementation of 1D reverse mode AD in Python}
+\newpage
+\section{Implementation of scalar reverse mode AD in Python}
 
-To implement reverse mode AD in python we used the symbolic language that we defined in \cite{PoPBook} as a template. This allowed us to have a symbolic language that we could use to easily construct our expression tree's/DAG's. It does this by using operator overloading our elementary operators so we can easily create an expression and represent it as a DAG that we can traverse. As it has a precedence in place. Here we added additional elementary functions Sin, Cos, Exp and Log. So that they can exist in expressions we create and behave correctly. We also modified our base Expression class to contain the following attributes
+To implement reverse mode AD in Python we used the symbolic language that we defined in \cite{PoPBook} as a template. This allowed us to have a symbolic language that we could use to easily construct our expressions. It does this by operator overloading our elementary operators so we can easily create an expression that we can traverse. Here we added additional elementary functions Sin, Cos, Exp and Log. So that they can exist in expressions we create and behave correctly. We also modified our base Expression class to contain the following attributes
 \begin{verbatim}
     class Expression:
         def __init__(self, *operands):
@@ -348,9 +350,10 @@ We also modified the \verb|evaluate()| function from \cite{PoPBook} to include e
     def _(expr, *o, **kwargs):
         return np.sin(o[0])
 \end{verbatim}
+
 Then we have to create an algorithm for traversing and evaluating the DAG at each node. Note here we need to traverse the DAG in postorder traversal, where we visit the operands before we visit the element. Note in implementation we keep a dict of the expression and the stored value so we can avoid unnecessary calculation. The idea of the algorithm is below
 
-\begin{algorithm}[h]
+\begin{algorithm}[h!]
 \caption{EvaluatePostvisitor function}\label{EvaluatePostvisitor}
 \begin{algorithmic}[1]
 \Procedure{EvaluatePostvisitor}{$expression,conditions$}
@@ -362,121 +365,48 @@ Then we have to create an algorithm for traversing and evaluating the DAG at eac
 \end{algorithmic}
 \end{algorithm}
 
+Now that we have done a postorder traversal of our expression, each element contains a correct t\verb|element.storedvalue| attribute based on its elementary function and our evaluating conditions. Now we need to do a preorder traversal of our graph, evaluating the adjoint of each node. To do this we need to create a new \verb|adjoint_evaluate()| method similar to the previous \verb|evaluate()| method but instead it will calculate the adjoint of each of the operands with respect to the element, the Table \ref{tab:AdjEval} shows the output of \verb|adjoint_evaluate()| based on each element. Presume $w_1$ and $w_2$ are \verb|v_1.storedvalue| and \verb|v_2.storedvalue| respectively for $v_1$ and $c_2$ operands of \verb|element|. Note $\sin()$, $\cos()$, etc only have 1 operand and thus only 1 output
 
-\begin{verbatim}
-    @evaluate.register(expressions.Sin)
-    def _(expr, *o, **kwargs):
-        return np.sin(o[0])
-\end{verbatim}
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|lll|}
+        \hline
+        Type of \verb|element| & Operand 1  & Operand 2 \\
+        \hline
+        Add() & 1 & 1 \\
+        Sub() & 1 & -1 \\
+        Mul() & $w_2$ & $w_1$ \\
+        Div() & $1/w_2$ & $\frac{-w_1}{{w_2}^2}$ \\
+        Pow() & $w_2{w_1}^{(w_2-1)}$ & ${w_1}^{w_2}\log(w_1)$ \\
+        Sin() & $\cos(w_1)$ &  \\
+        Cos() & $-\sin(w_1)$ &  \\
+        Exp() & $\exp(w_1)$ &  \\
+        Log() & $\frac{1}{w_1}$ &  \\
+        \hline
+    \end{tabular}
+    \caption{Output of \verb|adjoint\_evaluate(element)|}
+    \label{tab:AdjEval}
+\end{table}
 
+Now we have our \verb|adjoint_evaluate()| method we can run this at each element when traversing the expression tree in preorder traversal, visiting the element before its operands. The general idea of the algorithm is below
 
-We first had to define an expressions class that would take the form of a function say:
-
-
-
-\begin{equation}
-xsin(x+y)
-\end{equation}
-The expression was then broken down into the elementary functions ($+, -, *, /, sin, cos, exp, log$), from there we define a Directed Acyclic Graph using the earlier elementary functions and parent nodes and the one that follows child nodes, using network x to represent this we can represent (18) by the graph:
-
-\section{Accuracy of results}
-
-We can check the accuracy of our results using 2 methods, first, by using Taylor series we have the equation:
-\begin{equation}
-    F(x + \epsilon) = F(x) + \frac{dF}{dx} * \epsilon + O(\epsilon ^ 2)
-\end{equation}
-When we send $\epsilon$ to 0 the term $O(\epsilon)$ goes to 0 meaning we can approximate $\frac{dF}{dx}$ by:
-
-\begin{equation}
-    \frac{F(x + \epsilon) - F(x)}{\epsilon}
-\end{equation}
-
-We can then subtract this result from our own and the difference should approach 0 as our Epsilon approaches 0. This result is proven by the following graph showing our Taylor error as our Epsilon value approaches 0.
-
-\begin{center}
-    \includegraphics[width=12cm]{images/Taylor_error_1.png}
-\end{center}
-
-We can see from this graph that in general as our Epsilon gets smaller so does our Taylor error, as predicted, and our Taylor error plateaus around $10^{-16}$ and this is because machine Epsilon lies in this region.
-
-The other way we check the accuracy is by using the finite difference method, for this we use similar method with a key difference, the formula we will use to approximate the derivative is:
-
-\begin{equation}
-    \frac{F(x + \epsilon) + F(x - \epsilon)}{2 \epsilon}
-\end{equation}
-
-Using this equation we get an error of order $h^2$ instead of an error of order $h$ found in Taylor error, we see this with the following graph where we see the initial convergence is much faster:
-
-\begin{center}
-    \includegraphics[width=12cm]{images/Finite_Difference_error_1.png}
-\end{center}
-
-%% IDK if anybody can explain why it blows up but I can't
-
-\section{Implementation into python}
-
-\section{Applications}
-
-\bibliography{thebibliography}
-
-
-\section{Dump}
-
-\begin{algorithm}
-\caption{Evaluate Postvisitor}\label{evalpostvisitor}
-\begin{algorithmic}[1]
-\Procedure{Euclid}{$expr,conditions$}\Comment{Expression and conditions}
-\State $stack = []$
-\State $visited = \{\}$
-\State Push $expr$ onto $stack$
-\While{$stack$ is not empty}
-\State $element \gets stack.pop()$
-\For{$operand \in element.opernads$}
-\If{$operand \not \in visited$}
-\State $unvisited\_children.push(operand)$
-\EndIf
-\EndFor
-\If{$unvisited\_children not empty$}
-\State $stack.push(element)$
-\State $stack.push(unvisited\_children)$
-\Else
-\State $visited[element] \gets$ evaluate$(element, *(visited[operand]$ for $operand$ in $element.opernads), symbol\_map = conditions)$
-\State $element.storedvalue \gets visited[element]$
-\EndIf
-\EndWhile\label{euclidendwhile}
-\State \textbf{return} $visited[expr]$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-
-
-Algorithm 2 provides the pseudocode behind the \verb|EvaluatePostvisitor| function. This will traverse through the tree in postorder and evaluate each node as it goes along. The \verb|evaluate| function for a node itself will depend on the \verb|type()| of node (what its operators are), its already evaluated operands, and the initial conditions. For example \verb|Add(x, y)| with initial conditions \verb|x = 2, y = 3| will be evaluated by evaluating \verb|x| and \verb|y| first, which will both \verb|x.storedvalue = 2| and \verb|y.storedvalue = 3|. Then \verb|Add(x, y)| will be evaluated and \verb|Add(x, y).storedvalue() = 5|. Finally, the function will return $5$
-\\\\
-Using the graph below we can see what our function looks like after our EvaluatePostvisitor function.
-\\\\
-Next Algorithm 3 provides the pseudocode behind the \verb|AdjointPrevisitor()| function, this will now traverse through the tree in preorder, evaluating the adjoints of the operands of the node as it goes along. This different \verb|evaluate_adjoint| function for a node itself will depend on the \verb|type()| of node (what its operators are), and the \verb|storedvalue| for its operands. Once this function has evaluated the adjoint of an operand, it will recursively call itself again on its operand, this allows us to do preorder traversal on our expression tree.
-\\\\
-Using the graph below we can see what our function looks like after our AdjointPrevisitor function.
-\\\\
-Next Algorithm 4 provides the pseudocode behind the \verb|ReversemodeAD()| which takes in \verb|expression| and \verb|conditions| which are the expression and conditions to evaluate the derivative at and returns a dictionary of the partial derivatives of \verb|expression| w.r.t. the symbols in \verb|expression|. It does this by simply running our \verb|EvaluatePostvisitor(expression, conditions)|. And then running \verb|AdjointPrevisitor(expression)|. Once both are run we now have adjoints attached to every node/element in expression. It will then return a dictionary of the symbols and their respective adjoints (which are the partial derivatives)
-
-
-
-\begin{algorithm}
+\begin{algorithm}[h]
 \caption{AdjointPrevisitor function}\label{AdjointPrevisitor}
 \begin{algorithmic}[1]
-\Procedure{AdjointPrevisitor}{$expression$}
-\State traverse through \verb|expression|, visiting \verb|element| before its \verb|operands|
-\For{each \verb|operand in expression.operands|}
-\State evaluate the \verb|adjoint| of \verb|operand| w.r.t. \verb|expression|'s type and its \verb|operands|
-\State update and add this value to \verb|operand.adjoint|\Comment{Add value to allow recursion}
-\State run \verb|AdjointPrevisitor(operand)|
+\Procedure{AdjointPrevisitor}{$expression$, adjoint=1}
+\State \verb|expression.adjoint| $\gets$ adjoint
+\State \verb|adjoint| $=$ \verb|adjoint_evaluate(expression, operands)|\Comment{adjoint is a list}
+\For{each index,operand in enumerate(expressions.operand)}\Comment{Preorder traversal}
+\State \verb|operand.adjoint| $+=$ \verb|adjoint[index]|$\cdot$ \verb|expression.adjoint|
+\State run \verb|AdjointPrevisitor(operand, operand.adjoint)|
 \EndFor
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
-\begin{algorithm}
+Now we have populated all the elements with their respective adjoints and so we can simply return a dictionary of all the symbols and their adjoint values to get the derivatives of our original expression. So now we can simply define a new function like so to calculate the derivative of an expression given some conditions
+
+\begin{algorithm}[h]
 \caption{ReversemodeAD algorithm}\label{reverseAD}
 \begin{algorithmic}[1]
 \Procedure{ReversemodeAD}{$expression,conditions$}
@@ -487,171 +417,45 @@ Next Algorithm 4 provides the pseudocode behind the \verb|ReversemodeAD()| which
 \end{algorithmic}
 \end{algorithm}
 
-\begin{center}
-    \includegraphics[width=12cm]{images/graph.gv.pdf}
-\end{center}
+\section{Accuracy of results}
 
-\begin{algorithm}
-\caption{ForwardmodeAD algorithm}\label{forwardAD}
-\begin{algorithmic}[1]
-\Procedure{ForwardmodeAD}{$expression,conditions$}
-\State dict = dict()
-\For{ each symbol in conditions}
-\State non recursively traverse through $expression$, visiting $element$ after its $operands$
-    \For{ each \verb|element| in expression}
-    \State set \verb|element.adjoint = 0|\Comment{So we don't use adjoints calculated for other symbols}
-    \State evaluate value and \verb|adjoint| of \verb|element| w.r.t. its \verb|type()|, \verb|operands| and \verb|symbol|
-    \State dict[symbol] = \verb|expression.adjoint|\Comment{Store the adjoint w.r.t the symbol}
-    \EndFor
-\EndFor
-\State \textbf{return} a dictionary of symbols and their respective \verb|adjoints|
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-
-
-
-\section{Max Dump}
-
-If $n=m=1$ then
-\begin{equation*}
-    f'(x) \approx \frac{f(x+h)-f(x)}{h}
-\end{equation*}
-and from \cite{quarteroni} it is known that
-\begin{equation*}
-    f'(x) - \frac{f(x+h)-f(x)}{h} = - \frac{h}{2} f''(\xi)
-\end{equation*}
-where $\xi \in (x, x+h)$.
-
-\textbf{REFERENCE: https://rufflewind.com/2016-12-30/reverse-mode-automatic-differentiation}
-
-
-
-\section{Removed sections}
-
-
-Reverse mode AD consists of a forward pass over the expression tree followed by a reverse pass. The forward pass starts by substituting values into the independent variable(s) and then using these to evaluate the expressions of their parent node(s). This process propagates up the tree to the dependent variable(s). At each node, the evaluation is stored to be used in the reverse pass.
-
-During the reverse pass, the adjoint values of each node, $\bar{w_i} = \frac{\partial{y}}{\partial{w_i}}$, are calculated using the expression:
+We can check the accuracy of our results using 2 methods, first, by using Taylor series we have the equation:
+\begin{equation}
+    F(x + \epsilon) = F(x) + \frac{dF}{dx} * \epsilon + O(\epsilon ^ 2)
+\end{equation}
+When we send $\epsilon$ to 0 the term $O(\epsilon)$ goes to 0 meaning we can find $O(\epsilon^2)$ by rearranging the equation to get:
 
 \begin{equation}
-\Bar{v_i} = \sum_{j\in\{\mbox{parent of i}\}} \Bar{v_j}\frac{\partial{v_j}}{\partial{v_i}}
+    F(x + \epsilon) - F(x) - \frac{dF}{dx} * \epsilon
 \end{equation}
 
-In the following example, we find the derivative of the function $J = xsin(x+y)$ with respect to the variables $x$ and $y$ when $(x, y) = (1, 1)$.
-
-First, the nodes in the expression tree are labeled in the following way:
-\begin{equation}
-w_1 = x
-\end{equation}
-\begin{equation}
-w_2 = y
-\end{equation}
-\begin{equation}
-w_3 = w_1 + w_2
-\end{equation}
-\begin{equation}
-w_4 = sin(w_3)
-\end{equation}
-\begin{equation}
-w_5 = w_1 \cdot w_4
-\end{equation}
-\\\\
-
-Suppose we want to compute $\frac{\partial{J}}{\partial{u}}$ with $u = (x, y) = (1, 1)$, performing the forward pass we obtain $w_1 = 1, w_2 = 1, w_3 = 2, w_4 = sin(2), w_5 = sin(2)$.
-
-For the reverse pass, we seed the value of $\bar{w_5}$ as 1 then, using the formula for $\bar{w_i}$, we obtain:
-\begin{equation}
-\bar{w_4} = \bar{w_5}\frac{\partial{w_5}}{\partial{w_4}} = \bar{w_5}\cdot w_1 = 1
-\end{equation}
-\begin{equation}
-\bar{w_3} = \bar{w_4}\frac{\partial{w_4}}{\partial{w_3}} = \bar{w_4}\cdot cos(w_3) = cos(2)
-\end{equation}
-\begin{equation}
-\bar{w_2} = \bar{w_3}\frac{\partial{w_3}}{\partial{w_2}} = \bar{w_3}\cdot w_1 = cos(2)
-\end{equation}
-\begin{equation}
-\bar{w_1} = \bar{w_5}\frac{\partial{w_5}}{\partial{w_1}} + \bar{w_3}\frac{\partial{w_3}}{\partial{w_1}} = \bar{w_5}\cdot w_4 + \bar{w_3} = sin(2) + cos(2)
-\end{equation}
-Therefore, we have computed $\frac{\partial{J}}{\partial{x}}\vert_{(1, 1)} = sin(2) + cos(2)$ and $\frac{\partial{J}}{\partial{y}}\vert_{(1, 1)} = cos(2)$.
-
-
+When we compute this we get a value for $O(\epsilon^2)$ which as $\epsilon \to 0$ $O(\epsilon^2) \to 0$ at a rate proportional to $\epsilon^2$
 
 \begin{center}
-    \includegraphics[width=12cm]{images/DAG_1.png}
+    \includegraphics[width=12cm]{images/Taylor_error_1.png}
 \end{center}
 
-Now we have the graph, we can operate a forward pass and at each node, we save the value outputted. Taking the example $x = 1$ and $y = 1$ we assign values to nodes as so:
+We can see from this graph that in general as our Epsilon gets smaller so does our Taylor error, as predicted, and our Taylor error plateaus around $10^{-16}$ and this is because machine Epsilon lies in this region.
 
-\begin{equation*}
-    5: (1, ) 
-\end{equation*}
-\begin{equation*}
-    4: (1, )
-\end{equation*}
-\begin{equation*}
-    3: (2, )
-\end{equation*}
-\begin{equation*}
-    2: (0.90929, )
-\end{equation*}
-\begin{equation*}
-    1: (1, )
-\end{equation*}
-\begin{equation*}
-    0: (0.90929, )
-\end{equation*}
+The other way we check the accuracy is by using the finite difference method, for this we use a similar method with a key difference, the formula we will use to approximate the derivative is:
 
-Here we are numbering the nodes as they have been in the graph. Having computed these in the first pass we then, using equations (14) - (18) stated above we now calculate the adjoint values by doing a backward pass and assigning them to each node as so:
+\begin{equation}
+    \frac{F(x + \epsilon) + F(x)}{\epsilon} - \frac{dF}{dx}
+\end{equation}
 
-\begin{equation*}
-    5: (1, -0.41615)
-\end{equation*}
-\begin{equation*}
-    4: (1, 0.49315)
-\end{equation*}
-\begin{equation*}
-    3: (2, -0.41615)
-\end{equation*}
-\begin{equation*}
-    2: (0.90929, 1)
-\end{equation*}
-\begin{equation*}
-    1: (1, 0.90929)
-\end{equation*}
-\begin{equation*}
-    0: (0.90929, 1)
-\end{equation*}
+As you can see here we have divided the above equation by $\epsilon$ to find $O(\epsilon^2)/\epsilon$ as we can see converges at half the rate as (a rate of $\epsilon$ instead of $\epsilon^2$):
 
-Returning these values we see that our $\frac{dJ}{dx} = 0.49315 = cos(2) + sin(2)$ is the adjoint value of the x node (node 4) and our $\frac{dJ}{dy} = -0.41615 = cos(2)$ is the adjoint value of the y node (node 5).
+\begin{center}
+    \includegraphics[width=12cm]{images/Finite_Difference_error_1.png}
+\end{center}
 
 
-\begin{figure}
-\begin{floatrow}
-\ffigbox{%
-  \includegraphics[width=5cm]{images/DAGgraph.gv.pdf}
-}{%
-  \caption{A Tree, left, and DAG, right, representation of expression $Sin(x^2y) + e^{x^2}$. The DAG allows us to avoid unnecessary recursion in the $x^2$ term}
-}
-\capbtabbox{%
-  \begin{tabular}{|lcl|lclll|}
-        \hline
-        $v_{-1}$ & $\equiv$ & $x$ & $\Bar{v}_{-1}$ & $\equiv$ & $\Bar{v_2}\frac{\partial{v_2}}{\partial{v_{-1}}}$ & $=$ & $\Bar{v_2}v_1 {v_{-1}}^{(v_{1}-1)}$\\
-        $v_{0}$ & $\equiv$ & $y$ & $\Bar{v}_{0}$ & $\equiv$ & $\Bar{v_3}\frac{\partial{v_3}}{\partial{v_0}}$ & $=$ & $\Bar{v_3}v_2$\\
-        \hline
-        $v_{1}$ & $\equiv$ & $2$ & $\Bar{v}_{1}$ & $\equiv$ & $\Bar{v_2}\frac{\partial{v_2}}{\partial{v_1}}$ & $=$ & $\Bar{v}_{2}{v_{-1}}^{v_{1}}ln(v_{-1})$\\
-        $v_{2}$ & $\equiv$ & ${v_{-1}}^{v_{1}}$ & $\Bar{v}_{2}$ & $\equiv$ & $\Bar{v_3}\frac{\partial{v_3}}{\partial{v_2}} + \Bar{v_5}\frac{\partial{v_5}}{\partial{v_2}}$ & $=$ & $\Bar{v}_{3}v_0 + \Bar{v_5}e^{v_2}$\\
-        $v_{3}$ & $\equiv$ & ${v_{0}}*{v_{2}}$ & $\Bar{v}_{3}$ & $\equiv$ & $\Bar{v_4}\frac{\partial{v_4}}{\partial{v_3}}$ & $=$ & $\Bar{v_4}cos(v_2)$\\
-        $v_{4}$ & $\equiv$ & $sin(v_3)$ & $\Bar{v}_{4}$ & $\equiv$ & $\Bar{v_6}\frac{\partial{v_6}}{\partial{v_4}}$ & $=$ & $\Bar{v_6}$\\
-        $v_{5}$ & $\equiv$ & $e^{v_2}$ & $\Bar{v}_{5}$ & $\equiv$ & $\Bar{v_6}\frac{\partial{v_6}}{\partial{v_5}}$ & $=$ & $\Bar{v_6}$\\
-        \hline
-        $v_{6}$ & $\equiv$ & $v_5 + v_4$ & $\Bar{v}_{6}$ & $\equiv$ & $\frac{\partial{v_6}}{\partial{v_6}}$ & $=$ & $1$\\
-        \hline
-    \end{tabular}
-}{%
-  \caption{Table of nodes in Figure 2 of Equation 7}%
-}
-\end{floatrow}
-\end{figure}
+\section{Extention and implementation into NumPy arrays}
+
+\section{Applications}
+
+\bibliography{thebibliography}
+
+%Moved the algorithm, dump sections and work sections to seperate file called roughwork.tex which we can use to put parts that are not yet going to be in the paper
 
 \end{document}
