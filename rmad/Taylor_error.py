@@ -8,16 +8,11 @@ import numpy as np
 def taylor_error(expr, condition, eps, **kwargs):
     condition_new = dict(condition)
     condition_new[kwargs['var']] = condition_new[kwargs['var']] + eps
-    print(condition_new)
     evalpostvisitor(expr, symbol_map=condition)
     Jx = expr.storedvalue
     evalpostvisitor(expr, symbol_map=condition_new)
     Jdeltax = expr.storedvalue
-    print(Jx)
-    print(Jdeltax)
-    print(Jx - Jdeltax)
     dJx = reversemodeAD(expr, condition)
-    print(f"here is deriv {dJx[kwargs['var']]*eps}")
     # Using taylor series expansion find O(eps^2)
     return abs(Jdeltax - Jx - dJx[kwargs['var']]*eps)
 
