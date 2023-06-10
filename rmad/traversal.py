@@ -13,6 +13,7 @@ def evalpostvisitor(expr, **kwargs):
     visited = {}
     while stack:
         element = stack.pop()
+        element.adjoint = 0
         unvisited_children = []
         for operand in element.operands:
             if operand not in visited:
