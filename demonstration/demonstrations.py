@@ -104,8 +104,28 @@ def plottime(n):
     return plt.show()
 
 
-plottime(10)
+# plottime(10)
 
+
+def RMADEx1():
+    x = expressions.Symbol('x')
+    sin = expressions.Sin()
+    y = expressions.Symbol('y')
+    expression = sin(x+y)*x
+    conditions = {x:1, y:1}
+    return reversemodeAD(expression, conditions)
+
+def FMADEx1():
+    x = expressions.Symbol('x')
+    sin = expressions.Sin()
+    y = expressions.Symbol('y')
+    expression = sin(x+y)*x
+    conditions = {x:1, y:1}
+    return forwardmodevisitor(expression, conditions)
+
+print(RMADEx1())
+
+print(FMADEx1())
 
 # print(f"Time for FM AD:{timeRM(expression,conditions)}")
 # print(f"Time for RM AD:{timeFM(expression,conditions)}")

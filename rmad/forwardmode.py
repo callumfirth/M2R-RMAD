@@ -41,7 +41,7 @@ def forwardmodevisitor(expr, conditions):
             for expression in expr:
                 adjointlist.append(expression.adjoint)
         else:
-            adjointlist = [expr]
+            adjointlist = [expr.adjoint]
         adjoints[symbol] = adjointlist
     return adjoints
 
