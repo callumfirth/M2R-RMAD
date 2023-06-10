@@ -8,13 +8,18 @@ import numpy as np
 def taylor_error(expr, condition, eps, **kwargs):
     condition_new = dict(condition)
     condition_new[kwargs['var']] = condition_new[kwargs['var']] + eps
+    print(condition_new)
     evalpostvisitor(expr, symbol_map=condition)
-    Jx = expression.storedvalue
+    Jx = expr.storedvalue
     evalpostvisitor(expr, symbol_map=condition_new)
-    Jdeltax = exprdelta.storedvalue
-    dJx = reversemodeAD(expr, conditions)
+    Jdeltax = expr.storedvalue
+    print(Jx)
+    print(Jdeltax)
+    print(Jx - Jdeltax)
+    dJx = reversemodeAD(expr, condition)
+    print(f"here is deriv {dJx[kwargs['var']]*eps}")
     # Using taylor series expansion find O(eps^2)
-    return (Jdeltax - Jx - dJx[kwargs['var']]*eps)
+    return abs(Jdeltax - Jx - dJx[kwargs['var']]*eps)
 
 
 def taylor_error_plot(expr, condition, eps, **kwargs):  #eps is a list in this case
@@ -27,6 +32,4 @@ def taylor_error_plot(expr, condition, eps, **kwargs):  #eps is a list in this c
     plt.ylabel("Log10 of Taylor error")
     plt.title("Log-Log graph of Epsilon against Taylor error")
     plt.show()
-    
-
 
