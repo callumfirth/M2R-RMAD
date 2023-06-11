@@ -18,72 +18,48 @@
 \begin{document}
 
 \maketitle
-\tableofcontents
-\newpage
+
 \section{Introduction}
 
-Possibly the broadest issue we have with applying mathematical theory on a computer is that computers can only work with discrete values and since the very essence of a derivative includes $\lim_{x \to 0}$ we immediately run into issues. Immediately when trying to solve this problem one considers first principles where we set a small value $\epsilon$ and then compute the equation:
-
+When solving non-linear systems one method is Newton's method. Say the system is defined by
+\begin{equation} \label{Fxy}
+    \begin{split}
+        & F: \mathbb{R}^n \rightarrow \mathbb{R}^m \\
+        & F(x_1, \cdots, x_n) = (y_1, \cdots, y_m)
+    \end{split}
+\end{equation}
+then given $x_n \in \mathbb{R}^n$ the iterates are calculated by
 \begin{equation*}
-    \frac{f(x+\epsilon) - f(x)}{\epsilon}
+x_{n+1} = x_n - (F'(x_n))^{-1}F(x_n)
 \end{equation*}
-
-This method is called the Finite Differences method. This can give us good approximations however has some drawbacks, the first of all being we have to set $\epsilon$, and an optimal value for this may change depending on our function and the value $x$ that we evaluate at and another being that we will never be exact and always have an error, sometimes many orders higher than machine epsilon. Another common method that is used is symbolic differentiation, which takes mathematical expressions and finds their derivatives from a set of rules much like you or I would do on paper. This method although very accurate is tricky to implement, especially with larger functions, and will slow on multivariate functions when trying to compute all the partial derivatives.
-
-In this paper, we will be discussing algorithmic differentiation, this method breaks down a function into all its elementary operations and applies the chain rule to compute the derivative. Specifically, we will be looking at the reverse mode of algorithmic differentiation as it computes the derivates an order n faster than the forward mode, with n being the number of inputs to the function.
-
-The use of derivatives in algorithms is increasingly clear as artificial intelligence develops and proves its own uses. This is because of backpropagation which is a method used to train neural nets. On these neural nets, one has many nodes connected by a series of weights, such that the change in one value affects the change in another, to optimise these weights we must use a method called gradient descent which first requires us to find a derivative.
-
-Another use is in solving non-linear systems one method is Newton-Raphson in which iterates are calculated, given an initial $x_0$, using
-\begin{equation}
-\mathbf{x_{n+1}} = \mathbf{x_n} - [f'(\mathbf{x_n})]^{-1}f(\mathbf{x_n})
+where $F'(x_n)$ is the Jacobian of $F$ at $x_n$ defined by
+\begin{equation} \label{jacobian}
+    F'(x) = \begin{bmatrix}
+        \frac{\partial y_1}{\partial x_1} & \cdots & \frac{\partial y_1}{\partial x_n} \\
+        \vdots & \ddots & \vdots \\
+        \frac{\partial y_m}{\partial x_1} & \cdots & \frac{\partial y_m}{\partial x_n}
+    \end{bmatrix} \in \mathbb{R}^{m \times n}
 \end{equation}
-where
-\begin{equation}
-    f'(\mathbf{x}) = \begin{bmatrix}
-        \frac{\partial f_i}{\partial }
-    \end{bmatrix}
-\end{equation}
- 
-Hence the computation of derivatives of functions is key to finding the solutions of non-linear systems.
+
+Hence finding the derivative of a function is essential for us to be able to solve our system. So we need to find a way of computing the derivative of a function with low cost. Computing the derivative of the function is also essential in the development of neural networks, especially in the area of Backpropogation, a method used to train neural nets. On these neural nets, one has many nodes connected by a series of weights, such that the change in one value affects the change in another, to optimise these weights we must use a method called gradient descent which requires us to find a derivative.
+
+From these examples and those stated in \cite{appad} we see the importance of implementation of quick derivative computation on computers.
 
 \section{Basics of Computing Derivatives}
 
 There are three common ways to differentiate a function on a computer: numerically, symbolically, and algorithmically. The latter which we will be discussing in depth in this paper. Notably focusing on reverse mode algorithmic differentiation (AD). In contrast to symbolic and algorithmic differentiation, numerical differentiation results in an approximation for the derivative.
 
-The most common example of numerical differentiation is the finite differences method. For \\ $f: \mathbb{R}^n \longrightarrow \mathbb{R}^m$ a partial derivative can be approximated using a truncated Taylor series around $p \in \mathbb{R}^n$. From \cite{chem}
+The most common example of numerical differentiation is the finite differences method. For \\ $F: \mathbb{R}^n \longrightarrow \mathbb{R}^m$ in (\ref{Fxy}), a partial derivative can be approximated using a truncated Taylor series around $p \in \mathbb{R}^n$. 
 \begin{equation*}
-    \frac{\partial f_i (p)}{\partial x_j} \approx \frac{f_i(p+he_j) - f_i(p)}{h}
+    \frac{\partial F_i (p)}{\partial x_j} \approx \frac{F_i(p+he_j) - F_i(p)}{h}
 \end{equation*}
-This calculation for the derivative is approximate due to the error in the truncated Taylor series. The run time complexity of using finite differences to calculate all the partial derivatives of $f_i$ with respect to all $x_j$ is $\mathcal{O}(n)$ \cite{dhamarticle}. thus, finite differences is unsuited for systems with a large number of unknowns.
+This calculation for the derivative is approximate due to the error in the truncated Taylor series. The computational cost of calculating the Jacobian of $F$ in (\ref{jacobian}) is $n + 1$ times the cost of evaluating $F$ \cite{chem}. Thus, finite differences is unsuited for systems with a large number of unknowns.
 
-Symbolic differentiation involves taking an algebraic expression and computing its derivative with respect to a specified variable through repeated application of basic rules of calculus using computer algebra tools. It can be useful as, once the formula for the derivative is computed, finding the value of the derivative at a point is as simple as substituting it into the formula for the derivative.  Further, symbolic differentiation provides an explicit formula for the derivative which is beneficial from a mathematical point of view. However, it has the drawback that it can only be applied when the function to be differentiated exists in a closed form. Symbolic differentiation, like finite differences, is $\mathcal{O}(n)$ \cite{chem} hence it is inappropriate for large systems of unknowns.
+Symbolic differentiation involves taking an algebraic expression and computing its derivative with respect to a specified variable through repeated application of basic rules of calculus using computer algebra tools. It can be useful as, once the formula for the derivative is computed, finding the value of the derivative at a point is as simple as substituting it into the formula for the derivative.  Further, symbolic differentiation provides an explicit formula for the derivative which is beneficial from a mathematical point of view. However, it has the drawback that it can only be applied when the function to be differentiated exists in a closed form. For calculating the gradient of equation \ref{Fxy}, symbolic differentiation has a computational cost of $n$ times the cost of evaluating $F$ \cite{chem}. Thus, the computational cost for calculating the Jacobian of a set of equations would be prohibitively expensive.
 
-There are two forms of algorithmic differentiation: forward mode and reverse mode. Fundamental to AD is the application of the chain rule. Both have similar computational costs but are suited to different types of functions. Suppose $F: \mathbb{R}^n \rightarrow \mathbb{R}^m$, $F(x_1, \cdots, x_n) = (y_1, \cdots, y_m)$ and we wish to compute the Jacobian of this function
-\begin{equation*}
-    J = F'(\Vec{x}) = \begin{bmatrix}
-        \frac{\partial y_1}{\partial x_1} & \cdots & \frac{\partial y_1}{\partial x_n} \\
-        \vdots & \ddots & \vdots \\
-        \frac{\partial y_m}{\partial x_1} & \cdots & \frac{\partial y_m}{\partial x_n}
-    \end{bmatrix} \in \mathbb{R}^{m \times n}
-\end{equation*}
-with forward mode algorithmic differentiation, this has computational cost $\mathcal{O}(n)$. In contrast, the computational cost with reverse mode algorithmic differentiation is $\mathcal{O}(m)$ \cite{falisse}. Hence, reverse mode is suited for functions $F$ with fewer output variables or when calculating 
-\begin{equation*}
-    \frac{\partial y_i}{\partial x_1}, \cdots, \frac{\partial y_i}{\partial x_n}
-\end{equation*}
-for a $i \in \{1, \dots, m \}$.
-One drawback of reverse mode algorithmic differentiation over forward-mode is that it requires higher memory usage, due to the necessity to store intermediary values.
+There are two forms of algorithmic differentiation: forward mode and reverse mode. Fundamental to AD is the application of the chain rule. Both have similar computational costs for the Jacobian but are suited to different types of functions. With forward mode algorithmic differentiation, this has computational cost proportional to $n$ times the cost of evaluating $F$. In contrast, the computational cost of $[F'(x)]^\top$ with reverse mode algorithmic differentiation is proportional to $m$ times the cost of evaluating $F$ \cite{falisse}. Hence, reverse mode is suited for functions $F$ where $n >> m$. We will see below that the reverse mode has an even better complexity error for calculating gradients compared to the alternatives. One drawback of reverse mode algorithmic differentiation over forward-mode is that it requires higher memory usage, due to the necessity to store intermediary values.
 
 \section{Directed Acylic Graphs to Represent Expressions}
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=12cm]{images/Clustergraph.gv.pdf}
-    \caption{A DAG and Expression Tree representation of Equation \ref{example1}}
-    \label{fig:DAGgraph2}
-\end{figure}
-
-As in \cite{PoPBook}, we can represent an arithmetic expression as an expression tree. Here we represent each operator, symbol and number in an given expression as nodes in a graph, we denote these as elements. The operands of each element are the children of the node. Notation wise we will represent links out of a node indicating the children of the node, even though expression wise the children are "inputs" to such parent. We can also write an expression as a directed acylic graph which allows us to represent expressions with more than one operators to avoid recursion. An example of the difference between the two can be see in Figure \ref{fig:DAGgraph2}. We from now on will use DAG's to represent expressions as this is essential in lowering runtime and allowing fast computation of complicated expressions. We will presume that ordering of each child is important.
 
 For a function $F: \mathbb{R}^3 \rightarrow \mathbb{R}^2$ defined by
 \begin{equation} \label{example1}
@@ -93,11 +69,20 @@ For a function $F: \mathbb{R}^3 \rightarrow \mathbb{R}^2$ defined by
         \sin (x^2 y) + e^{x^2} \\ e^{x^2} \log z
     \end{pmatrix}
 \end{equation}
-the representation as a DAG and an expression tree can be seen in Figure \ref{fig:DAGgraph2}.
+its representation as a DAG and an expression tree can be seen in Figure \ref{fig:DAGgraph2}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=12cm]{images/Clustergraph.gv.pdf}
+    \caption{A DAG and expression tree representation of Equation \ref{example1}}
+    \label{fig:DAGgraph2}
+\end{figure}
+
+As in \cite{PoPBook}, we can represent an arithmetic expression as an expression tree. Here we represent each operator, symbol and number in an given expression as nodes in a graph, we denote these as elements. The operands of each element are the children of the node. We will represent links out of a node indicating the children of the node, even though expression wise the children are "inputs" to such parent. We can also write an expression as a directed acylic graph which allows us to represent expressions with more than one operators to avoid recursion. An example of the difference between the two can be see in Figure \ref{fig:DAGgraph2}. We from now on will use DAG's to represent expressions as this is essential in lowering runtime and allowing fast computation of complicated expressions. We will presume that ordering of each child is important.
 
 \section{Fundamentals of Algorithmic Differentiation}
 
-Using notation from  \cite{evald}, let $F: \mathbb{R}^n \rightarrow \mathbb{R}^m$ and $F(x) = y$ as in Section 2. Assume $F$ is the composition of a sequence of continuously differentiable elemental functions $(\varphi_i)_{i=1,\ldots, l}$, the derivatives of which can be easily calculated. Hence, $F$ can be represented as a DAG. In our case we will use the elemental functions provided below.
+Using notation from \cite{evald}, let $F: \mathbb{R}^n \rightarrow \mathbb{R}^m$ and $F(x) = y$ as in Section 2. Assume $F$ is the composition of a sequence of continuously differentiable elemental functions $(\varphi_i)_{i=1,\ldots, l}$, the derivatives of which can be easily calculated. Hence, $F$ can be represented as a DAG. In our case we will use the elemental functions provided in Table \ref{tab:elemental}.
 
 \begin{table}[h]
     \centering
@@ -127,7 +112,7 @@ Using $j \prec i$ to show $v_i$ depends directly on $v_j$ and $j \prec i \Longri
     v_i = \varphi_i (v_j)_{j \prec i} \text{ for } \varphi_i : \mathbb{R}^{n_i} \longrightarrow \mathbb{R}
 \end{equation*}
 
-\subsection{Forward Mode Algorithmic Differentiation}
+\subsection{Forward Mode}
 
 We will use the interpretation of forward mode AD given in \cite{dhamarticle}. Assume $x$ is equal to the value a time-dependent $x(t)$ takes at $t=0$. Then define the tangent 
 \begin{equation*}
@@ -141,11 +126,11 @@ As $y = F(x)$ we calculate the tangent $\dot{y}$ as
     \equiv \Dot{F}(x, \Dot{x})
 \end{equation*}
 Using the additional notation $u_i = (v_j)_{j \prec i}$ and $\Dot{u}_i = (\Dot{v}_j)_{j \prec i}$, the idea can be applied to an elemental function $\varphi_i : \mathbb{R}^{n_i} \longrightarrow \mathbb{R}$, $v_i = \varphi_i (u_i)$ to get the result
-\begin{equation}
+\begin{equation*}
     \label{tangentequ}
     \Dot{v_i} = \sum_{j \prec i} \left\{ \Dot{v}_j \cdot \frac{\partial}{\partial v_j} \varphi_i (u_i) \right\} 
     \equiv \Dot{\varphi}_i(u_i, \Dot{u}_i)
-\end{equation}
+\end{equation*}
 
 This can be summarised as the general evaluation procedure given in \cite{evald} and given in Table \ref{tab:gep}.
 
@@ -184,24 +169,24 @@ When represented on a DAG, forward mode AD begins at the inputs and moves throug
     \label{tab:gtp}
 \end{table}
 
-\subsection{Reverse Mode Algorithmic Differentiation}
+\subsection{Reverse Mode}
 
 As in \cite{dhamarticle}, consider for the image of $F$ the hyperplane $\{ y \in \mathbb{R}^m | \Bar{y}^\top y = c\}$ for a given vector $\Bar{y} \in \mathbb{R}^m$ and a given value $c \in \mathbb{R}$. The inverse image of this hyperplane is given by the set $\{ x \in \mathbb{R}^n | \Bar{y}^\top F(x) = c\}$. We can apply the implicit function theorem to this set to calculate the normal to this hyperplane at $x$ as
-\begin{equation}
+\begin{equation*}
     \Bar{x}^\top = \Bar{y}^\top F'(x) \equiv \Bar{F}(x, \Bar{y})
-\end{equation}
+\end{equation*}
 This calculation is provided $\Bar{x}^\top$ does not vanish.
 
 Using the additional notation $\Bar{u}_i = (\Bar{v}_j)_{j \prec i}$, we calculate the adjoint function for each elemental function $\varphi : \mathbb{R}^{n_i} \longrightarrow \mathbb{R}$ as
-\begin{equation}
+\begin{equation*}
     \Bar{u}_i += \Bar{v}_i \nabla \varphi_i (u_i)
-\end{equation}
+\end{equation*}
 
-In reverse mode, the tree is first traversed beginning at the inputs and finishing at the outputs, storing the value the elemental function takes at each node. Then, the tree is traversed in the other direction storing the value the adjoint function takes at each node. This produces a the adjoint procedure for computing the first derivative from \cite{dhamarticle}, given below.
+In reverse mode, the tree is first traversed beginning at the inputs and finishing at the outputs, storing the value the elemental function takes at each node. Then, the tree is traversed in the other direction storing the value the adjoint function takes at each node. This produces a the adjoint procedure for computing the first derivative from \cite{dhamarticle}, given in Table \ref{tab:ap}.
 
 \begin{table}[h]
     \centering
-    \begin{tabular}{|lcll|}
+    \begin{tabular}{|llll|}
         \hline
         $v_{i}$ & $=$ & $0$ & $i = 1, \ldots, l$ \\
         \hline
@@ -224,11 +209,40 @@ In reverse mode, the tree is first traversed beginning at the inputs and finishi
     \label{tab:ap}
 \end{table}
 
-\section{Applying Algorithmic Differentiation on DAG's}
+\section{Complexity Results for Algorithmic Differentiation}
 
-If we consider an expression represented by a DAG, then it is very easy to apply the concept of Forward and Reverse mode algorithmic differentiation. Here we can represent each Element/Node denoted $v_i$ as our elementary function $v_i = \varphi_i (v_j)_{j \prec i}$ where now we can view $j \prec i$ to mean that $v_i$ is an operand of $v_j$. Then to apply forward mode differentiation we can compute our tangents in Equation \ref{tangentequ} by traversing this graph with post-order traversal, calculating both the values, $v_i$, and the tangent values, $\Dot{v_i}$ as we go along. So we can calculate the derivatives of all the output variables with respect to each input variable on each pass. Alternatively we can do reverse mode algorithmic differentiation by first traversing postorder traversal on the graph, computing all the values, $v_i$. Then we can preorder traverse the graph to compute the derivative of each output variable with respect to every input variable on each pass.
+Below we will use notation and results from \cite{dhamarticle} for the number of operations and the memory usage required to compute a function. The number of operations is denoted $\text{OPS}(\cdot)$. The amount of random access memory and the amount of sequentially accessed memory are denoted $\text{RMEM}(\cdot)$ and $\text{SMEM}(\cdot)$ respectively. 
 
-This gives us an insight to why forward mode has a computational cost of $\mathcal{O}(n)$. As we require to have $n$ forward passes to compute the derivative. Similary we can see that reverse mode has a computational cost of $\mathcal{O}(m)$. As we require to have $m$ reverse passes into order to calculate the derivative. Here we refer to a forward pass as the postorder traversal on a expression and a reverse pass as the preorder traversal on a expression.
+\subsection{Forward Mode}
+
+Given $x, \Dot{x} \in \mathbb{R}^n$ we attain an upper bounded for calculating the number of operations required to compute $F'(x) \Dot{x}$ given in (\ref{ops1}). Given an upper bound on the time taken to compute one operation calculation on the bounded for the time taken to compute $F'(x) \Dot{x}$ is simple.
+\begin{equation} \label{ops1}
+    \text{OPS}(F'(x) \Dot{x}) \leq 3 \cdot \text{OPS}(F(x))
+\end{equation}
+Further, we get an exact value for the memory requirement in (\ref{rmem1}).
+\begin{equation} \label{rmem1}
+    \text{RMEM}(F'(x) \Dot{x}) = 2 \cdot \text{RMEM}(F(x))
+\end{equation}
+
+\subsection{Reverse Mode}
+
+Given $x \in \mathbb{R}^n$ and $\Bar{y} \in \mathbb{R}^m$ we attain an upper bound for calculating the number of operations required to compute $\Bar{y}^\top F'(x)$ given in (\ref{ops2}). Similarly to before, an upper bound for the time taken to compute $\Bar{y}^\top F'(x)$ can be calculated provided we know the time taken to compute one operation.
+\begin{equation} \label{ops2}
+    \text{OPS}(\Bar{y} F'(x)) \leq 4 \cdot \text{OPS}(F(x))
+\end{equation}
+The memory usage is given in (\ref{rmem2}). Here we see the random access memory usage is the same as forward mode but the use of sequentially accessed memory creates an overall memory usage increase.
+\begin{equation} \label{rmem2}
+    \begin{tabular}{c}
+        $\text{RMEM}(\Bar{y} F'(x)) = 2 \cdot \text{RMEM}(F(x))$ \\ 
+        $\text{SMEM}(\Bar{y} F'(x)) \approx \text{OPS}(F(x))$
+    \end{tabular}
+\end{equation}
+
+\section{Applying Algorithmic Differentiation on Directed Acyclic Graphs}
+
+If we consider an expression represented by a DAG, then it is very easy to apply the concept of Forward and Reverse mode algorithmic differentiation. Here we can represent each Element/Node denoted $v_i$ as our elementary function $v_i = \varphi_i (v_j)_{j \prec i}$ where now we can view $j \prec i$ to mean that $v_i$ is an operand of $v_j$. Then to apply forward mode differentiation we can compute our tangents in (\ref{tangentequ}) by traversing this graph with post-order traversal, calculating both the values, $v_i$, and the tangent values, $\Dot{v_i}$ as we go along. So we can calculate the derivatives of all the output variables with respect to each input variable on each pass. Alternatively we can do reverse mode algorithmic differentiation by first traversing postorder traversal on the graph, computing all the values, $v_i$. Then we can preorder traverse the graph to compute the derivative of each output variable with respect to every input variable on each pass.
+
+This gives us an idea of why forward mode has a computational cost proportional to $n$. As we require to have $n$ forward passes to compute the derivative. Similary we can see that reverse mode has a computational cost proportional to $m$. As we require to have $m$ reverse passes into order to calculate the derivative. Here we refer to a forward pass as the postorder traversal on a expression and a reverse pass as the preorder traversal on a expression.
 
 For the next two sections we will be considering the equation given by
 \begin{equation}
@@ -239,13 +253,13 @@ For the next two sections we will be considering the equation given by
 
 \begin{figure}[h!]
     \includegraphics[width=4cm]{images/Graph_DAGExample.pdf}
-    \caption{The DAG of Equation \ref{example2}}
+    \caption{DAG of (\ref{example2})}
     \label{fig:DAGgraph}
 \end{figure}
 
-\subsection{Example of Forward Mode Algorithmic Differentiation on a DAG}
+\subsection{Example of Forward Mode}
 
-Say we want to apply our algorithm to Equation \ref{example2} represented by the DAG in Figure \ref{fig:DAGgraph} evaluating at $x=2$, $y=2$. Here we label the nodes according to the notation used above as seen in Table \ref{example1}. 
+Say we want to apply our algorithm to (\ref{example2}) represented by the DAG in Figure \ref{fig:DAGgraph} evaluating at $x=2$, $y=2$. Here we label the nodes according to the notation used above as seen in Table \ref{example1}. 
 
 
 
@@ -265,7 +279,7 @@ Say we want to apply our algorithm to Equation \ref{example2} represented by the
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Example of Reverse Mode Algorithmic Differentiation on a DAG}
+\subsection{Example of Reverse Mode}
 
 
 We then traverse the graph in postorder traversal, computing the value of each node as we go along. The results after this pass are seen in Table \ref{tab:example1FP}. Now we will traverse the tree with preorder traversal. We know that first $\dot{v_6} \equiv 1$ and we have all our values calculated from the previous pass, so we get the adjoints as listed in Table \ref{tab:example1RP}
@@ -287,7 +301,7 @@ We then traverse the graph in postorder traversal, computing the value of each n
         $v_{6}$ & $=$ & $v_5 + v_4$ & $\Bar{v}_{6}$ & $=$ & $\frac{\partial{v_6}}{\partial{v_6}}$ & $=$ & $1$\\
         \hline
     \end{tabular}
-    \caption{Table of Node Values and Adjoints in Figure \ref{fig:DAGgraph} of Equation \ref{example2}}
+    \caption{Table of Node Values and Adjoints in Figure \ref{fig:DAGgraph} of (\ref{example2})}
     \label{tab:example1}
 \end{table}
 
@@ -333,7 +347,7 @@ We then traverse the graph in postorder traversal, computing the value of each n
 \end{table}
 
 \newpage
-\section{Implementation of scalar reverse mode AD in Python}
+\section{Implementation of Scalar Reverse Mode in Python}
 
 To implement reverse mode AD in Python we used the symbolic language that we defined in \cite{PoPBook} as a template. This allowed us to have a symbolic language that we could use to easily construct our expressions. It does this by operator overloading our elementary operators so we can easily create an expression that we can traverse. Here we added additional elementary functions Sin, Cos, Exp and Log. So that they can exist in expressions we create and behave correctly. We also modified our base Expression class to contain the following attributes
 \begin{verbatim}
@@ -351,7 +365,7 @@ We also modified the \verb|evaluate()| function from \cite{PoPBook} to include e
         return np.sin(o[0])
 \end{verbatim}
 
-Then we have to create an algorithm for traversing and evaluating the DAG at each node. Note here we need to traverse the DAG in postorder traversal, where we visit the operands before we visit the element. Note in implementation we keep a dict of the expression and the stored value so we can avoid unnecessary calculation. The idea of the algorithm is below
+Then we have to create an algorithm for traversing and evaluating the DAG at each node. Note here we need to traverse the DAG in postorder traversal, where we visit the operands before we visit the element. Note in implementation we keep a dictionary of the expression and the stored value so we can avoid unnecessary calculation and to make the traversal non-recursive. The idea of the algorithm is seen in algorithm \ref{EvaluatePostvisitor}
 
 \begin{algorithm}[h!]
 \caption{EvaluatePostvisitor function}\label{EvaluatePostvisitor}
@@ -388,7 +402,7 @@ Now that we have done a postorder traversal of our expression, each element cont
     \label{tab:AdjEval}
 \end{table}
 
-Now we have our \verb|adjoint_evaluate()| method we can run this at each element when traversing the expression tree in preorder traversal, visiting the element before its operands. The general idea of the algorithm is below
+Now we have our \verb|adjoint_evaluate()| method we can run this function at each element when traversing the expression tree in preorder traversal, visiting the element before its operands. The general idea of the algorithm is described in algorithm \ref{AdjointPrevisitor}
 
 \begin{algorithm}[h]
 \caption{AdjointPrevisitor function}\label{AdjointPrevisitor}
@@ -404,7 +418,7 @@ Now we have our \verb|adjoint_evaluate()| method we can run this at each element
 \end{algorithmic}
 \end{algorithm}
 
-Now we have populated all the elements with their respective adjoints and so we can simply return a dictionary of all the symbols and their adjoint values to get the derivatives of our original expression. So now we can simply define a new function like so to calculate the derivative of an expression given some conditions
+Now we have populated all the elements with their respective adjoints and so we can simply return a dictionary of all the symbols and their adjoint values to get the derivatives of our original expression. So now we can simply define a new function to calculate the derivative of an expression given some conditions. The general idea of this function is seen in Algorithm \ref{reverseAD}
 
 \begin{algorithm}[h]
 \caption{ReversemodeAD algorithm}\label{reverseAD}
@@ -417,7 +431,22 @@ Now we have populated all the elements with their respective adjoints and so we 
 \end{algorithmic}
 \end{algorithm}
 
-\section{Accuracy of results}
+Now we can test our implementation on the previous example given in Equation \ref{example2} represented by the DAG in Figure \ref{fig:DAGgraph}. To do this we run the code below. We see our output is exactly the same as we calculated previously.
+
+\begin{verbatim}
+    sin = expressions.Sin()
+    exp = expressions.Exp()
+    x = expressions.Symbol('x')
+    y = expressions.Symbol('y')
+    expression = sin(y * x**2) + exp(x**2)
+    conditions = {x:2, y:2}
+    reversemodeAD(expression, conditions)
+    > {'x': 217.22859986210804, 'y': -0.5820001352344542}
+\end{verbatim}
+
+
+
+\section{Accuracy of Results}
 
 We can check the accuracy of our results using 2 methods, first, by using Taylor series we have the equation:
 \begin{equation}
@@ -435,27 +464,104 @@ When we compute this we get a value for $O(\epsilon^2)$ which as $\epsilon \to 0
     \includegraphics[width=12cm]{images/Taylor_error_1.png}
 \end{center}
 
-We can see from this graph that in general as our Epsilon gets smaller so does our Taylor error, as predicted, and our Taylor error plateaus around $10^{-16}$ and this is because machine Epsilon lies in this region.
-
-The other way we check the accuracy is by using the finite difference method, for this we use a similar method with a key difference, the formula we will use to approximate the derivative is:
+When checking if our result is correct we need to calculate the rate of convergence, since we are finding $O(\epsilon^2)$ we expect our convergence to be at the rate of $\epsilon^2$. To check our rate of convergence we use the formula:
 
 \begin{equation}
-    \frac{F(x + \epsilon) + F(x)}{\epsilon} - \frac{dF}{dx}
+    \frac{\ln{\frac{\|u_1 - u\|}{\|u_2 - u\|}}}{\ln{\frac{|h_1|}{|h_2|}}} = \frac{\ln\|u_1 - u\| - \ln\|u_2 - u\|}{\ln|h_1| - |h_2|}
 \end{equation}
 
-As you can see here we have divided the above equation by $\epsilon$ to find $O(\epsilon^2)/\epsilon$ as we can see converges at half the rate as (a rate of $\epsilon$ instead of $\epsilon^2$):
-
-\begin{center}
-    \includegraphics[width=12cm]{images/Finite_Difference_error_1.png}
-\end{center}
+Where $u_1, u_2$ are our approximations using $F(x + \epsilon) - F(x)$, $u$ is our calculated derivative using Reverse Mode AD, and $h_1, h_2$ are the corresponding $\epsilon$ for $u_1, u_2$. This value should give us the power of $\epsilon$ to which we are converging at. In our case we got: \input{images/rate_of_convergence.txt} which is significantly close enough to 2 to tell us we are converging at a rate of $\epsilon^2$.
 
 
-\section{Extention and implementation into NumPy arrays}
+
+
+
+\section{Extension and Implementation into NumPy Arrays}
+
+Now we consider our expression as being a function of $F: \mathbb{R}^n \longrightarrow \mathbb{R}^m$. We cannot do this with our current implementation. Instead, we need to represent our expression as a NumPy 1 x m array, where each element of our array consists of the corresponding output. We can now change our algorithms for evaluation of the value and adjoint so they work correctly, this involves simply running our reversemode algorithm for each subexpression in our array, and making sure to record the adjoints of each of the symbols at each subexpresion. The modified algorithms are seen in Algorithm \ref{reverseADArr} and \ref{EvaluatePostvisitorArr}. Noting that our postvisitor traversal we use is still non-recursive.
+
+\begin{algorithm}[h]
+\caption{ReversemodeAD algorithm for arrays}\label{reverseADArr}
+\begin{algorithmic}[1]
+\Procedure{ReversemodeAD}{$expression,conditions$}
+\State run \verb|EvaluatePostvisitor(expression, conditions)|
+\For{each subexpression in expression}
+\State run \verb|AdjointPrevisitor(subexpression)|
+\EndFor
+\State \textbf{return} a dictionary of Symbols and their respective \verb|adjoints| for each subexpression
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[h!]
+\caption{EvaluatePostvisitor algorithm for arrays}\label{EvaluatePostvisitorArr}
+\begin{algorithmic}[1]
+\Procedure{EvaluatePostvisitor}{$expression,conditions$}
+\For{each subexpression in expression}
+\For{each element in subexpression}\Comment{Postorder non-recursive traversal}
+\State \verb|value| $\gets$ \verb|evaluate(element, operands, conditions)|
+\State \verb|element.storedvalue| $\gets$ \verb|value|
+\EndFor
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Now we can compute the adjoints of our DAG in Figure \ref{fig:DAGgraph2} for Equation \ref{example1} using our modified code. Here we get the following result for initial conditions $x=1$, $y=\pi$, $z=1$:
+
+\begin{verbatim}
+    sin = expressions.Sin()
+    exp = expressions.Exp()
+    log = expressions.Log()
+    x = expressions.Symbol('x')
+    y = expressions.Symbol('y')
+    z = expressions.Symbol('z')
+    expression = np.array([log(z) * exp(x**2), exp(x**2) + sin(x**2 * y)])
+    conditions = {x:1, y:np.pi, z:1}
+    reversemodeAD(expression, conditions)
+    > {'x': [0.0, -0.846621650261496], 'y': [0, -1.0], 'z': [2.718281828459045, 0]}
+\end{verbatim}
+
+Which is what we would expect.
+
+
+
+
+\section{Difference in Runtime}
+
+Lets say we want to plot the time taken to compute various functions of $n$ unique input variables, as seen in Equation \ref{TimeFunc}. We can compare the difference in runtime between our Forward Mode AD and Reverse Mode AD. To give us a more robust plot we compute 1000 different derivatives at each stage. The results of this test is seen in Figure \ref{fig:TimeDiff}
+\begin{equation} 
+    \label{TimeFunc}
+    \begin{split}
+        f_1(\textbf{x}) = \prod_{i=1}^n x_i & \quad f_2(\textbf{x}) = \prod_{i=1}^n \sin(x_i) \\
+        f_3(\textbf{x}) = \prod_{i=1}^n \exp(x_i) & \quad f_4(\textbf{x}) = \prod_{i=1}^n \log(x_i)
+    \end{split}
+\end{equation}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=15cm]{images/Time_Difference_Example2.pdf}
+    \caption{Time taken to compute 1000 derivatives of the functions in Equation \ref{TimeFunc} varying the number of input parameters}
+    \label{fig:TimeDiff}
+\end{figure}
+
+As expected, Forward Mode automatic differentiation grows around linearly on the number of unique input variables that we have. This further proves the importance of using Reverse Mode automatic differentiation when working with systems with large amounts of variables like neural networks.
+
+
 
 \section{Applications}
 
-\bibliography{thebibliography}
+\subsection{Advection Diffusion Equation}
 
-%Moved the algorithm, dump sections and work sections to seperate file called roughwork.tex which we can use to put parts that are not yet going to be in the paper
+Consider the simplified 1 dimensional advection-diffusion equation given by Equation \ref{AdvectionDiffusion} where we are measuring the concentration of some liquid over time where we also account for velocity and diffusion.
+
+\begin{equation}
+    \label{AdvectionDiffusion}
+    \frac{\partial C}{\partial t} = - V\frac{\partial C}{\partial x} + D\frac{\partial^2 C}{\partial x^2}
+\end{equation}
+
+
+
+\bibliography{thebibliography}
 
 \end{document}
