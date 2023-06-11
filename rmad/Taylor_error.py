@@ -21,10 +21,11 @@ def taylor_error_plot(expr, condition, eps, **kwargs):  #eps is a list in this c
     result = []
     for e in eps:
         result.append(taylor_error(expr, condition, e, **kwargs))
+    fig = plt.figure()
     plt.plot(np.log10(np.array(eps)), np.log10(abs(np.array(result))))
     plt.gca().invert_xaxis()
     plt.xlabel("Log10 of Epsilon")
     plt.ylabel("Log10 of Taylor error")
     plt.title("Log-Log graph of Epsilon against Taylor error")
-    plt.show()
+    return fig
 
