@@ -50,4 +50,4 @@ def test_FMADEx1():
     ans = forwardmodeAD(expression, conditions)
     d1 = ans[x]
     d2 = ans[y]
-    assert np.allclose([d1[0], d2[0]], [0.4931505903, -0.4161468365])
+    assert np.allclose([d1, d2], [0.4931505903, -0.4161468365])
