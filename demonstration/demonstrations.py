@@ -28,7 +28,7 @@ def generatex(n):
 
 def generatew(n):
     np.random.seed(0)
-    return [np.random.randn(1, 10000) for i in range(n)]
+    return [np.random.randn(1, 1000) for i in range(n)]
 
 
 def timex1(n):
@@ -105,7 +105,7 @@ def plottime(n):
     plt.legend()
     fig.align_labels()
     fig.tight_layout()
-    plt.savefig('image.pdf', bbox_inches='tight', pad_inches=0)
+    plt.savefig('Graph_TimeDiff.pdf', bbox_inches='tight', pad_inches=0)
 
     return plt.show()
 
@@ -219,7 +219,7 @@ def Cluster_Graph():
     draw_cluster(expr1, expr2, "Cluster_1")
 
 
-# plottime(50)
+plottime(75)
 
 # print(RMADEx1())
 
