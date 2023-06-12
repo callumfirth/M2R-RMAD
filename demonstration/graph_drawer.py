@@ -14,7 +14,6 @@ def exprpostvisitor(expr, graph, node="v", **kwargs):
     id = 0
     while stack:
         element = stack.pop()
-        element.adjoint = 0
         unvisited_children = []
         for operand in element.operands:
             if operand not in visited:
@@ -25,9 +24,7 @@ def exprpostvisitor(expr, graph, node="v", **kwargs):
                 stack.append(x)
         else:
             id += 1
-            if isinstance(element, expressions.Number):
-                name = element.value
-            elif isinstance(element, expressions.Symbol):
+            if isinstance(element, (expressions.Number, expressions.Symbol)):
                 name = element.value
             else:
                 name = element.symbol

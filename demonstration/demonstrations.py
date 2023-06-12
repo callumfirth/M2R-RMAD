@@ -105,7 +105,7 @@ def plottime(n):
     plt.legend()
     fig.align_labels()
     fig.tight_layout()
-    plt.savefig('Graph_TimeDiff.pdf', bbox_inches='tight', pad_inches=0)
+    plt.savefig('images/Graph_TimeDiff.pdf', bbox_inches='tight', pad_inches=0)
 
     return plt.show()
 
@@ -219,7 +219,7 @@ def Cluster_Graph():
     draw_cluster(expr1, expr2, "Cluster_1")
 
 
-plottime(75)
+# plottime(75)
 
 # print(RMADEx1())
 
