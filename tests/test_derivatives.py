@@ -51,3 +51,33 @@ def test_FMADEx1():
     d1 = ans[x]
     d2 = ans[y]
     assert np.allclose([d1, d2], [0.4931505903, -0.4161468365])
+
+def test_RMADEexample1():
+    sin = expressions.Sin()
+    exp = expressions.Exp()
+    log = expressions.Log()
+    x = expressions.Symbol('x')
+    y = expressions.Symbol('y')
+    z = expressions.Symbol('z')
+    expr = np.asarray([log(z)*exp(x**2), exp(x**2)+sin(x**2 * y)])
+    conditions = {x: 2, y: 2, z: 5}
+    ans = reversemodeAD(expr, conditions)
+    assert np.allclose(ans[x], [2*2*np.exp(2**2)*np.log(5), 
+                                2*2*(2*np.cos(2*2**2)+np.exp(2**2))]) and \
+        np.allclose(ans[y], [0, np.cos(2*2**2)*2**2]) and \
+        np.allclose(ans[z], [np.exp(2**2)/5, 0])
+    
+def test_FMADEexample1():
+    sin = expressions.Sin()
+    exp = expressions.Exp()
+    log = expressions.Log()
+    x = expressions.Symbol('x')
+    y = expressions.Symbol('y')
+    z = expressions.Symbol('z')
+    expr = np.asarray([log(z)*exp(x**2), exp(x**2)+sin(x**2 * y)])
+    conditions = {x: 2, y: 2, z: 5}
+    ans = forwardmodeAD(expr, conditions)
+    assert np.allclose(ans[x], [2*2*np.exp(2**2)*np.log(5), 
+                                2*2*(2*np.cos(2*2**2)+np.exp(2**2))]) and \
+        np.allclose(ans[y], [0, np.cos(2*2**2)*2**2]) and \
+        np.allclose(ans[z], [np.exp(2**2)/5, 0])
