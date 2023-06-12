@@ -93,6 +93,7 @@ def _closeto0(value):
         value = 0
     return value
 
+
 @singledispatch
 def adjoint_evaluate(expr, *o, **kwargs):
     """Return the adjoint, of the operands of an expression node.
