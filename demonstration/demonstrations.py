@@ -128,7 +128,7 @@ def FMADEx1():
     return forwardmodeAD(expression, conditions)
 
 
-def example1():
+def example_nparray():
     sin = expressions.Sin()
     exp = expressions.Exp()
     log = expressions.Log()
@@ -141,7 +141,7 @@ def example1():
     conditions = {x: 1, y: np.pi, z: 1}
     return reversemodeAD(expression, conditions)
 
-def example2():
+def example_rm():
     sin = expressions.Sin()
     exp = expressions.Exp()
     x = expressions.Symbol('x')
@@ -225,9 +225,9 @@ def Cluster_Graph():
 
 # print(FMADEx1())
 
-# print(example1())
+# print(example_rm())
 
-# print(example2())
+# print(example_nparray())
 
 # taylor_error_example()
 
@@ -237,40 +237,15 @@ def Cluster_Graph():
 
 # Cluster_Graph()
 
+def reproduce():
+    RMADEx1()  # Unused: RM result on sin(x+y)*x x,y=1
+    FMADEx1()  # Unused: FM result on sin(x+y)*x x,y=1
+    plottime(75)  # Plot for timedifference
+    example_rm()  # Result for RM algo test in 1D
+    example_nparray()  # # Result for RM algo test with arrays
+    taylor_error_example()  # Taylor error figure and result
+    DAG_example1()  # Unused: DAG fig
+    DAG_example2()  # DAG fig for manual RM algorithm
+    Cluster_Graph()  # Cluster graph figure for comparison
 
-
-
-
-# print(f"Time for FM AD:{timeRM(expression,conditions)}")
-# print(f"Time for RM AD:{timeFM(expression,conditions)}")
-
-# So random arrays are same each time
-# Set how many x,y values we want
-# n = 10
-# Array of initial conditions
-# Array of x symbols
-
-# x = generatex(n)
-# w = generatew(n)
-# sin = expressions.Sin()
-# cos = expressions.Cos()
-# exp = expressions.Exp()
-# log = expressions.Log()
-# conditions = dict(zip(x, w))
-# expression = np.asarray([log(x[0]**2)*x[9] + 2*x[1]*x[2]*cos(x[3]**4), exp(x[5]**2)*sin(x[8]*x[6]**2)+x[6]*x[8]])
-
-# x = generatex(n)
-# sin = expressions.Sin()
-# cos = expressions.Cos()
-# exp = expressions.Exp()
-# log = expressions.Log()
-# conditions = dict(zip(x, w))
-# expression = np.asarray([log(x[0]**2)*x[9] + 2*x[1]*x[2]*cos(x[3]**4), exp(x[5]**2)*sin(x[8]*x[6]**2)+x[6]*x[8]])
-
-# expression = np.asarray([log(x[0]**2)*x[9] + 2*x[1]*x[2]*cos(x[3]**4), exp(x[5]**2)*sin(x[8]*x[6]**2)+x[6]*x[8]])
-
-# print(f"Time for FM AD:{timeRM(expression,conditions)}")
-# print(f"Time for RM AD:{timeFM(expression,conditions)}")
-
-# print(f"Derivative of {expression} at {conditions} in FM: {forward}")
-# print(f"Derivative of {expression} at {conditions} in RM: {reverse}")
+# reproduce() #Please dont run this yet, run ones individually above for testing
