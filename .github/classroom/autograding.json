@@ -1,0 +1,44 @@
+{
+    "tests": [
+      {
+        "name": "setup",
+        "setup": "python3  -m pip install setuptools pytest flake8 pep8-naming flake8-docstrings numpy",
+        "run": "python3 -m pip install -U pip",
+        "input": "",
+        "output": "",
+        "comparison": "included",
+        "timeout": 1,
+        "points": null
+      },
+      {
+        "name": "setup-course-repo",
+        "setup": "git clone https://github.com/object-oriented-python/object-oriented-programming.git",
+        "run": "python -m pip install object-oriented-programming/",
+        "input": "",
+        "output": "",
+        "comparison": "included",
+        "timeout": 1,
+        "points": null
+      },
+      {
+        "name": "derivatives",
+        "setup": "",
+        "run": "pytest tests/test_derivatives.py",
+        "input": "",
+        "output": "",
+        "comparison": "included",
+        "timeout": 1,
+        "points": 1
+      },
+      {
+        "name": "flake8",
+        "setup": "",
+        "run": "flake8 --extend-exclude=object-oriented-programming",
+        "input": "",
+        "output": "",
+        "comparison": "included",
+        "timeout": 1,
+        "points": 1
+      }
+    ]
+  }
