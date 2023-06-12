@@ -25,9 +25,9 @@ When solving non-linear systems one method is Newton's method. Say the system is
 \begin{equation} \label{Fxy}
         F: \mathbb{R}^n \rightarrow \mathbb{R}^m \quad F(x_1, \cdots, x_n) = (y_1, \cdots, y_m)
 \end{equation}
-then given $x_n \in \mathbb{R}^n$ the iterates are calculated by
+then given $x_0 \in \mathbb{R}^n$ the iterates are calculated by
 \begin{equation*}
-x_{n+1} = x_n - (F'(x_n))^{-1}F(x_n)
+x_{n+1} = x_n - (F'(x_n))^{-1}F(x_n) \quad n \in \mathbb{N}
 \end{equation*}
 where $F'(x_n)$ is the Jacobian of $F$ at $x_n$ defined by
 \begin{equation} \label{jacobian}
@@ -249,7 +249,7 @@ For the next two sections we will be considering the equation given by
 
 
 \begin{figure}[h!]
-    \includegraphics[width=4cm]{images/Graph_DAGExample.pdf}
+    \includegraphics[width=4cm]{images/Graph_Example2.pdf}
     \caption{DAG of (\ref{example2})}
     \label{fig:DAGgraph}
 \end{figure}
