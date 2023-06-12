@@ -1,8 +1,8 @@
 import numpy as np
-import numpy.linalg as linalg
 import rmad.expressions as expressions
 from rmad.traversal import evalpostvisitor
 import matplotlib.pyplot as plt
+
 
 def first_deriv_matrix_maker(n):
     array = []
@@ -18,6 +18,7 @@ def first_deriv_matrix_maker(n):
         array.append(arr)
     array = np.array(array)
     return array
+
 
 def second_deriv_matrix_maker(n):
     array = []
@@ -44,6 +45,7 @@ def evaluating_points(expr, eval_points):
         evaluated_points.append(expr.storedvalue)
     return evaluated_points
 
+
 def time_step(C, eval_points, V=1, D=1):
     n = len(eval_points)
     A = first_deriv_matrix_maker(n)
@@ -53,9 +55,6 @@ def time_step(C, eval_points, V=1, D=1):
     print(dc)
     return dc
 
-exp = expressions.Exp()
-x = expressions.Symbol('x')
-expr = exp(x**2 * -1)
 
 def over_time(expr, eval_points, startend, iterations, V=1, D=1):
     C = evaluating_points(expr, eval_points)
@@ -66,5 +65,11 @@ def over_time(expr, eval_points, startend, iterations, V=1, D=1):
         plt.plot(eval_points, C)
         C = C + time_step(C, eval_points, V, D)
     return values_over_time
+
+
+exp = expressions.Exp()
+x = expressions.Symbol('x')
+expr = exp(x**2 * -1)
+
 
 over_time(expr, np.linspace(-1, 1, 200), (0, 2), 200)

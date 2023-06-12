@@ -1,7 +1,11 @@
 from rmad import *
+import rmad.expressions as expressions
+from rmad.reversemode import reversemodeAD
+from rmad.forwardmode import forwardmodeAD
 import numpy as np
 import time
 import matplotlib.pyplot as plt
+from demonstration.taylor_error import taylor_error, taylor_error_plot
 
 
 def timeRM(expr, conditions):
@@ -13,7 +17,7 @@ def timeRM(expr, conditions):
 
 def timeFM(expr, conditions):
     start = time.time()
-    forward = forwardmodevisitor(expr, conditions)
+    forward = forwardmodeAD(expr, conditions)
     end = time.time()
     return end - start
 
@@ -92,6 +96,8 @@ def plottime(n):
     ax3.set_title("Plotting the time to compute derivative of fn_3")
     ax4.set_title("Plotting the time to compute derivative of fn_4")
 
+    plt.plot()
+
     ax1.set_ylabel("t: Time taken to compute derivative")
     ax3.set_ylabel("t: Time taken to compute derivative")
     ax3.set_xlabel("n: Number of input variables")
@@ -104,28 +110,84 @@ def plottime(n):
     return plt.show()
 
 
-# plottime(10)
-
-
 def RMADEx1():
     x = expressions.Symbol('x')
     sin = expressions.Sin()
     y = expressions.Symbol('y')
     expression = sin(x+y)*x
-    conditions = {x:1, y:1}
+    conditions = {x: 1, y: 1}
     return reversemodeAD(expression, conditions)
+
 
 def FMADEx1():
     x = expressions.Symbol('x')
     sin = expressions.Sin()
     y = expressions.Symbol('y')
     expression = sin(x+y)*x
-    conditions = {x:1, y:1}
-    return forwardmodevisitor(expression, conditions)
+    conditions = {x: 1, y: 1}
+    return forwardmodeAD(expression, conditions)
 
-print(RMADEx1())
 
-print(FMADEx1())
+def example1():
+    sin = expressions.Sin()
+    exp = expressions.Exp()
+    log = expressions.Log()
+    x = expressions.Symbol('x')
+    y = expressions.Symbol('y')
+    z = expressions.Symbol('z')
+    expression = np.asarray([log(z)*exp(x**2), exp(x**2)+sin(x**2 * y)])
+    conditions = {x: 1, y: np.pi, z: 1}
+    return reversemodeAD(expression, conditions)
+
+def example2():
+    sin = expressions.Sin()
+    exp = expressions.Exp()
+    x = expressions.Symbol('x')
+    y = expressions.Symbol('y')
+    expression = sin(y * x**2) + exp(x**2)
+    conditions = {x: 2, y: 2}
+    return reversemodeAD(expression, conditions)
+
+
+def taylor_error_example():
+    x = expressions.Symbol('x')
+    y = expressions.Symbol('y')
+    sin = expressions.Sin()
+
+    expr = x*sin(x + y)
+    conditions = {x: 1, y: 1}
+    eps = [10**(-(i+1)) for i in range(10)]
+
+    fig = taylor_error_plot(expr, conditions, eps, var=x)
+    try:
+        fig.savefig('images\\taylor_error_1.png')
+    except:
+        print("Taylor_Error_Example: Could not save figure: Path not found, make sure to run shell in .../M2R-RMAD/ folder")
+    order_of_convergence = np.log(abs(taylor_error(expr, conditions, eps[3], var=x)/taylor_error(expr, conditions, eps[6], var=x)))/np.log(abs(eps[3]/eps[6]))
+    try:
+        f = open('images\\rate_of_convergence.txt', 'w')
+        f.write(str(order_of_convergence))
+    except:
+        print("Taylor_Error_Example: Could not save result: Path not found, make sure to run shell in .../M2R-RMAD/ folder")
+
+
+# plottime(50)
+
+# print(RMADEx1())
+
+# print(FMADEx1())
+
+# print(example1())
+
+# print(example2())
+
+# taylor_error_example()
+
+
+
+
+
+
 
 # print(f"Time for FM AD:{timeRM(expression,conditions)}")
 # print(f"Time for RM AD:{timeFM(expression,conditions)}")

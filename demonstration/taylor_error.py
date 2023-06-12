@@ -1,6 +1,5 @@
 from rmad.reversemode import reversemodeAD
 from rmad.traversal import evalpostvisitor
-import rmad.expressions as expressions
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -28,4 +27,3 @@ def taylor_error_plot(expr, condition, eps, **kwargs):  #eps is a list in this c
     plt.ylabel("Log10 of Taylor error")
     plt.title("Log-Log graph of Epsilon against Taylor error")
     return fig
-

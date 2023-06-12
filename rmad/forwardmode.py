@@ -2,7 +2,7 @@ import rmad.expressions as expressions
 import numpy as np
 from functools import singledispatch
 
-def forwardmodevisitor(expr, conditions):
+def forwardmodeAD(expr, conditions):
     """Visit an expression in post-order applying a function."""
     adjoints = dict()
     for symbol in conditions.keys():
