@@ -1,12 +1,12 @@
+import numpy as np
+import time
+import matplotlib.pyplot as plt
 from rmad import *
 import rmad.expressions as expressions
 from rmad.reversemode import reversemodeAD
 from rmad.forwardmode import forwardmodeAD
-import numpy as np
-import time
-import matplotlib.pyplot as plt
 from demonstration.taylor_error import taylor_error, taylor_error_plot
-
+from demonstration.graph_drawer import draw_expression
 
 def timeRM(expr, conditions):
     start = time.time()
@@ -135,7 +135,9 @@ def example1():
     x = expressions.Symbol('x')
     y = expressions.Symbol('y')
     z = expressions.Symbol('z')
-    expression = np.asarray([log(z)*exp(x**2), exp(x**2)+sin(x**2 * y)])
+    x2 = x**2
+    expx2 = exp(x2)
+    expression = np.asarray([log(z)*expx2, expx2+sin(x2 * y)])
     conditions = {x: 1, y: np.pi, z: 1}
     return reversemodeAD(expression, conditions)
 
@@ -144,7 +146,8 @@ def example2():
     exp = expressions.Exp()
     x = expressions.Symbol('x')
     y = expressions.Symbol('y')
-    expression = sin(y * x**2) + exp(x**2)
+    x2 = x**2
+    expression = sin(y * x2) + exp(x2)
     conditions = {x: 2, y: 2}
     return reversemodeAD(expression, conditions)
 
@@ -171,6 +174,27 @@ def taylor_error_example():
         print("Taylor_Error_Example: Could not save result: Path not found, make sure to run shell in .../M2R-RMAD/ folder")
 
 
+def DAG_example1():
+    sin = expressions.Sin()
+    exp = expressions.Exp()
+    log = expressions.Log()
+    x = expressions.Symbol('x')
+    y = expressions.Symbol('y')
+    z = expressions.Symbol('z')
+    x2 = x**2
+    expx2 = exp(x2)
+    expr = np.asarray([log(z)*expx2, expx2+sin(x2 * y)])
+    draw_expression(expr, "Example1")
+
+
+def DAG_example2():
+    x = expressions.Symbol('x')
+    y = expressions.Symbol('y')
+    sin = expressions.Sin()
+    exp = expressions.Exp()
+    x2 = x**2
+    expr = sin(y * x2) + exp(x2)
+    draw_expression(expr, "Example2")
 # plottime(50)
 
 # print(RMADEx1())
@@ -182,6 +206,10 @@ def taylor_error_example():
 # print(example2())
 
 # taylor_error_example()
+
+# DAG_example1()
+
+# DAG_example2()
 
 
 

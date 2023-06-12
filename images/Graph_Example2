@@ -1,0 +1,19 @@
+digraph {
+	v_1 [label=2]
+	v_2 [label=x]
+	v_3 [label="^"]
+	v_3 -> v_2 [constraint=true minlen=1.5]
+	v_3 -> v_1 [constraint=true minlen=1.5]
+	v_4 [label=exp]
+	v_4 -> v_3 [constraint=true minlen=1.5]
+	v_5 [label=y]
+	v_6 [label="*"]
+	v_6 -> v_5 [constraint=true minlen=1.5]
+	v_6 -> v_3 [constraint=true minlen=1.5]
+	v_7 [label=sin]
+	v_7 -> v_6 [constraint=true minlen=1.5]
+	v_8 [label="+"]
+	v_8 -> v_7 [constraint=true minlen=1.5]
+	v_8 -> v_4 [constraint=true minlen=1.5]
+	margin=0
+}
