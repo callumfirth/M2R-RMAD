@@ -6,7 +6,7 @@ import rmad.expressions as expressions
 from rmad.reversemode import reversemodeAD
 from rmad.forwardmode import forwardmodeAD
 from demonstration.taylor_error import taylor_error, taylor_error_plot
-from demonstration.graph_drawer import draw_expression
+from demonstration.graph_drawer import draw_expression, draw_cluster
 
 def timeRM(expr, conditions):
     start = time.time()
@@ -195,6 +195,30 @@ def DAG_example2():
     x2 = x**2
     expr = sin(y * x2) + exp(x2)
     draw_expression(expr, "Example2")
+
+
+def Cluster_Graph():
+    sin = expressions.Sin()
+    exp = expressions.Exp()
+    log = expressions.Log()
+    x_1 = expressions.Symbol('x')
+    x_2 = expressions.Symbol('x')
+    x_3 = expressions.Symbol('x')
+    y_1 = expressions.Symbol('y')
+    z_1 = expressions.Symbol('z')
+    expr1 = np.asarray([log(z_1)*exp(x_1**2), exp(x_3**2)+sin(x_2**2 * y_1)])
+    sin2 = expressions.Sin()
+    exp2 = expressions.Exp()
+    log2 = expressions.Log()
+    x = expressions.Symbol('x')
+    y = expressions.Symbol('y')
+    z = expressions.Symbol('z')
+    x2 = x**2
+    expx2 = exp2(x2)
+    expr2 = np.asarray([log2(z)*expx2, expx2+sin2(x2 * y)])
+    draw_cluster(expr1, expr2, "Cluster_1")
+
+
 # plottime(50)
 
 # print(RMADEx1())
@@ -211,7 +235,7 @@ def DAG_example2():
 
 # DAG_example2()
 
-
+# Cluster_Graph()
 
 
 
