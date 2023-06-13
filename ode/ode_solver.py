@@ -7,11 +7,8 @@ import matplotlib.pyplot as plt
 def first_deriv_matrix_maker(n):
     array = []
     for i in range(n):
-        if i == 0:
-            arr = np.array([0, 1] + [0 for i in range(n-2)])
-        elif i == n-1:
-            arr = np.array([0 for i in range(n-2)] + [-1, 0])
-        else:
+        arr = np.zeros(n)
+        if i != 0 and i != n-1:
             arr = np.zeros(n)
             arr[i-1] = -1
             arr[i+1] = 1
@@ -23,12 +20,8 @@ def first_deriv_matrix_maker(n):
 def second_deriv_matrix_maker(n):
     array = []
     for i in range(n):
-        if i == 0:
-            arr = np.array([-2, 1] + [0 for i in range(n-2)])
-        elif i == n-1:
-            arr = np.array([0 for i in range(n-2)] + [1, -2])
-        else:
-            arr = np.zeros(n)
+        arr = np.zeros(n)
+        if i != 0 and i != n-1:
             arr[i-1] = 1
             arr[i] = -2
             arr[i+1] = 1
@@ -37,27 +30,18 @@ def second_deriv_matrix_maker(n):
     return array
 
 
-def evaluating_points(expr, eval_points):
-    evaluated_points = []
-    for i in eval_points:
-        conditions = {x: i}
-        evalpostvisitor(expr, symbol_map=conditions)
-        evaluated_points.append(expr.storedvalue)
-    return evaluated_points
-
-
 def time_step(C, eval_points, V=1, D=1):
     n = len(eval_points)
     A = first_deriv_matrix_maker(n)
     B = second_deriv_matrix_maker(n)
     h = eval_points[1] - eval_points[0]
     dc = -(V * np.matmul(A, C)/(2*h)) + D*np.matmul(B, C)/(h**2)
-    print(dc)
     return dc
 
 
 def over_time(expr, eval_points, startend, iterations, V=1, D=1):
-    C = evaluating_points(expr, eval_points)
+    evalpostvisitor(expr, symbol_map={x: eval_points})
+    C = expr.storedvalue
     iters = np.linspace(startend[0], startend[1], iterations)
     values_over_time = []
     for i in iters:
@@ -71,5 +55,37 @@ exp = expressions.Exp()
 x = expressions.Symbol('x')
 expr = exp(x**2 * -1)
 
+#over_time(expr, np.linspace(-1, 1, 200), (0, 2), 200)
 
-over_time(expr, np.linspace(-1, 1, 200), (0, 2), 200)
+
+def over_time2(expr, size, numpoints, endtime, dt, V=1, D=1):
+    gridpoints = np.linspace(0, size, numpoints)
+    evalpostvisitor(expr, symbol_map={x: gridpoints})
+    C = expr.storedvalue
+    C = np.append(C, np.zeros(4*numpoints))
+    gridpoints2 = np.linspace(0, size*5, 5*numpoints)
+    timepoints = np.arange(0, endtime, dt)
+    values_over_time = [np.array(C)]
+    fig, ax = plt.subplots()
+    for t in timepoints:
+        C = C + time_step(C, gridpoints2, V, D)*dt
+        values_over_time = np.append(values_over_time, C)
+        if t in np.arange(0, endtime, dt*100):
+            ax.plot(gridpoints2, C)
+    plt.show()
+    return values_over_time
+
+def plot_graph(expr, size, numpoints, endtime, dt, V=1, D=1):
+    points = over_time2(expr, size, numpoints, endtime, dt, V=1, D=1)
+    fig , ax = plt.subplots()
+    for t in np.arange(0, endtime, 100*dt):
+        print(points)
+        ax.plot(points[:, t], np.linspace(0, size*5, numpoints*5))
+    plt.show()
+
+x = expressions.Symbol('x')
+expr = expressions.Sin(x)**2
+
+print(over_time2(expr, size=np.pi, numpoints=100, endtime=2, dt=0.001, V=5, D=0.35))
+
+#plot_graph(expr, size=np.pi, numpoints=100, endtime=2, dt=0.001, V=5, D=0.35)
