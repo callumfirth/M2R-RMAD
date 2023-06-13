@@ -8,11 +8,12 @@
 \usepackage{amsmath}
 \usepackage{algpseudocode}
 \usepackage{algorithm}
+\usepackage{pgfplotstable}
 \usepackage[numbers]{natbib} % number references and natbib for more styles
 \bibliographystyle{unsrtnat} % sets bibliography to vancouver style
 
 \title{Reverse Mode Algorithmic Differentiation}
-\author{cf1021, sam221, aml21, mf621}
+\author{Callum Firth, Maximilian Fricker, Alexander Le Marchant, Samuel Murdoch} % alphabetical
 \date{}
 
 \begin{document}
@@ -462,7 +463,7 @@ When we send $\epsilon$ to 0 the term $O(\epsilon)$ goes to 0 meaning we can fin
 When we compute this we get a value for $O(\epsilon^2)$ which as $\epsilon \to 0$ $O(\epsilon^2) \to 0$ at a rate proportional to $\epsilon^2$
 
 \begin{center}
-    \includegraphics[width=12cm]{images/Taylor_error_1.png}
+    \includegraphics[width=12cm]{images/taylor_error_1.pdf}
 \end{center}
 
 When checking if our result is correct we need to calculate the rate of convergence, since we are finding $O(\epsilon^2)$ we expect our convergence to be at the rate of $\epsilon^2$. To check our rate of convergence we use the formula:
@@ -473,10 +474,20 @@ When checking if our result is correct we need to calculate the rate of converge
 
 Where $u_1, u_2$ are our approximations using $F(x + \epsilon) - F(x)$, $u$ is our calculated derivative using Reverse Mode AD, and $h_1, h_2$ are the corresponding $\epsilon$ for $u_1, u_2$. This value should give us the power of $\epsilon$ to which we are converging at. In our case we got:
 
-\beigin{}
-\input{images/rate_of_convergence.txt}
+\begin{center}
+    \pgfplotstabletypeset[
+    columns/0/.style={column name={Points}},
+    columns/1/.style={column name={Gradients}},
+    header=false,
+    string type,
+    before row=\hline,
+    every last row/.style={after row=\hline},
+    column type/.add={|}{},
+    every last column/.style={column type/.add={}{|}}
+]{images/rate_of_convergence.txt}%
+\end{center}
 
-which is significantly close enough to 2 to tell us we are converging at a rate of $\epsilon^2$.
+As you can see at nearly all points we got values significantly close to 2. So we are converging at a rate of $\epsilon^2$.
 
 
 
@@ -592,6 +603,32 @@ Consider the simplified 1 dimensional advection-diffusion equation given by Equa
 \end{equation}
 
 \subsubection{Implementation}
+
+If we model the concentration along 1 dimension as a simple function we can then sample a concentration at different distances. We have an example of sampling a function that shows concentration distributed as the standard-normal distribution:
+\begin{center}
+    \includegraphics[width=12cm]{images/show_sampling.png}
+\end{center}
+
+Now we have these points, using central difference equations, we can find approximations for our $\frac{\partial C}{\partial x}$ and our $\frac{\partial^2 C}{(\partial X)^2}$. If we number the nodes $C_1, C_2, C_3...$ then we get that:
+
+\begin{equation}
+    \frac{\partial C_i}{\partial x} \approx \frac{F(C_{i+1}) - F(C_{i-1})}{2h}
+\end{equation}
+\begin{equation}
+    \frac{\partial C_i}{\partial x} \approx \frac{F(C_{i+1}) -2F(C_i) + F(C_{i-1})}{h^2}
+\end{equation}
+
+Where $h$ is the distance between each sample point. If we want to generalize this for all points we can use the matrices:
+
+\begin{center}
+    \begin{pmatrix}
+    0 & 1 & 0 & ...\\
+    -1 & 0 & 1 & ...\\
+    0 & -1 & 0 & ...\\
+    . & . & . & ...
+    \end{pmatrix}
+\end{center}
+
 
 \begin{figure}
     \centering
