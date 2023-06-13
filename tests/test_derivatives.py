@@ -61,7 +61,9 @@ def test_RMADEexample1(xval, yval, zval):
     x = expressions.Symbol('x')
     y = expressions.Symbol('y')
     z = expressions.Symbol('z')
-    expr = np.asarray([log(z)*exp(x**2), exp(x**2)+sin(x**2 * y)])
+    x2 = x**2
+    expx2 = exp(x2)
+    expr = np.asarray([log(z)*expx2, expx2+sin(x2 * y)])
     conditions = {x: xval, y: yval, z: zval}
     ans = reversemodeAD(expr, conditions)
     assert np.allclose(
@@ -82,7 +84,9 @@ def test_FMADEexample1(xval, yval, zval):
     x = expressions.Symbol('x')
     y = expressions.Symbol('y')
     z = expressions.Symbol('z')
-    expr = np.asarray([log(z)*exp(x**2), exp(x**2)+sin(x**2 * y)])
+    x2 = x**2
+    expx2 = exp(x2)
+    expr = np.asarray([log(z)*expx2, expx2+sin(x2 * y)])
     conditions = {x: xval, y: yval, z: zval}
     ans = forwardmodeAD(expr, conditions)
     assert np.allclose(
