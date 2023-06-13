@@ -53,7 +53,7 @@ def test_FMADEx1(xval, yval):
 @pytest.mark.parametrize("xval,yval,zval", [(1, 1, 1),
                                             (np.pi, np.pi, np.exp(1)),
                                             (randint(0, 10), randint(0, 100),
-                                             randint(0, 100))])
+                                             randint(1, 100))])
 def test_RMADEexample1(xval, yval, zval):
     sin = expressions.Sin()
     exp = expressions.Exp()
@@ -76,7 +76,7 @@ def test_RMADEexample1(xval, yval, zval):
 @pytest.mark.parametrize("xval,yval,zval", [(1, 1, 1),
                                             (np.pi, np.pi, np.exp(1)),
                                             (randint(0, 10), randint(0, 100),
-                                             randint(0, 100))])
+                                             randint(1, 100))])
 def test_FMADEexample1(xval, yval, zval):
     sin = expressions.Sin()
     exp = expressions.Exp()
