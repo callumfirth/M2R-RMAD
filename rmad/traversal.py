@@ -4,9 +4,7 @@ import numpy as np
 
 
 def evalpostvisitor(expr, **kwargs):
-    """
-    Visit an expression in post-order applying a function.
-    """
+    """Visit an expression in post-order applying a function."""
     stack = []
     if isinstance(expr, np.ndarray):
         for expression in expr:
@@ -36,6 +34,9 @@ def evalpostvisitor(expr, **kwargs):
 def adjointprevisitor(expr, fn_adjoint=1, **kwargs):
     """
     Traverse tree in preorder applying the adjoint to each node.
+
+    Traverses the tree in preorder, where we visit the children after parent
+    then recursively calls itself.
 
     Parameters
     ----------
