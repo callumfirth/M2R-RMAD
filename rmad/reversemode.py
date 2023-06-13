@@ -3,7 +3,9 @@ import numpy as np
 
 
 def reversemodeAD(expr, conditions):
-    """Return dict of the derivatives of expr w.r.t symbols"""
+    """
+    Return dict of the derivatives of expr w.r.t symbols
+    """
     try:
         evalpostvisitor(expr, symbol_map=conditions)  # Forward traverse
     except ZeroDivisionError:  # Not currently used i dont think

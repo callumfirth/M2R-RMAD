@@ -9,14 +9,14 @@ from demonstration.taylor_error import taylor_error, taylor_error_plot
 from demonstration.graph_drawer import draw_expression, draw_cluster
 
 
-def timeRM(expr, conditions):
+def timerm(expr, conditions):
     start = time.time()
     reversemodeAD(expr, conditions)
     end = time.time()
     return end - start
 
 
-def timeFM(expr, conditions):
+def timefm(expr, conditions):
     start = time.time()
     forwardmodeAD(expr, conditions)
     end = time.time()
@@ -39,7 +39,7 @@ def timex1(n, m):
     expr = 1
     for i in range(n):
         expr *= x[i]
-    return [timeFM(expr, conditions), timeRM(expr, conditions)]
+    return [timefm(expr, conditions), timerm(expr, conditions)]
 
 
 def timex2(n, m):
@@ -49,7 +49,7 @@ def timex2(n, m):
     expr = 1
     for i in range(n):
         expr *= expressions.Sin(x[i])
-    return [timeFM(expr, conditions), timeRM(expr, conditions)]
+    return [timefm(expr, conditions), timerm(expr, conditions)]
 
 
 def timex3(n, m):
@@ -59,7 +59,7 @@ def timex3(n, m):
     expr = 1
     for i in range(n):
         expr *= expressions.Exp(x[i])
-    return [timeFM(expr, conditions), timeRM(expr, conditions)]
+    return [timefm(expr, conditions), timerm(expr, conditions)]
 
 
 def timex4(n, m):
@@ -69,7 +69,7 @@ def timex4(n, m):
     expr = 1
     for i in range(n):
         expr *= expressions.Log(x[i])
-    return [timeFM(expr, conditions), timeRM(expr, conditions)]
+    return [timefm(expr, conditions), timerm(expr, conditions)]
 
 
 def plottime(n, m, iterations):
@@ -90,17 +90,17 @@ def plottime(n, m, iterations):
     timelines4 /= iterations
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(15, 10))
 
-    FM, = ax1.plot(nrange, timelines1[:, 0], label="Forward Mode")
-    RM, = ax1.plot(nrange, timelines1[:, 1], label="Reverse Mode")
+    fm, = ax1.plot(nrange, timelines1[:, 0], label="Forward Mode")
+    rm, = ax1.plot(nrange, timelines1[:, 1], label="Reverse Mode")
 
-    FM, = ax2.plot(nrange, timelines2[:, 0], label="Forward Mode")
-    RM, = ax2.plot(nrange, timelines2[:, 1], label="Reverse Mode")
+    fm, = ax2.plot(nrange, timelines2[:, 0], label="Forward Mode")
+    rm, = ax2.plot(nrange, timelines2[:, 1], label="Reverse Mode")
 
-    FM, = ax3.plot(nrange, timelines3[:, 0], label="Forward Mode")
-    RM, = ax3.plot(nrange, timelines3[:, 1], label="Reverse Mode")
+    fm, = ax3.plot(nrange, timelines3[:, 0], label="Forward Mode")
+    rm, = ax3.plot(nrange, timelines3[:, 1], label="Reverse Mode")
 
-    FM, = ax4.plot(nrange, timelines4[:, 0], label="Forward Mode")
-    RM, = ax4.plot(nrange, timelines4[:, 1], label="Reverse Mode")
+    fm, = ax4.plot(nrange, timelines4[:, 0], label="Forward Mode")
+    rm, = ax4.plot(nrange, timelines4[:, 1], label="Reverse Mode")
 
     ax1.set_title("Plotting the time to compute derivative of fn_1")
     ax2.set_title("Plotting the time to compute derivative of fn_2")
@@ -121,7 +121,7 @@ def plottime(n, m, iterations):
     return plt.show()
 
 
-def RMADEx1():
+def rmx1():
     x = expressions.Symbol('x')
     sin = expressions.Sin()
     y = expressions.Symbol('y')
@@ -130,7 +130,7 @@ def RMADEx1():
     return reversemodeAD(expression, conditions)
 
 
-def FMADEx1():
+def fmx1():
     x = expressions.Symbol('x')
     sin = expressions.Sin()
     y = expressions.Symbol('y')
@@ -139,7 +139,7 @@ def FMADEx1():
     return forwardmodeAD(expression, conditions)
 
 
-def RMADEx2():
+def rmx2():
     x = expressions.Symbol('x')
     sin = expressions.Sin()
     cos = expressions.Cos()
@@ -149,7 +149,7 @@ def RMADEx2():
     return reversemodeAD(expression, conditions)
 
 
-def FMADEx2():
+def fmx2():
     x = expressions.Symbol('x')
     sin = expressions.Sin()
     cos = expressions.Cos()
@@ -218,7 +218,7 @@ def taylor_error_example():
                  make sure to run shell in .../M2R-RMAD/ folder")
 
 
-def DAG_example1():
+def dag_example1():
     sin = expressions.Sin()
     exp = expressions.Exp()
     log = expressions.Log()
@@ -231,7 +231,7 @@ def DAG_example1():
     draw_expression(expr, "Example1")
 
 
-def DAG_example2():
+def dag_example2():
     x = expressions.Symbol('x')
     y = expressions.Symbol('y')
     sin = expressions.Sin()
@@ -241,7 +241,7 @@ def DAG_example2():
     draw_expression(expr, "Example2")
 
 
-def Cluster_Graph():
+def cluster_graph():
     sin = expressions.Sin()
     exp = expressions.Exp()
     log = expressions.Log()
@@ -281,7 +281,7 @@ def func_nm(n, m):
 def arraytimeRM(n, m):
     # conditions = np.asarray([[dict(zip(generatex(i+1),generatew(i+1, 2)))
     # for i in range(n)] for j in range(m)])
-    arr = np.asarray([[timeRM(*func_nm(i+1, j+1)) for i in range(n)]
+    arr = np.asarray([[timerm(*func_nm(i+1, j+1)) for i in range(n)]
                       for j in range(m)])
     return arr
 
@@ -289,7 +289,7 @@ def arraytimeRM(n, m):
 def arraytimeFM(n, m):
     # conditions = np.asarray([[dict(zip(generatex(i+1), generatew(i+1, 2)))
     # for i in range(n)] for j in range(m)])
-    arr = np.asarray([[timeFM(*func_nm(i+1, j+1)) for i in range(n)]
+    arr = np.asarray([[timefm(*func_nm(i+1, j+1)) for i in range(n)]
                       for j in range(m)])
     return arr
 
@@ -307,16 +307,16 @@ def heatmap(n, m, iterations):
     rmarr /= iterations
     fmarr /= iterations
 
-    RM = ax1.matshow(rmarr,
+    rm = ax1.matshow(rmarr,
                      cmap="hot", origin="lower", interpolation="nearest")
-    FM = ax2.matshow(fmarr,
+    fm = ax2.matshow(fmarr,
                      cmap="hot", origin="lower", interpolation="nearest")
 
     norm = colors.Normalize(vmin=min(np.min(rmarr), np.min(fmarr)),
                             vmax=max(np.max(rmarr), np.max(fmarr)))
-    RM.set_norm(norm)
-    FM.set_norm(norm)
-    cbar = plt.colorbar(FM, ax=(ax1, ax2), location="bottom")
+    rm.set_norm(norm)
+    fm.set_norm(norm)
+    cbar = plt.colorbar(fm, ax=(ax1, ax2), location="bottom")
 
     ax1.set_ylabel("m: Number of outputs")
     ax1.set_xlabel("n: Number of inputs")
@@ -358,14 +358,14 @@ def heatmap(n, m, iterations):
 # Cluster_Graph()
 
 def reproduce():
-    RMADEx1()  # Unused: RM result on sin(x+y)*x x,y=1
-    FMADEx1()  # Unused: FM result on sin(x+y)*x x,y=1
+    rmx1()  # Unused: RM result on sin(x+y)*x x,y=1
+    fmx1()  # Unused: FM result on sin(x+y)*x x,y=1
     plottime(75, 1, 50)  # Plot for timedifference (75 input, 1 deriv, 50 iter)
     example_rm()  # Result for RM algo test in 1D
     example_nparray()  # # Result for RM algo test with arrays
     taylor_error_example()  # Taylor error figure and result
-    DAG_example1()  # Unused: DAG fig
-    DAG_example2()  # DAG fig for manual RM algorithm
-    Cluster_Graph()  # Cluster graph figure for comparison
+    dag_example1()  # Unused: DAG fig
+    dag_example2()  # DAG fig for manual RM algorithm
+    cluster_graph()  # Cluster graph figure for comparison
 
 # reproduce() #Please dont run yet, run ones individually above for testing

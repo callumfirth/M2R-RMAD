@@ -4,7 +4,9 @@ import numpy as np
 
 
 def evalpostvisitor(expr, **kwargs):
-    """Visit an expression in post-order applying a function."""
+    """
+    Visit an expression in post-order applying a function.
+    """
     stack = []
     if isinstance(expr, np.ndarray):
         for expression in expr:
@@ -32,7 +34,8 @@ def evalpostvisitor(expr, **kwargs):
 
 
 def adjointprevisitor(expr, fn_adjoint=1, **kwargs):
-    """Traverse tree in preorder applying the adjoint to each node.
+    """
+    Traverse tree in preorder applying the adjoint to each node.
 
     Parameters
     ----------
@@ -54,7 +57,7 @@ def adjointprevisitor(expr, fn_adjoint=1, **kwargs):
 
 
 def adjoint(tree):
-    """Print adjoint values of all the nodes in the tree"""
+    """Print adjoint values of all the nodes in the tree."""
     print(f"Value,adjoint: {tree}: {tree.storedvalue}, {tree.adjoint}")
     for child in tree.operands:
         adjoint(child)
