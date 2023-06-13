@@ -195,7 +195,8 @@ def taylor_error_example():
 
     fig = taylor_error_plot(expr, conditions, eps, var=x)
     try:
-        fig.savefig('images\\taylor_error_1.png')
+        fig.savefig('images\\taylor_error_1.pdf', bbox_inches='tight',
+                    pad_inches=0)
     except FileNotFoundError:
         raise FileNotFoundError(
             "Taylor_Error_Example: Could not save figure: \
@@ -356,6 +357,7 @@ def heatmap(n, m, iterations):
 # DAG_example2()
 
 # Cluster_Graph()
+
 
 def reproduce():
     rmx1()  # Unused: RM result on sin(x+y)*x x,y=1
