@@ -32,7 +32,11 @@ def evalpostvisitor(expr, **kwargs):
 
 
 def adjointprevisitor(expr, fn_adjoint=1, **kwargs):
-    """Traverse tree in preorder applying the adjoint to each node.
+    """
+    Traverse tree in preorder applying the adjoint to each node.
+
+    Traverses the tree in preorder, where we visit the children after parent
+    then recursively calls itself.
 
     Parameters
     ----------
@@ -41,7 +45,6 @@ def adjointprevisitor(expr, fn_adjoint=1, **kwargs):
     fn_parent: float
         The adjoint value of the parent node of expr
     """
-
     # Set the adjoint of the parent node (initially this is the seed = 1)
     expr.adjoint = fn_adjoint
     # Then visit the children of the parent node and set their adjoints
@@ -54,7 +57,7 @@ def adjointprevisitor(expr, fn_adjoint=1, **kwargs):
 
 
 def adjoint(tree):
-    """Print adjoint values of all the nodes in the tree"""
+    """Print adjoint values of all the nodes in the tree."""
     print(f"Value,adjoint: {tree}: {tree.storedvalue}, {tree.adjoint}")
     for child in tree.operands:
         adjoint(child)
