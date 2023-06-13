@@ -2,9 +2,10 @@ import numpy as np
 import rmad.expressions as expressions
 from rmad.traversal import evalpostvisitor
 import matplotlib.pyplot as plt
+import numpy.linalg as linalg
 
 
-def first_deriv_matrix_maker(n):
+def first_deriv_matrix_maker(n, h):
     array = []
     for i in range(n):
         arr = np.zeros(n)
@@ -13,11 +14,11 @@ def first_deriv_matrix_maker(n):
             arr[i-1] = -1
             arr[i+1] = 1
         array.append(arr)
-    array = np.array(array)
+    array = np.array(array)/(2*h)
     return array
 
 
-def second_deriv_matrix_maker(n):
+def second_deriv_matrix_maker(n, h):
     array = []
     for i in range(n):
         arr = np.zeros(n)
@@ -26,20 +27,20 @@ def second_deriv_matrix_maker(n):
             arr[i] = -2
             arr[i+1] = 1
         array.append(arr)
-    array = np.array(array)
+    array = np.array(array)/(h**2)
     return array
 
 
-def time_step(C, eval_points, V=1, D=1):
+def time_step(C, eval_points, dt=0.1, V=1, D=1):
     n = len(eval_points)
-    A = first_deriv_matrix_maker(n)
-    B = second_deriv_matrix_maker(n)
     h = eval_points[1] - eval_points[0]
-    dc = -(V * np.matmul(A, C)/(2*h)) + D*np.matmul(B, C)/(h**2)
-    return dc
+    A = first_deriv_matrix_maker(n, h)
+    B = second_deriv_matrix_maker(n, h) # (I - dt V A + dt D B) = m
+    m = np.identity(n) - V*np.matmul(A, C)*dt + D*np.matmul(B, C)*dt
+    return m
 
 
-def over_time(expr, eval_points, startend, iterations, V=1, D=1):
+def over_time(expr, eval_points, startend, iterations, V=1, D=1, dt=0.001):
     evalpostvisitor(expr, symbol_map={x: eval_points})
     C = expr.storedvalue
     iters = np.linspace(startend[0], startend[1], iterations)
@@ -47,15 +48,15 @@ def over_time(expr, eval_points, startend, iterations, V=1, D=1):
     for i in iters:
         values_over_time.append(C)
         plt.plot(eval_points, C)
-        C = C + time_step(C, eval_points, V, D)
+        m = time_step(C, eval_points, dt)
+        C = linalg.solve(m, C)
+    plt.show()
     return values_over_time
 
 
 exp = expressions.Exp()
 x = expressions.Symbol('x')
 expr = exp(x**2 * -1)
-
-#over_time(expr, np.linspace(-1, 1, 200), (0, 2), 200)
 
 
 def over_time2(expr, size, numpoints, endtime, dt, V=1, D=1):
