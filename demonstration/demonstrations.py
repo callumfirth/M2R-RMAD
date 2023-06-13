@@ -2,23 +2,23 @@ from matplotlib import colors
 import numpy as np
 import time
 import matplotlib.pyplot as plt
-from rmad import *
 import rmad.expressions as expressions
 from rmad.reversemode import reversemodeAD
 from rmad.forwardmode import forwardmodeAD
 from demonstration.taylor_error import taylor_error, taylor_error_plot
 from demonstration.graph_drawer import draw_expression, draw_cluster
 
+
 def timeRM(expr, conditions):
     start = time.time()
-    reverse = reversemodeAD(expr, conditions)
+    reversemodeAD(expr, conditions)
     end = time.time()
     return end - start
 
 
 def timeFM(expr, conditions):
     start = time.time()
-    forward = forwardmodeAD(expr, conditions)
+    forwardmodeAD(expr, conditions)
     end = time.time()
     return end - start
 
@@ -88,8 +88,8 @@ def plottime(n, m, iterations):
     timelines2 /= iterations
     timelines3 /= iterations
     timelines4 /= iterations
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2,2, figsize=(15,10))
-    
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(15, 10))
+
     FM, = ax1.plot(nrange, timelines1[:, 0], label="Forward Mode")
     RM, = ax1.plot(nrange, timelines1[:, 1], label="Reverse Mode")
 
@@ -159,7 +159,6 @@ def FMADEx2():
     return forwardmodeAD(expression, conditions)
 
 
-
 def example_nparray():
     sin = expressions.Sin()
     exp = expressions.Exp()
@@ -172,6 +171,7 @@ def example_nparray():
     expression = np.asarray([log(z)*expx2, expx2+sin(x2 * y)])
     conditions = {x: 1, y: np.pi, z: 1}
     return reversemodeAD(expression, conditions)
+
 
 def example_rm():
     sin = expressions.Sin()
@@ -196,14 +196,26 @@ def taylor_error_example():
     fig = taylor_error_plot(expr, conditions, eps, var=x)
     try:
         fig.savefig('images\\taylor_error_1.png')
-    except:
-        print("Taylor_Error_Example: Could not save figure: Path not found, make sure to run shell in .../M2R-RMAD/ folder")
-    order_of_convergence = np.log(abs(taylor_error(expr, conditions, eps[3], var=x)/taylor_error(expr, conditions, eps[6], var=x)))/np.log(abs(eps[3]/eps[6]))
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            "Taylor_Error_Example: Could not save figure: \
+                make sure to run shell in .../M2R-RMAD/ folder")
+    order_of_convergence = np.log(abs(taylor_error(expr,
+                                                   conditions,
+                                                   eps[3],
+                                                   var=x)
+                                      / taylor_error(expr,
+                                                     conditions,
+                                                     eps[6],
+                                                     var=x))) \
+        / np.log(abs(eps[3]/eps[6]))
     try:
         f = open('images\\rate_of_convergence.txt', 'w')
         f.write(str(order_of_convergence))
-    except:
-        print("Taylor_Error_Example: Could not save result: Path not found, make sure to run shell in .../M2R-RMAD/ folder")
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            "Taylor_Error_Example: Could not save result: \
+                 make sure to run shell in .../M2R-RMAD/ folder")
 
 
 def DAG_example1():
@@ -258,31 +270,34 @@ def func_nm(n, m):
         for i in range(n):
             if i == 0:
                 subexpr = j*x[i]**j
-                
+
             else:
                 subexpr += j*x[i]**j
-                #newexpr = j*x[i]**j
-                #otherexpr = newexpr + 2*newexpr + newexpr**3
-                #subexpr += otherexpr + expressions.Sin(otherexpr) + expressions.Cos(otherexpr)
         expression = np.append(expression, subexpr)
     conditions = dict(zip(x, generatew(n, 1)))
     return expression, conditions
 
 
 def arraytimeRM(n, m):
-    #conditions = np.asarray([[dict(zip(generatex(i+1), generatew(i+1, 2))) for i in range(n)] for j in range(m)])
-    arr = np.asarray([[timeRM(*func_nm(i+1, j+1)) for i in range(n)] for j in range(m)])
+    # conditions = np.asarray([[dict(zip(generatex(i+1),generatew(i+1, 2)))
+    # for i in range(n)] for j in range(m)])
+    arr = np.asarray([[timeRM(*func_nm(i+1, j+1)) for i in range(n)]
+                      for j in range(m)])
     return arr
 
+
 def arraytimeFM(n, m):
-    #conditions = np.asarray([[dict(zip(generatex(i+1), generatew(i+1, 2))) for i in range(n)] for j in range(m)])
-    arr = np.asarray([[timeFM(*func_nm(i+1, j+1)) for i in range(n)] for j in range(m)])
+    # conditions = np.asarray([[dict(zip(generatex(i+1), generatew(i+1, 2)))
+    # for i in range(n)] for j in range(m)])
+    arr = np.asarray([[timeFM(*func_nm(i+1, j+1)) for i in range(n)]
+                      for j in range(m)])
     return arr
+
 
 def heatmap(n, m, iterations):
     fig, (ax1, ax2) = plt.subplots(1, 2)
 
-    #extent = [1, n, 1, m]
+    # extent = [1, n, 1, m]
     rmarr = 0
     fmarr = 0
     for i in range(iterations):
@@ -292,14 +307,16 @@ def heatmap(n, m, iterations):
     rmarr /= iterations
     fmarr /= iterations
 
+    RM = ax1.matshow(rmarr,
+                     cmap="hot", origin="lower", interpolation="nearest")
+    FM = ax2.matshow(fmarr,
+                     cmap="hot", origin="lower", interpolation="nearest")
 
-    RM = ax1.matshow(rmarr, cmap="hot", origin="lower", interpolation="nearest")
-    FM = ax2.matshow(fmarr, cmap="hot", origin="lower", interpolation="nearest")
-
-    norm = colors.Normalize(vmin=min(np.min(rmarr), np.min(fmarr)),vmax=max(np.max(rmarr), np.max(fmarr)))
+    norm = colors.Normalize(vmin=min(np.min(rmarr), np.min(fmarr)),
+                            vmax=max(np.max(rmarr), np.max(fmarr)))
     RM.set_norm(norm)
     FM.set_norm(norm)
-    cbar = plt.colorbar(FM, ax=(ax1,ax2), location="bottom")
+    cbar = plt.colorbar(FM, ax=(ax1, ax2), location="bottom")
 
     ax1.set_ylabel("m: Number of outputs")
     ax1.set_xlabel("n: Number of inputs")
@@ -309,25 +326,28 @@ def heatmap(n, m, iterations):
     cbar.ax.set_xlabel("Average time taken to compute derivative")
 
     fig.align_labels()
-    plt.savefig('images/Graph_HeatMapTimeDiff.pdf', bbox_inches='tight', pad_inches=0)
+    plt.savefig('images/Graph_HeatMapTimeDiff.pdf',
+                bbox_inches='tight',
+                pad_inches=0)
 
     plt.show()
 
-heatmap(25, 25, 10)
+
+# heatmap(25, 25, 10)
 
 # plottime(75, 1, 50)
 
-print(RMADEx1())
+# print(RMADEx1())
 
-print(FMADEx1())
+# print(FMADEx1())
 
-print(RMADEx2())
+# print(RMADEx2())
 
-print(FMADEx2())
+# print(FMADEx2())
 
-print(example_rm())
+# print(example_rm())
 
-print(example_nparray())
+# print(example_nparray())
 
 # taylor_error_example()
 
@@ -348,4 +368,4 @@ def reproduce():
     DAG_example2()  # DAG fig for manual RM algorithm
     Cluster_Graph()  # Cluster graph figure for comparison
 
-# reproduce() #Please dont run this yet, run ones individually above for testing
+# reproduce() #Please dont run yet, run ones individually above for testing

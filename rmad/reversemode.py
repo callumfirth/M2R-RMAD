@@ -1,6 +1,7 @@
 from rmad.traversal import evalpostvisitor, adjointprevisitor
 import numpy as np
 
+
 def reversemodeAD(expr, conditions):
     """Return dict of the derivatives of expr w.r.t symbols"""
     try:
@@ -11,10 +12,10 @@ def reversemodeAD(expr, conditions):
     if isinstance(expr, np.ndarray):
         symbols = dict((symbol, []) for symbol in conditions)
         for expression in expr:
-            adjointprevisitor(expression)  # Backwards traverse through the tree
+            adjointprevisitor(expression)  # Backwards traverse the tree
             for symbol in conditions.keys():
-                symbols[symbol].append(symbol.adjoint)  # Store the adjoint values
-                symbol.adjoint = 0  # So that next pass the adjoint symbols are set back to 0
+                symbols[symbol].append(symbol.adjoint)  # Store adjoint values
+                symbol.adjoint = 0  # So next pass, adjoints are set back to 0
     else:
         adjointprevisitor(expr)  # Backwards traverse through the tree
         # For each symbol, return the dict of the repsective adjoint

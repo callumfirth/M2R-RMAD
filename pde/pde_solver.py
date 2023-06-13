@@ -35,7 +35,7 @@ def time_step(C, eval_points, dt=0.1, V=1, D=1):
     n = len(eval_points)
     h = eval_points[1] - eval_points[0]
     A = first_deriv_matrix_maker(n, h)
-    B = second_deriv_matrix_maker(n, h) # (I - dt V A + dt D B) = m
+    B = second_deriv_matrix_maker(n, h)  # (I - dt V A + dt D B) = m
     m = np.identity(n) + V*A*dt - D*B*dt
     return m
 
@@ -79,17 +79,19 @@ def over_time2(expr, size, numpoints, endtime, dt, V=1, D=1):
     plt.show()
     return values_over_time
 
+
 def plot_graph(expr, size, numpoints, endtime, dt, V=1, D=1):
     points = over_time2(expr, size, numpoints, endtime, dt, V=1, D=1)
-    fig , ax = plt.subplots()
+    fig, ax = plt.subplots()
     for t in np.arange(0, endtime, 100*dt):
         print(points)
         ax.plot(points[:, t], np.linspace(0, size*5, numpoints*5))
     plt.show()
 
+
 x = expressions.Symbol('x')
 expr = expressions.Sin(x)**2
 
-print(over_time2(expr, size=np.pi, numpoints=100, endtime=1, dt=0.01, V=10, D=5))
+over_time2(expr, size=np.pi, numpoints=100, endtime=1, dt=0.01, V=10, D=5)
 
-#plot_graph(expr, size=np.pi, numpoints=100, endtime=2, dt=0.001, V=5, D=0.35)
+# plot_graph(expr, size=np.pi, numpoints=100, endtime=2, dt=0.001, V=5, D=0.35)

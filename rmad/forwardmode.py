@@ -2,20 +2,17 @@ import rmad.expressions as expressions
 import numpy as np
 from functools import singledispatch
 
+
 def forwardmodeAD(expr, conditions):
     """Visit an expression in post-order applying a function."""
     symbols = dict()
     for symbol in conditions.keys():
-
-        # Returns stack of output expr (so works for arrays)
         if isinstance(expr, np.ndarray):
             stack = []
             for expression in expr:
                 stack.append(expression)
         else:
             stack = [expr]
-
-        # The actual forwardmode func
         visited = {}
         while stack:
             element = stack.pop()
@@ -30,12 +27,10 @@ def forwardmodeAD(expr, conditions):
                     stack.append(x)
             else:
                 visited[element] = forwardevaluate(element, symbol,
-                                                *(operand for operand in
-                                                element.operands),
-                                            symbol_map=conditions)
+                                                   *(operand for operand in
+                                                     element.operands),
+                                                   symbol_map=conditions)
                 element.storedvalue = visited[element]
-
-        #Returns adjoint of each expression in our expr (so works for arrays)
         if isinstance(expr, np.ndarray):
             adjointlist = []
             for expression in expr:
@@ -76,6 +71,7 @@ def _(expr, seed, *o, **kwargs):
     expr.adjoint += 0
     return value
 
+
 @forwardevaluate.register(int)
 def _(expr, seed, *o, **kwargs):
     value = expr
@@ -114,21 +110,24 @@ def _(expr, seed, *o, **kwargs):
 def _(expr, seed, *o, **kwargs):
     value = o[0].storedvalue * o[1].storedvalue
     expr.storedvalue = value
-    expr.adjoint += o[0].storedvalue*o[1].adjoint + o[1].storedvalue*o[0].adjoint
+    expr.adjoint += o[0].storedvalue * \
+        o[1].adjoint + o[1].storedvalue * o[0].adjoint
     return value
 
 
 @forwardevaluate.register(expressions.Div)
 def _(expr, seed, *o, **kwargs):
     value = o[0].storedvalue / o[1].storedvalue
-    expr.adjoint += (o[0].adjoint*o[1].storedvalue - o[1].adjoint*o[0].storedvalue) / (o[1].storedvalue ** 2)
+    expr.adjoint += (o[0].adjoint*o[1].storedvalue
+                     - o[1].adjoint*o[0].storedvalue) / (o[1].storedvalue ** 2)
     return value
 
 
 @forwardevaluate.register(expressions.Pow)
 def _(expr, seed, *o, **kwargs):
     value = o[0].storedvalue ** o[1].storedvalue
-    expr.adjoint += o[0].adjoint * o[1].storedvalue * o[0].storedvalue ** (o[1].storedvalue - 1)
+    expr.adjoint += o[0].adjoint * o[1].storedvalue * \
+        o[0].storedvalue ** (o[1].storedvalue - 1)
     return value
 
 
@@ -154,6 +153,7 @@ def _(expr, symbol, *o, **kwargs):
     expr.storedvalue = value
     expr.adjoint += np.exp(o[0].storedvalue) * o[0].adjoint
     return value
+
 
 @forwardevaluate.register(expressions.Log)
 def _(expr, symbol, *o, **kwargs):

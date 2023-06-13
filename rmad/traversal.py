@@ -2,6 +2,7 @@ from rmad.evaluate import evaluate, adjoint_evaluate
 from rmad.expressions import Symbol
 import numpy as np
 
+
 def evalpostvisitor(expr, **kwargs):
     """Visit an expression in post-order applying a function."""
     stack = []
@@ -29,6 +30,7 @@ def evalpostvisitor(expr, **kwargs):
                                         **kwargs)
             element.storedvalue = visited[element]
 
+
 def adjointprevisitor(expr, fn_adjoint=1, **kwargs):
     """Traverse tree in preorder applying the adjoint to each node.
 
@@ -48,7 +50,7 @@ def adjointprevisitor(expr, fn_adjoint=1, **kwargs):
         operand.adjoint += adjoint[counter] * expr.adjoint
         adjointprevisitor(operand, operand.adjoint)
         if not isinstance(operand, Symbol):
-            operand.adjoint = 0  # So that next pass the adjoints are set back to 0
+            operand.adjoint = 0  # So that next pass the adjoints are set to 0
 
 
 def adjoint(tree):

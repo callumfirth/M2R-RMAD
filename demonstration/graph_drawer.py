@@ -2,6 +2,7 @@ import graphviz as gv
 import numpy as np
 import rmad.expressions as expressions
 
+
 def exprpostvisitor(expr, graph, node="v", **kwargs):
     """Visit an expression in post-order applying a function."""
     stack = []

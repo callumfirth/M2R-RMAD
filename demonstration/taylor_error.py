@@ -16,7 +16,7 @@ def taylor_error(expr, condition, eps, **kwargs):
     return abs(Jdeltax - Jx - dJx[kwargs['var']]*eps)
 
 
-def taylor_error_plot(expr, condition, eps, **kwargs):  #eps is a list in this case
+def taylor_error_plot(expr, condition, eps, **kwargs):
     result = []
     for e in eps:
         result.append(taylor_error(expr, condition, e, **kwargs))
