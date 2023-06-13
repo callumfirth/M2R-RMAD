@@ -1,3 +1,4 @@
+from matplotlib import colors
 import numpy as np
 import time
 import matplotlib.pyplot as plt
@@ -23,17 +24,17 @@ def timeFM(expr, conditions):
 
 
 def generatex(n):
-    return [expressions.Symbol(f'x{i}') for i in range(n)]
+    return [expressions.Symbol(f'x_{i}') for i in range(n)]
 
 
-def generatew(n):
+def generatew(n, m):
     np.random.seed(0)
-    return [np.random.randn(1, 1000) for i in range(n)]
+    return [np.random.randn(m) for i in range(n)]
 
 
-def timex1(n):
+def timex1(n, m):
     x = generatex(n)
-    w = generatew(n)
+    w = generatew(n, m)
     conditions = dict(zip(x, w))
     expr = 1
     for i in range(n):
@@ -41,9 +42,9 @@ def timex1(n):
     return [timeFM(expr, conditions), timeRM(expr, conditions)]
 
 
-def timex2(n):
+def timex2(n, m):
     x = generatex(n)
-    w = generatew(n)
+    w = generatew(n, m)
     conditions = dict(zip(x, w))
     expr = 1
     for i in range(n):
@@ -51,9 +52,9 @@ def timex2(n):
     return [timeFM(expr, conditions), timeRM(expr, conditions)]
 
 
-def timex3(n):
+def timex3(n, m):
     x = generatex(n)
-    w = generatew(n)
+    w = generatew(n, m)
     conditions = dict(zip(x, w))
     expr = 1
     for i in range(n):
@@ -61,9 +62,9 @@ def timex3(n):
     return [timeFM(expr, conditions), timeRM(expr, conditions)]
 
 
-def timex4(n):
+def timex4(n, m):
     x = generatex(n)
-    w = generatew(n)
+    w = generatew(n, m)
     conditions = dict(zip(x, w))
     expr = 1
     for i in range(n):
@@ -71,12 +72,22 @@ def timex4(n):
     return [timeFM(expr, conditions), timeRM(expr, conditions)]
 
 
-def plottime(n):
+def plottime(n, m, iterations):
     nrange = range(1, n+1)
-    timelines1 = np.asarray([timex1(n) for n in nrange])
-    timelines2 = np.asarray([timex2(n) for n in nrange])
-    timelines3 = np.asarray([timex3(n) for n in nrange])
-    timelines4 = np.asarray([timex4(n) for n in nrange])
+    timelines1 = 0
+    timelines2 = 0
+    timelines3 = 0
+    timelines4 = 0
+    for i in range(iterations):
+        print(i)
+        timelines1 += np.asarray([timex1(n, m) for n in nrange])
+        timelines2 += np.asarray([timex2(n, m) for n in nrange])
+        timelines3 += np.asarray([timex3(n, m) for n in nrange])
+        timelines4 += np.asarray([timex4(n, m) for n in nrange])
+    timelines1 /= iterations
+    timelines2 /= iterations
+    timelines3 /= iterations
+    timelines4 /= iterations
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2,2, figsize=(15,10))
     
     FM, = ax1.plot(nrange, timelines1[:, 0], label="Forward Mode")
@@ -126,6 +137,27 @@ def FMADEx1():
     expression = sin(x+y)*x
     conditions = {x: 1, y: 1}
     return forwardmodeAD(expression, conditions)
+
+
+def RMADEx2():
+    x = expressions.Symbol('x')
+    sin = expressions.Sin()
+    cos = expressions.Cos()
+    y = expressions.Symbol('y')
+    expression = np.array([sin(x+y)*x, cos(x)])
+    conditions = {x: 1, y: 1}
+    return reversemodeAD(expression, conditions)
+
+
+def FMADEx2():
+    x = expressions.Symbol('x')
+    sin = expressions.Sin()
+    cos = expressions.Cos()
+    y = expressions.Symbol('y')
+    expression = np.array([sin(x+y)*x, cos(x)])
+    conditions = {x: 1, y: 1}
+    return forwardmodeAD(expression, conditions)
+
 
 
 def example_nparray():
@@ -219,15 +251,83 @@ def Cluster_Graph():
     draw_cluster(expr1, expr2, "Cluster_1")
 
 
-# plottime(75)
+def func_nm(n, m):
+    x = [expressions.Symbol(f'x_{i}') for i in range(n)]
+    expression = np.array([])
+    for j in range(m):
+        for i in range(n):
+            if i == 0:
+                subexpr = j*x[i]**j
+                
+            else:
+                subexpr += j*x[i]**j
+                #newexpr = j*x[i]**j
+                #otherexpr = newexpr + 2*newexpr + newexpr**3
+                #subexpr += otherexpr + expressions.Sin(otherexpr) + expressions.Cos(otherexpr)
+        expression = np.append(expression, subexpr)
+    conditions = dict(zip(x, generatew(n, 1)))
+    return expression, conditions
 
-# print(RMADEx1())
 
-# print(FMADEx1())
+def arraytimeRM(n, m):
+    #conditions = np.asarray([[dict(zip(generatex(i+1), generatew(i+1, 2))) for i in range(n)] for j in range(m)])
+    arr = np.asarray([[timeRM(*func_nm(i+1, j+1)) for i in range(n)] for j in range(m)])
+    return arr
 
-# print(example_rm())
+def arraytimeFM(n, m):
+    #conditions = np.asarray([[dict(zip(generatex(i+1), generatew(i+1, 2))) for i in range(n)] for j in range(m)])
+    arr = np.asarray([[timeFM(*func_nm(i+1, j+1)) for i in range(n)] for j in range(m)])
+    return arr
 
-# print(example_nparray())
+def heatmap(n, m, iterations):
+    fig, (ax1, ax2) = plt.subplots(1, 2)
+    
+    #extent = [1, n, 1, m]
+    rmarr = 0
+    fmarr = 0
+    for i in range(iterations):
+        print(i)
+        rmarr += arraytimeRM(n, m)
+        fmarr += arraytimeFM(n, m)
+    rmarr /= iterations
+    fmarr /= iterations
+    
+    
+    RM = ax1.matshow(rmarr, cmap="hot", origin="lower", interpolation="nearest")
+    FM = ax2.matshow(fmarr, cmap="hot", origin="lower", interpolation="nearest")
+    
+    norm = colors.Normalize(vmin=min(np.min(rmarr), np.min(fmarr)),vmax=max(np.max(rmarr), np.max(fmarr)))
+    RM.set_norm(norm)
+    FM.set_norm(norm)
+    cbar = plt.colorbar(FM, ax=(ax1,ax2), location="bottom")
+    
+    ax1.set_ylabel("m: Number of outputs")
+    ax1.set_xlabel("n: Number of inputs")
+    ax2.set_xlabel("n: Number of inputs")
+    ax1.set_title("Reverse Mode")
+    ax2.set_title("Forward Mode")
+    cbar.ax.set_xlabel("Average time taken to compute derivative")
+    
+    fig.align_labels()
+    plt.savefig('images/Graph_HeatMapTimeDiff.pdf', bbox_inches='tight', pad_inches=0)
+
+    plt.show()
+
+# heatmap(20, 20, 20)
+
+# plottime(75, 1, 50)
+
+print(RMADEx1())
+
+print(FMADEx1())
+
+print(RMADEx2())
+
+print(FMADEx2())
+
+print(example_rm())
+
+print(example_nparray())
 
 # taylor_error_example()
 
@@ -240,7 +340,7 @@ def Cluster_Graph():
 def reproduce():
     RMADEx1()  # Unused: RM result on sin(x+y)*x x,y=1
     FMADEx1()  # Unused: FM result on sin(x+y)*x x,y=1
-    plottime(75)  # Plot for timedifference
+    plottime(75, 1, 50)  # Plot for timedifference (75 input, 1 deriv, 50 iter)
     example_rm()  # Result for RM algo test in 1D
     example_nparray()  # # Result for RM algo test with arrays
     taylor_error_example()  # Taylor error figure and result

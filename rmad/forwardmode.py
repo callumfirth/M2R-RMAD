@@ -4,12 +4,12 @@ from functools import singledispatch
 
 def forwardmodeAD(expr, conditions):
     """Visit an expression in post-order applying a function."""
-    adjoints = dict()
+    symbols = dict()
     for symbol in conditions.keys():
 
         # Returns stack of output expr (so works for arrays)
-        stack = []
         if isinstance(expr, np.ndarray):
+            stack = []
             for expression in expr:
                 stack.append(expression)
         else:
@@ -36,14 +36,14 @@ def forwardmodeAD(expr, conditions):
                 element.storedvalue = visited[element]
 
         #Returns adjoint of each expression in our expr (so works for arrays)
-        adjointlist = []
         if isinstance(expr, np.ndarray):
+            adjointlist = []
             for expression in expr:
                 adjointlist.append(expression.adjoint)
         else:
             adjointlist = expr.adjoint
-        adjoints[symbol] = adjointlist
-    return adjoints
+        symbols[symbol] = adjointlist
+    return symbols
 
 
 @singledispatch

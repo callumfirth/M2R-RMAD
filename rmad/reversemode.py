@@ -3,17 +3,14 @@ import numpy as np
 
 def reversemodeAD(expr, conditions):
     """Return dict of the derivatives of expr w.r.t symbols"""
-    symbols = dict()
     try:
         evalpostvisitor(expr, symbol_map=conditions)  # Forward traverse
     except ZeroDivisionError:  # Not currently used i dont think
         raise Exception("Function not valid at initial condition")
 
     if isinstance(expr, np.ndarray):
-        for symbol in conditions.keys():
-            symbols[symbol] = []
+        symbols = dict((symbol, []) for symbol in conditions)
         for expression in expr:
-            symbol.adjoint = 0
             adjointprevisitor(expression)  # Backwards traverse through the tree
             for symbol in conditions.keys():
                 symbols[symbol].append(symbol.adjoint)  # Store the adjoint values
@@ -21,6 +18,5 @@ def reversemodeAD(expr, conditions):
     else:
         adjointprevisitor(expr)  # Backwards traverse through the tree
         # For each symbol, return the dict of the repsective adjoint
-        for symbol in conditions.keys():
-            symbols[symbol] = symbol.adjoint
+        symbols = dict((symbol, symbol.adjoint) for symbol in conditions)
     return symbols
