@@ -36,7 +36,7 @@ def time_step(C, eval_points, dt=0.1, V=1, D=1):
     h = eval_points[1] - eval_points[0]
     A = first_deriv_matrix_maker(n, h)
     B = second_deriv_matrix_maker(n, h) # (I - dt V A + dt D B) = m
-    m = np.identity(n) - V*np.matmul(A, C)*dt + D*np.matmul(B, C)*dt
+    m = np.identity(n) + V*A*dt - D*B*dt
     return m
 
 
@@ -63,15 +63,18 @@ def over_time2(expr, size, numpoints, endtime, dt, V=1, D=1):
     gridpoints = np.linspace(0, size, numpoints)
     evalpostvisitor(expr, symbol_map={x: gridpoints})
     C = expr.storedvalue
-    C = np.append(C, np.zeros(4*numpoints))
-    gridpoints2 = np.linspace(0, size*5, 5*numpoints)
+    C = np.append(C, np.zeros(8*numpoints))
+    C = np.append(np.zeros(numpoints), C)
+    gridpoints2 = np.linspace(0, size*10, 10*numpoints)
     timepoints = np.arange(0, endtime, dt)
     values_over_time = [np.array(C)]
     fig, ax = plt.subplots()
-    for t in timepoints:
-        C = C + time_step(C, gridpoints2, V, D)*dt
+    ax.plot(gridpoints2, C)
+    for t in range(len(timepoints)):
+        m = time_step(C, gridpoints2, dt, V, D)
+        C = linalg.solve(m, C)
         values_over_time = np.append(values_over_time, C)
-        if t in np.arange(0, endtime, dt*100):
+        if t % 10 == 0:
             ax.plot(gridpoints2, C)
     plt.show()
     return values_over_time
@@ -87,6 +90,6 @@ def plot_graph(expr, size, numpoints, endtime, dt, V=1, D=1):
 x = expressions.Symbol('x')
 expr = expressions.Sin(x)**2
 
-print(over_time2(expr, size=np.pi, numpoints=100, endtime=2, dt=0.001, V=5, D=0.35))
+print(over_time2(expr, size=np.pi, numpoints=100, endtime=1, dt=0.01, V=10, D=5))
 
 #plot_graph(expr, size=np.pi, numpoints=100, endtime=2, dt=0.001, V=5, D=0.35)
