@@ -41,6 +41,16 @@
         "points": 1
       },
       {
+        "name": "evaluate",
+        "setup": "",
+        "run": "pytest tests/test_evaluate.py",
+        "input": "",
+        "output": "",
+        "comparison": "included",
+        "timeout": 1,
+        "points": 1
+      },
+      {
         "name": "flake8",
         "setup": "",
         "run": "flake8 --extend-exclude=object-oriented-programming",
