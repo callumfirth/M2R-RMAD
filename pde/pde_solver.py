@@ -71,9 +71,9 @@ def over_time2(expr, size, numpoints, endtime, dt, V=1, D=1):
     fig, ax = plt.subplots()
     ax.plot(gridpoints2, C)
     for t in range(len(timepoints)):
+        values_over_time = np.append(values_over_time, C)
         m = time_step(C, gridpoints2, dt, V, D)
         C = linalg.solve(m, C)
-        values_over_time = np.append(values_over_time, C)
         if t % 10 == 0:
             ax.plot(gridpoints2, C)
     plt.show()
