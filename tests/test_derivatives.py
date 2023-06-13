@@ -23,7 +23,7 @@ def test_imports():
 
 
 @pytest.mark.parametrize("xval,yval", [(1, 1), (np.pi, np.pi),
-                                       (randint(0, 100), randint(0, 100))])
+                                       (randint(-99, 100), randint(-99, 100))])
 def test_RMADEx1(xval, yval):
     x = expressions.Symbol('x')
     sin = expressions.Sin()
@@ -37,7 +37,7 @@ def test_RMADEx1(xval, yval):
 
 
 @pytest.mark.parametrize("xval,yval", [(1, 1), (np.pi, np.pi),
-                                       (randint(0, 100), randint(0, 100))])
+                                       (randint(-99, 100), randint(-99, 100))])
 def test_FMADEx1(xval, yval):
     x = expressions.Symbol('x')
     sin = expressions.Sin()
