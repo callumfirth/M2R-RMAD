@@ -55,4 +55,3 @@ conditions = {x: 1, y: 1}
 eps = [10**(-(i+1)) for i in range(10)]
 
 print(convergence_table(expr, conditions, eps, var=x))
-
