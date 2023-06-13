@@ -41,8 +41,6 @@ def convergence_table(expr, condition, eps, **kwargs):
     points = [f"{i+1}-{i+2}" for i in range(len(eps)-1)]
     d = dict(zip(points, grads))
     f = open("images\\rate_of_convergence.txt", 'w')
-    f.write("{:<8} {:<15}".format('Point','Gradient'))
-    f.write("\n")
     for point, grad in d.items():
         f.write("{:<8} {:<15}".format(point, grad))
         f.write("\n")
