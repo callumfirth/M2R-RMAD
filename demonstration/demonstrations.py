@@ -281,7 +281,7 @@ def arraytimeFM(n, m):
 
 def heatmap(n, m, iterations):
     fig, (ax1, ax2) = plt.subplots(1, 2)
-    
+
     #extent = [1, n, 1, m]
     rmarr = 0
     fmarr = 0
@@ -291,29 +291,29 @@ def heatmap(n, m, iterations):
         fmarr += arraytimeFM(n, m)
     rmarr /= iterations
     fmarr /= iterations
-    
-    
+
+
     RM = ax1.matshow(rmarr, cmap="hot", origin="lower", interpolation="nearest")
     FM = ax2.matshow(fmarr, cmap="hot", origin="lower", interpolation="nearest")
-    
+
     norm = colors.Normalize(vmin=min(np.min(rmarr), np.min(fmarr)),vmax=max(np.max(rmarr), np.max(fmarr)))
     RM.set_norm(norm)
     FM.set_norm(norm)
     cbar = plt.colorbar(FM, ax=(ax1,ax2), location="bottom")
-    
+
     ax1.set_ylabel("m: Number of outputs")
     ax1.set_xlabel("n: Number of inputs")
     ax2.set_xlabel("n: Number of inputs")
     ax1.set_title("Reverse Mode")
     ax2.set_title("Forward Mode")
     cbar.ax.set_xlabel("Average time taken to compute derivative")
-    
+
     fig.align_labels()
     plt.savefig('images/Graph_HeatMapTimeDiff.pdf', bbox_inches='tight', pad_inches=0)
 
     plt.show()
 
-# heatmap(20, 20, 20)
+heatmap(25, 25, 10)
 
 # plottime(75, 1, 50)
 
