@@ -19,6 +19,9 @@
 
 \maketitle
 
+\tableofcontents
+\newpage
+
 \section{Introduction}
 
 When solving non-linear systems one method is Newton's method. Say the system is defined by
@@ -241,10 +244,10 @@ If we consider an expression represented by a DAG, then it is very easy to apply
 
 This gives us an idea of why forward mode has a computational cost proportional to $n$. As we require to have $n$ forward passes to compute the derivative. Similary we can see that reverse mode has a computational cost proportional to $m$. As we require to have $m$ reverse passes into order to calculate the derivative. Here we refer to a forward pass as the postorder traversal on a expression and a reverse pass as the preorder traversal on a expression.
 
-For the next two sections we will be considering the equation given by
+For the examples below we will be considering the second output from the function given in (\ref{example1}).
 \begin{equation}
     \label{example2}
-    f(x,y) = \sin(yx^2) + e^{x^2}
+    F_2(x,y) = \sin(x^2y) + e^{x^2}
 \end{equation}
 
 
@@ -289,10 +292,10 @@ We then traverse the graph in postorder traversal, computing the value of each n
         $v_{-1}$ & $\equiv$ & $x$ & $\Bar{v}_{-1}$ & $=$ & $\Bar{v_2}\frac{\partial{v_2}}{\partial{v_{-1}}}$ & $=$ & $\Bar{v_2}v_1 {v_{-1}}^{(v_{1}-1)}$\\
         $v_{0}$ & $\equiv$ & $y$ & $\Bar{v}_{0}$ & $=$ & $\Bar{v_3}\frac{\partial{v_3}}{\partial{v_0}}$ & $=$ & $\Bar{v_3}v_2$\\
         \hline
-        $v_{1}$ & $=$ & $2$ & $\Bar{v}_{1}$ & $=$ & $\Bar{v_2}\frac{\partial{v_2}}{\partial{v_1}}$ & $=$ & $\Bar{v}_{2}{v_{-1}}^{v_{1}}ln(v_{-1})$\\
+        $v_{1}$ & $=$ & $2$ & $\Bar{v}_{1}$ & $=$ & $\Bar{v_2}\frac{\partial{v_2}}{\partial{v_1}}$ & $=$ & $\Bar{v}_{2}{v_{-1}}^{v_{1}}\log(v_{-1})$\\
         $v_{2}$ & $=$ & ${v_{-1}}^{v_{1}}$ & $\Bar{v}_{2}$ & $=$ & $\Bar{v_3}\frac{\partial{v_3}}{\partial{v_2}} + \Bar{v_5}\frac{\partial{v_5}}{\partial{v_2}}$ & $=$ & $\Bar{v}_{3}v_0 + \Bar{v_5}e^{v_2}$\\
-        $v_{3}$ & $=$ & ${v_{0}}*{v_{2}}$ & $\Bar{v}_{3}$ & $=$ & $\Bar{v_4}\frac{\partial{v_4}}{\partial{v_3}}$ & $=$ & $\Bar{v_4}cos(v_2)$\\
-        $v_{4}$ & $=$ & $sin(v_3)$ & $\Bar{v}_{4}$ & $=$ & $\Bar{v_6}\frac{\partial{v_6}}{\partial{v_4}}$ & $=$ & $\Bar{v_6}$\\
+        $v_{3}$ & $=$ & ${v_{0}}*{v_{2}}$ & $\Bar{v}_{3}$ & $=$ & $\Bar{v_4}\frac{\partial{v_4}}{\partial{v_3}}$ & $=$ & $\Bar{v_4}\cos(v_2)$\\
+        $v_{4}$ & $=$ & $\sin(v_3)$ & $\Bar{v}_{4}$ & $=$ & $\Bar{v_6}\frac{\partial{v_6}}{\partial{v_4}}$ & $=$ & $\Bar{v_6}$\\
         $v_{5}$ & $=$ & $e^{v_2}$ & $\Bar{v}_{5}$ & $=$ & $\Bar{v_6}\frac{\partial{v_6}}{\partial{v_5}}$ & $=$ & $\Bar{v_6}$\\
         \hline
         $v_{6}$ & $=$ & $v_5 + v_4$ & $\Bar{v}_{6}$ & $=$ & $\frac{\partial{v_6}}{\partial{v_6}}$ & $=$ & $1$\\
@@ -312,10 +315,10 @@ We then traverse the graph in postorder traversal, computing the value of each n
         $v_{1}$ & $\equiv$ & $2$ & $=$ & 2 & $=$ & 2\\
         $v_{2}$ & $\equiv$ & ${v_{-1}}^{v_{1}}$ & $=$ & $ 2^2$ & $=$ & $4$\\
         $v_{3}$ & $\equiv$ & $v_0 * v_2$ & $=$ & $ 2 * 4$ & $=$ & $8$\\
-        $v_{4}$ & $\equiv$ & $sin(v_3)$ & $=$ & $sin(8)$ & $\approx$ & $0.9894$\\
+        $v_{4}$ & $\equiv$ & $\sin(v_3)$ & $=$ & $\sin(8)$ & $\approx$ & $0.9894$\\
         $v_{5}$ & $\equiv$ & $e^{v_2}$ & $=$ & $ e^4$ & $\approx$ & $54.5982$\\
         \hline
-        $v_{6}$ & $\equiv$ & $v_5 + v_4$ & $=$ & $e^4 + sin(8)$ & $\approx$ & $55.5875$\\
+        $v_{6}$ & $\equiv$ & $v_5 + v_4$ & $=$ & $e^4 + \sin(8)$ & $\approx$ & $55.5875$\\
         \hline
     \end{tabular}
     \caption{Values of Figure \ref{fig:DAGgraph} After Forward Pass}
@@ -327,12 +330,12 @@ We then traverse the graph in postorder traversal, computing the value of each n
     \centering
     \begin{tabular}{|lclllll|}
         \hline
-        $\Bar{v}_{-1}$ & $=$ & $\Bar{v_2}v_1 {v_{-1}}^{(v_{1}-1)}$ & $=$ & $(2cos(8)+e^4) \cdot 2 \cdot 2^{2-1} = 8cos(8)+4e^4$ & $\approx$ & $217.2286$\\
-        $\Bar{v}_{0}$ & $=$ & $\Bar{v_3}v_2$ & $=$ & $cos(8)\cdot4 = 4cos(8)$ & $\approx$ & $-0.5820$\\
+        $\Bar{v}_{-1}$ & $=$ & $\Bar{v_2}v_1 {v_{-1}}^{(v_{1}-1)}$ & $=$ & $(2\cos(8)+e^4) \cdot 2 \cdot 2^{2-1} = 8\cos(8)+4e^4$ & $\approx$ & $217.2286$\\
+        $\Bar{v}_{0}$ & $=$ & $\Bar{v_3}v_2$ & $=$ & $\cos(8)\cdot4 = 4\cos(8)$ & $\approx$ & $-0.5820$\\
         \hline
-        $\Bar{v}_{1}$ & $=$ & $\Bar{v}_{2}{v_{-1}}^{v_{1}}ln(v_{-1})$ & $=$ & $(2cos(8)+e^4) \cdot 2^2 \cdot ln(2) = 8cos(8)ln(2) +4e^4ln(2)$ & $\approx$ & $63.1932$\\
-        $\Bar{v}_{2}$ & $=$ & $\Bar{v}_{3}v_0 + \Bar{v_5}e^{v_2}$ & $=$ & $cos(8) \cdot 2 + 1 \cdot e^{4} = 2cos(8)+e^4$ & $\approx$ & $54.3071$\\
-        $\Bar{v}_{3}$ & $=$ & $\Bar{v_4}cos(v_3)$ & $=$ & $1 \cdot cos(8) = cos(8)$ & $\approx$ & $-0.1455$\\
+        $\Bar{v}_{1}$ & $=$ & $\Bar{v}_{2}{v_{-1}}^{v_{1}}\log(v_{-1})$ & $=$ & $(2\cos(8)+e^4) \cdot 2^2 \cdot \log(2) = 8\cos(8)\log(2) +4e^4\log(2)$ & $\approx$ & $63.1932$\\
+        $\Bar{v}_{2}$ & $=$ & $\Bar{v}_{3}v_0 + \Bar{v_5}e^{v_2}$ & $=$ & $\cos(8) \cdot 2 + 1 \cdot e^{4} = 2\cos(8)+e^4$ & $\approx$ & $54.3071$\\
+        $\Bar{v}_{3}$ & $=$ & $\Bar{v_4}\cos(v_3)$ & $=$ & $1 \cdot \cos(8) = \cos(8)$ & $\approx$ & $-0.1455$\\
         $\Bar{v}_{4}$ & $=$ & $\Bar{v_6}$ & $=$ & $1$ & $=$ & $1$\\
         $\Bar{v}_{5}$ & $=$ & $\Bar{v_6}$ & $=$ & $1$ & $=$ & $1$\\
         \hline
@@ -387,12 +390,12 @@ Now that we have done a postorder traversal of our expression, each element cont
         Add() & 1 & 1 \\
         Sub() & 1 & -1 \\
         Mul() & $w_2$ & $w_1$ \\
-        Div() & $1/w_2$ & $\frac{-w_1}{{w_2}^2}$ \\
+        Div() & $1/w_2$ & $-w_1/w_2^2$ \\
         Pow() & $w_2{w_1}^{(w_2-1)}$ & ${w_1}^{w_2}\log(w_1)$ \\
         Sin() & $\cos(w_1)$ &  \\
         Cos() & $-\sin(w_1)$ &  \\
         Exp() & $\exp(w_1)$ &  \\
-        Log() & $\frac{1}{w_1}$ &  \\
+        Log() & $1/w_1$ &  \\
         \hline
     \end{tabular}
     \caption{Output of \verb|adjoint\_evaluate(element)|}
@@ -435,7 +438,8 @@ Now we can test our implementation on the previous example given in Equation \re
     exp = expressions.Exp()
     x = expressions.Symbol('x')
     y = expressions.Symbol('y')
-    expression = sin(y * x**2) + exp(x**2)
+    x2 = x**2
+    expression = sin(y * x2) + exp(x2)
     conditions = {x:2, y:2}
     reversemodeAD(expression, conditions)
     > {'x': 217.22859986210804, 'y': -0.5820001352344542}
@@ -464,10 +468,15 @@ When we compute this we get a value for $O(\epsilon^2)$ which as $\epsilon \to 0
 When checking if our result is correct we need to calculate the rate of convergence, since we are finding $O(\epsilon^2)$ we expect our convergence to be at the rate of $\epsilon^2$. To check our rate of convergence we use the formula:
 
 \begin{equation}
-    \frac{\ln{\frac{\|u_1 - u\|}{\|u_2 - u\|}}}{\ln{\frac{|h_1|}{|h_2|}}} = \frac{\ln\|u_1 - u\| - \ln\|u_2 - u\|}{\ln|h_1| - |h_2|}
+    \frac{\log{\frac{\|u_1 - u\|}{\|u_2 - u\|}}}{\log{\frac{|h_1|}{|h_2|}}} = \frac{\log\|u_1 - u\| - \log\|u_2 - u\|}{\log|h_1| - |h_2|}
 \end{equation}
 
-Where $u_1, u_2$ are our approximations using $F(x + \epsilon) - F(x)$, $u$ is our calculated derivative using Reverse Mode AD, and $h_1, h_2$ are the corresponding $\epsilon$ for $u_1, u_2$. This value should give us the power of $\epsilon$ to which we are converging at. In our case we got: \input{images/rate_of_convergence.txt} which is significantly close enough to 2 to tell us we are converging at a rate of $\epsilon^2$.
+Where $u_1, u_2$ are our approximations using $F(x + \epsilon) - F(x)$, $u$ is our calculated derivative using Reverse Mode AD, and $h_1, h_2$ are the corresponding $\epsilon$ for $u_1, u_2$. This value should give us the power of $\epsilon$ to which we are converging at. In our case we got:
+
+\beigin{}
+\input{images/rate_of_convergence.txt}
+
+which is significantly close enough to 2 to tell us we are converging at a rate of $\epsilon^2$.
 
 
 
@@ -513,7 +522,9 @@ Now we can compute the adjoints of our DAG in Figure \ref{fig:DAGgraph2} for Equ
     x = expressions.Symbol('x')
     y = expressions.Symbol('y')
     z = expressions.Symbol('z')
-    expression = np.array([log(z) * exp(x**2), exp(x**2) + sin(x**2 * y)])
+    x2 = x**2
+    expx2 = exp(x2)
+    expression = np.array([log(z) * expx2, expx2 + sin(x2 * y)])
     conditions = {x:1, y:np.pi, z:1}
     reversemodeAD(expression, conditions)
     > {'x': [0.0, -0.846621650261496], 'y': [0, -1.0], 'z': [2.718281828459045, 0]}
@@ -526,7 +537,7 @@ Which is what we would expect.
 
 \section{Difference in Runtime}
 
-Lets say we want to plot the time taken to compute various functions of $n$ unique input variables, as seen in Equation \ref{TimeFunc}. We can compare the difference in runtime between our Forward Mode AD and Reverse Mode AD. To give us a more robust plot we compute 1000 different derivatives at each stage. The results of this test is seen in Figure \ref{fig:TimeDiff}
+Lets say we want to plot the time taken to compute various functions of $n$ unique input variables, as seen in Equation \ref{TimeFunc}. We can compare the difference in runtime between our Forward Mode AD and Reverse Mode AD. To give us a more robust plot we compute the average time taken over many iterations. The results of this test is seen in Figure \ref{fig:TimeDiff}
 \begin{equation} 
     \label{TimeFunc}
     \begin{split}
@@ -537,17 +548,40 @@ Lets say we want to plot the time taken to compute various functions of $n$ uniq
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=15cm]{images/Graph_TimeDiff.pdf}
-    \caption{Time taken to compute 1000 derivatives of the functions in Equation \ref{TimeFunc} varying the number of input parameters}
+    \includegraphics[width=15cm]{images/Graph_TimeDiff2.pdf}
+    \caption{Average time taken to compute the derivatives of the functions in Equation \ref{TimeFunc} 50 times varying the number of input parameters}
     \label{fig:TimeDiff}
 \end{figure}
 
 As expected, Forward Mode automatic differentiation grows around linearly on the number of unique input variables that we have. This further proves the importance of using Reverse Mode automatic differentiation when working with systems with large amounts of variables like neural networks.
 
+We can also see below the heatmap of the runtime when computing the derivative of a function, $f: \mathbb{R}^n \rightarrow \mathbb{R}^m$ listed in Equation \ref{func_nm}
+
+\begin{equation}
+    f \begin{pmatrix}
+        x_1 \\ \vdots \\ x_i \\ \vdots \\ x_n
+    \end{pmatrix} = \begin{pmatrix}
+        \sum_{i=1}^n x_i \\ \vdots \\ \sum_{i=1}^n j \cdot x_{i}^{j} \\ \vdots \\ \sum_{i=1}^n m \cdot x_{i}^{m}
+    \end{pmatrix}
+    \label{func_nm}
+\end{equation}
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics{images/Graph_HeatmapTimeDiff.pdf}
+    \caption{The heatmap of average time taken to compute the derivative of a function listed in Equation \ref{func_nm}}
+    \label{fig:heatmap}
+\end{figure}
+
+Here we can see that for a function with a low number of input parameters and high number of output variables we may prefer to use forward mode AD, however for functions with a high amount of input variables and a low number of output variables we will much prefer to use reverse mode AD. We can also see that reverse mode AD stays at low cost throughout compared to forward mode which blows up quickly with each increase in input/output variables
+
+
+
 
 
 \section{Applications}
-
+\todo{Hello}
 \subsection{Advection Diffusion Equation}
 
 Consider the simplified 1 dimensional advection-diffusion equation given by Equation \ref{AdvectionDiffusion} where we are measuring the concentration of some liquid over time where we also account for velocity and diffusion.
@@ -557,7 +591,16 @@ Consider the simplified 1 dimensional advection-diffusion equation given by Equa
     \frac{\partial C}{\partial t} = - V\frac{\partial C}{\partial x} + D\frac{\partial^2 C}{\partial x^2}
 \end{equation}
 
+\subsubection{Implementation}
 
+\begin{figure}
+    \centering
+    \includegraphics{Figure_1_ODE.pdf}
+    \caption{Plot of Equation \ref{AdvectionDiffusion} with V=5, D=0.35, plotting from t=0 to t=2 at timesteps 0.1}
+    \label{fig:ODE}
+\end{figure}
+
+\newpage
 
 \bibliography{thebibliography}
 
