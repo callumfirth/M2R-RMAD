@@ -21,16 +21,6 @@
         "points": null
       },
       {
-        "name": "setup-course-repo",
-        "setup": "git clone https://github.com/object-oriented-python/object-oriented-programming.git",
-        "run": "python -m pip install object-oriented-programming/",
-        "input": "",
-        "output": "",
-        "comparison": "included",
-        "timeout": 1,
-        "points": null
-      },
-      {
         "name": "derivatives",
         "setup": "",
         "run": "pytest tests/test_derivatives.py",
