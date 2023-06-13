@@ -45,7 +45,6 @@ def adjointprevisitor(expr, fn_adjoint=1, **kwargs):
     fn_parent: float
         The adjoint value of the parent node of expr
     """
-
     # Set the adjoint of the parent node (initially this is the seed = 1)
     expr.adjoint = fn_adjoint
     # Then visit the children of the parent node and set their adjoints

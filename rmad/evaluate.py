@@ -97,7 +97,7 @@ def _closeto0(value):
 @singledispatch
 def adjoint_evaluate(expr, *o, **kwargs):
     """
-    Returns adjoint of the tree.
+    Return adjoint of the tree.
 
     Return the adjoint, of the operands of an expression node.
     This is similar to the partial derivative of the expression
