@@ -338,13 +338,13 @@ def heatmap(n, m, iterations):
 
 # plottime(75, 1, 50)
 
-# print(RMADEx1())
+# print(rmx1())
 
-# print(FMADEx1())
+# print(fmx1())
 
-# print(RMADEx2())
+# print(rmx2())
 
-# print(FMADEx2())
+# print(fmx2())
 
 # print(example_rm())
 
@@ -352,9 +352,9 @@ def heatmap(n, m, iterations):
 
 # taylor_error_example()
 
-# DAG_example1()
+# dag_example1()
 
-# DAG_example2()
+# dag_example2()
 
 # Cluster_Graph()
 

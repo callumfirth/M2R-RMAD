@@ -16,7 +16,7 @@ def exprpostvisitor(expr, graph, node="v", **kwargs):
     while stack:
         element = stack.pop()
         unvisited_children = []
-        for operand in element.operands:
+        for operand in reversed(element.operands):
             if operand not in visited:
                 unvisited_children.append(operand)
         if unvisited_children:
