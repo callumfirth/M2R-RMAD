@@ -6,7 +6,7 @@ from pde.pde_solver import initial_C
 import rmad.expressions as expressions
 from rmad.reversemode import reversemodeAD
 from rmad.forwardmode import forwardmodeAD
-from demonstration.taylor_error import taylor_error, taylor_error_plot
+from demonstration.taylor_error import taylor_error, taylor_error_plot, convergence_table
 from demonstration.graph_drawer import draw_expression, draw_cluster
 from rmad.traversal import evalpostvisitor
 from pde.pde_solver import loop
@@ -378,11 +378,33 @@ def exampleforshow3():
     return reversemodeAD(expr, conditions)
 
 #print(exampleforshow())
-print(exampleforshow2())
+#print(exampleforshow2())
 #print(exampleforshow3())
 # plotpde()
 
-#print(pde1())
+
+'''numpoints = 1000
+size = 10*np.pi
+func = lambda x: np.sin(x)**2 if np.pi < x < 2*np.pi else 0.0
+
+C0 = initial_C(func, size, numpoints)
+
+pde = expressions.AdvDif(C0, D=5, V=10, dt=0.01, size=np.pi)
+v = expressions.Symbol('v')
+e = 100
+expr2 = pde(v)
+conditions = {v: C0}'''
+eps = [10**(-(i+1)) for i in range(10)]
+
+x = expressions.Symbol('x')
+y = expressions.Symbol('y')
+z = expressions.Symbol('z')
+x2 = x**2
+expx2 = exp(x2)
+expression = np.asarray([log(z)*expx2, expx2+sin(x2 * y)])
+conditions = {x: 1, y: np.pi, z: 1}
+
+#taylor_error_plot(expression, conditions, eps, var=x)
 
 
 def ex222():
