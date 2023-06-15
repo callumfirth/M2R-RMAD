@@ -1,7 +1,8 @@
 from functools import singledispatch
 import rmad.expressions as expressions
 import numpy as np
-
+from pde.pde_solver import solve
+from pde.pde_solver import time_step
 
 @singledispatch
 def evaluate(expr, *o, **kwargs):
@@ -86,6 +87,17 @@ def _(expr, *o, **kwargs):
     return np.log(o[0])
 
 
+@evaluate.register(expressions.AdvDif)
+def _(expr, *o, **kwargs):
+    V = expr.V
+    D = expr.D
+    dt = expr.dt
+    size = expr.size
+    numpoints = len(o[0])
+    gridpoints = np.linspace(0, 10*size, numpoints)
+    return solve(o[0], gridpoints, dt, V, D)
+
+
 def _closeto0(value):
     if isinstance(value, np.ndarray):
         value[np.isclose(value, 0, atol=1e-12)] = 0
@@ -167,3 +179,14 @@ def _(expr, *o, **kwargs):
 @adjoint_evaluate.register(expressions.Log)
 def _(expr, *o, **kwargs):
     return [1/o[0]]
+
+@adjoint_evaluate.register(expressions.AdvDif)
+def _(expr, *o, **kwargs):
+    V = expr.V
+    D = expr.D
+    dt = expr.dt
+    size = expr.size
+    numpoints = len(o[0])
+    gridpoints = np.linspace(0, 10*size, numpoints)
+    M = time_step(o[0], gridpoints, dt, V, D)
+    return [np.linalg.solve(M.T, o[0])]

@@ -1,6 +1,6 @@
 """Module to represent mathematical expressions."""
 from numbers import Number as Num
-
+import numpy as np
 
 class Expression:
     """Main expression class."""
@@ -197,3 +197,15 @@ class Log(Function):
 
     symbol = "log"
     precedence = 4
+
+
+class AdvDif(Function):
+
+    """AdvectionDiffusion PDE."""
+    symbol = "AdvDif"
+    precedence = 4
+    
+    D = 5
+    V = 10
+    dt = 0.01
+    size = np.pi
