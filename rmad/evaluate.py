@@ -128,57 +128,63 @@ def adjoint_evaluate(expr, *o, **kwargs):
 
 @adjoint_evaluate.register(expressions.Number)
 def _(expr, *o, **kwargs):
-    return [1]  # Essentially redundant as numbers have no operands
+    return [1 * expr.adjoint]  # Essentially redundant as numbers have no operands
 
 
 @adjoint_evaluate.register(expressions.Symbol)
 def _(expr, *o, **kwargs):
-    return [1]  # Essentially redundant as symbols have no operands
+    return [1 * expr.adjoint]  # Essentially redundant as symbols have no operands
 
 
 @adjoint_evaluate.register(expressions.Add)
 def _(expr, *o, **kwargs):
-    return [1, 1]
+    return [1 * expr.adjoint,
+            1 * expr.adjoint]
 
 
 @adjoint_evaluate.register(expressions.Sub)
 def _(expr, *o, **kwargs):
-    return [1, -1]
+    return [1 * expr.adjoint,
+            -1 * expr.adjoint]
 
 
 @adjoint_evaluate.register(expressions.Mul)
 def _(expr, *o, **kwargs):
-    return [o[1], o[0]]
+    return [o[1] * expr.adjoint,
+            o[0] * expr.adjoint]
 
 
 @adjoint_evaluate.register(expressions.Div)
 def _(expr, *o, **kwargs):
-    return [1/o[1], -o[0]/o[1]**2]
+    return [(1/o[1]) * expr.adjoint,
+            (-o[0]/o[1]**2) * expr.adjoint]
 
 
 @adjoint_evaluate.register(expressions.Pow)
 def _(expr, *o, **kwargs):
-    return [o[1] * o[0]**(o[1]-1), o[0]**o[1] * np.log(o[0])]
+    return [(o[1] * o[0]**(o[1]-1)) * expr.adjoint,
+            (o[0]**o[1] * np.log(o[0])) * expr.adjoint]
 
 
 @adjoint_evaluate.register(expressions.Sin)
 def _(expr, *o, **kwargs):
-    return [np.cos(o[0])]
+    return [np.cos(o[0]) * expr.adjoint]
 
 
 @adjoint_evaluate.register(expressions.Cos)
 def _(expr, *o, **kwargs):
-    return [-np.sin(o[0])]
+    return [-np.sin(o[0]) * expr.adjoint]
 
 
 @adjoint_evaluate.register(expressions.Exp)
 def _(expr, *o, **kwargs):
-    return [np.exp(o[0])]
+    return [np.exp(o[0]) * expr.adjoint]
 
 
 @adjoint_evaluate.register(expressions.Log)
 def _(expr, *o, **kwargs):
-    return [1/o[0]]
+    return [1/o[0] * expr.adjoint]
+
 
 @adjoint_evaluate.register(expressions.AdvDif)
 def _(expr, *o, **kwargs):
@@ -189,4 +195,4 @@ def _(expr, *o, **kwargs):
     numpoints = len(o[0])
     gridpoints = np.linspace(0, 10*size, numpoints)
     M = time_step(gridpoints, dt, V, D)
-    return [np.linalg.solve(M.T, o[0])]
+    return [np.linalg.solve(M.T, expr.adjoint)]
