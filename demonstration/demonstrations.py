@@ -201,6 +201,7 @@ def taylor_error_example():
     try:
         fig.savefig('images\\taylor_error_1.pdf', bbox_inches='tight',
                     pad_inches=0)
+        fig.savefig('images\\taylor_error_1.png')
     except FileNotFoundError:
         raise FileNotFoundError(
             "Taylor_Error_Example: Could not save figure: \
@@ -380,6 +381,8 @@ def pde1():
 def plotpde():
     over_time_plot(size=np.pi, numpoints=100, endtime=1.5, dt=0.01, V=10, D=5)
 
+
+taylor_error_example()
 
 # plotpde()
 
