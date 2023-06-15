@@ -1,9 +1,10 @@
 \documentclass{beamer}
 %Information to be included in the title page:
 \title{Reverse Mode Algorithmic Differentiation}
-\author{cf1021, sam221, aml21, mf621}
-\institute{Imperial College London}
-\date{}
+\author[Group 18]{Callum Firth, Maximilian Fricker, Alexander Le Marchant, Samuel Murdoch}
+\institute[Imperial]{Imperial College London}
+\date{20th June 2023}
+\usetheme{Madrid}
 
 \begin{document}
 
@@ -34,12 +35,183 @@
 % Mention theory why we care about the neural network stuff
 % Talk about neural networks maybe application on backpropagation, reducing loss func, optimising weights etc
 
+\begin{frame}{Table of Contents}
+    \frametitle{Table of Contents}
+    \tableofcontents
+\end{frame}
+
+\section{Introduction}
+
+\begin{frame}{Why are Derivatives important?}
+\frametitle{Why are Derivatives Important?}
+Motivation, neural networks, gradient descent
+\end{frame}
+
+\begin{frame}{Types of Differentiation}
+\frametitle{Types of differentiation}
+Three common ways to differentiate a function on a computer
+\begin{itemize}
+    \item Finite Differences
+    \item Symbolic Differentiation
+    \item Algorithmic Differentiation (AD)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Finite Differences}
+    \begin{itemize}
+        \item Uses a truncated Taylor expansion
+        \item For $F: \mathbb{R}^n \longrightarrow \mathbb{R}^m$
+            \begin{equation*}
+            \frac{\partial F_i (p)}{\partial x_j} \approx \frac{F_i(p+he_j) - F_i(p)}{h}
+            \end{equation*}
+        \item Returns \alert{approximate} value
+        \item Expensive to compute Jacobian
+            \begin{itemize}
+                \item $\mathcal{O}(n \mu)$, $\mu$ is order of $F$
+            \end{itemize}
+    \end{itemize}  
+\end{frame}
+
+\begin{frame}{Symbolic Differentiation}
+    \begin{itemize}
+        \item Uses computer algebra packages to take derivatives
+        \item Once solution found any value can be plugged in
+        \item Returns \alert{exact} value
+        \item Forward mode more expensive than reverse mode
+            \begin{itemize}
+                \item $\mathcal{O}(n \mu)$
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Algorithmic Differentiation}
+    \begin{itemize}
+        \item Two types
+            \begin{itemize}
+                \item Forward mode
+                \item Reverse mode - we will focus on reverse mode
+            \end{itemize}
+        \item Application of chain rule
+        \item Returns \alert{exact} value
+        \item Low computational costs
+            \begin{itemize}
+                \item $\mathcal{O}(n \mu)$ with forward mode
+                \item $\mathcal{O}(m \mu)$ with reverse mode
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\section{Reverse Mode Algorithmic Differentiation}
 
 
+\begin{frame}{Reverse Mode AD}
+    \begin{itemize}
+        \item Output variable to be differentiated is fixed
+        \item Quantity of interest is the \alert{adjoint}, $\Bar{v}_i$
+        \item Start at output variables and end at input variables
+    \end{itemize}
+    \begin{equation*}
+        \Bar{v}_j = \sum_{i \succ j} \left\{ \Bar{v}_i \cdot \frac{\partial v_i}{\partial v_j} \right\} \quad i \succ j  \text{ if } v_i \text{ depends directly on } v_j
+    \end{equation*} 
+\end{frame}
+
+\begin{frame}{Expressions as Trees}
+\frametitle{Expressions as Trees}
+Simple maybe 3 input 1 output
+\end{frame}
+
+\begin{frame}{Expressions as Directed Acylic Graphs}
+    \frametitle{Expressions as Directed Acylic Graphs}
+\end{frame}
+
+\begin{frame}{Reverse Mode Algorithmic Differentiation on DAGs/Trees}
+\frametitle{Reverse Mode Algorithmic Differentiation on DAGs/Trees}
+On DAGs
+\end{frame}
+
+\begin{frame}{Adjoints of Standard Functions}
+    \begin{table}[h!]
+    \centering
+    \begin{tabular}{|lll|}
+        \hline
+        Function & $\Bar{x}$ & $\Bar{y}$ \\
+        \hline
+        $x+y$ & $1$ & $1$ \\
+        $x-y$ & $1$ & $-1$ \\
+        $x \times y$ & $y$ & $x$ \\
+        $x / y$ & $1/y$ & $-x/y^2$ \\
+        $x^y$ & $y{x}^{(y-1)}$ & ${x}^{y}\log(x)$ \\
+        $\sin(x)$ & $\cos(x)$ &  \\
+        $\cos(x)$ & $-\sin(x)$ &  \\
+        $\exp(x)$ & $\exp(x)$ &  \\
+        $\log(x)$ & $1/x$ &  \\
+        \hline
+    \end{tabular}
+    \label{tab:Adjelementals}
+    \end{table}
+\end{frame}
+
+\begin{frame}{Forward Pass}
+\frametitle{Forward Pass}
+DAG gif forward pass
+\end{frame}
+
+\begin{frame}{Reverse Pass}
+\frametitle{Reverse Pass}
+DAG gif reverse pass
+\end{frame}
+
+\begin{frame}{Time Complexity}
+\frametitle{??Time complexity?? demo??}
+Difference in FM and RM?
+\end{frame}
+
+\begin{frame}{Demo}
+\frametitle{Demo 1}
+Demo that what we have works
+\end{frame}
+
+\begin{frame}{Numpy Demo}
+\frametitle{What if we want more than 1 output}
+Show new DAG
+Numpy arr implemenentation talk
+\end{frame}
 
 \begin{frame}
-\frametitle{Sample frame title}
-This is some text in the first frame. This is some text in the first frame. This is some text in the first frame.
+\frametitle{??Time complexity?? Demo??}
+Time difference in FM and RM
+\end{frame}
+
+\begin{frame}{Further Applications}
+\frametitle{Further Applications}
+If we want to solve adjoint of PDE
+\end{frame}
+
+\begin{frame}
+\frametitle{Advection Diffusion Equation}
+Talk about initial setup
+\end{frame}
+
+\begin{frame}
+\frametitle{More: Advection diffusion equation}
+Maybe show gif or picture of the graph over time
+This show implementations
+How do we know we are correct
+\end{frame}
+
+\begin{frame}
+\frametitle{Adjoint of this}
+Now the adjoint of this
+\end{frame}
+
+\begin{frame}
+\frametitle{Demo}
+How does this work with our code/work
+\end{frame}
+
+\begin{frame}
+\frametitle{??Conclusion??}
+How does this work with our code/work
 \end{frame}
 
 \end{document}
