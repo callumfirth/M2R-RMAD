@@ -177,6 +177,16 @@ def example_rm():
     conditions = {x: 2, y: 2}
     return reversemodeAD(expression, conditions)
 
+def taylor_test_test():
+    x = expressions.Symbol('x')
+    x2 = x**2
+    expression = sin(x2) + (x2)
+    w = np.array([1, 2, 3, 4])
+    conditions = {x: w}
+    eps = [10**(-(i+1)) for i in range(10)]
+    return taylor_error_plot(expression, conditions, eps, var=x)
+
+#print(taylor_test_test())
 
 def taylor_error_example():
     x = expressions.Symbol('x')
@@ -383,7 +393,7 @@ def exampleforshow3():
 # plotpde()
 
 
-'''numpoints = 1000
+numpoints = 1000
 size = 10*np.pi
 func = lambda x: np.sin(x)**2 if np.pi < x < 2*np.pi else 0.0
 
@@ -393,18 +403,11 @@ pde = expressions.AdvDif(C0, D=5, V=10, dt=0.01, size=np.pi)
 v = expressions.Symbol('v')
 e = 100
 expr2 = pde(v)
-conditions = {v: C0}'''
+conditions = {v: C0}
 eps = [10**(-(i+1)) for i in range(10)]
 
-x = expressions.Symbol('x')
-y = expressions.Symbol('y')
-z = expressions.Symbol('z')
-x2 = x**2
-expx2 = exp(x2)
-expression = np.asarray([log(z)*expx2, expx2+sin(x2 * y)])
-conditions = {x: 1, y: np.pi, z: 1}
 
-#taylor_error_plot(expression, conditions, eps, var=x)
+taylor_error_plot(expr2, conditions, eps, var=v)
 
 
 def ex222():
