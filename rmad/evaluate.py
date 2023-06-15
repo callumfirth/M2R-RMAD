@@ -98,6 +98,10 @@ def _(expr, *o, **kwargs):
     return solve(o[0], gridpoints, dt, V, D)
 
 
+@evaluate.register(expressions.Pick)
+def _(expr, *o, **kwargs):
+    return o[0][expr.e]
+
 def _closeto0(value):
     if isinstance(value, np.ndarray):
         value[np.isclose(value, 0, atol=1e-12)] = 0
@@ -197,4 +201,11 @@ def _(expr, *o, **kwargs):
     M = time_step(gridpoints, dt, V, D)
     print(expr.adjoint)
     print(o[0])
-    return [np.linalg.solve(M.T, np.ones(numpoints))]
+    return [np.linalg.solve(M.T, expr.adjoint)]
+
+
+@adjoint_evaluate.register(expressions.Pick)
+def _(expr, *o, **kwargs):
+    zeros = np.zeros(len(o[0]))
+    zeros[expr.e] = 1
+    return [zeros * expr.adjoint]

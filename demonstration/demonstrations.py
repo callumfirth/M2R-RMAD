@@ -344,12 +344,14 @@ def pde1():
     print(C0)
     pde = expressions.AdvDif(C0, D=5, V=10, dt=0.01, size=np.pi)
     v = expressions.Symbol('v')
-    expr2 = pde(v)
+    e = 100
+    expr2 = expressions.Pick(pde(v), e)
     # for i in range(9):
     #     expr2 = pde(expr2)
     conditions = {v: C0}
 
     B = reversemodeAD(expr2, conditions)
+
 
     return B
 
@@ -359,9 +361,8 @@ def plotpde():
 
 
 # plotpde()
-#plotpde()
 
-# print(pde1())
+print(pde1())
 
 # heatmap(25, 25, 10)
 

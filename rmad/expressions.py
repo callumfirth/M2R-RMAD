@@ -216,6 +216,16 @@ class AdvDif(Function):
         self.size = size
 
 
+class Pick(Operator):
+    """Pick the ith element in array"""
+    symbol = "pick"
+    precendence = 4
+
+    def __init__(self, operands, e):
+        self.e = e
+        super().__init__(operands)
+
+
 sin = Sin()
 cos = Cos()
 exp = Exp()
