@@ -345,8 +345,8 @@ def pde1():
     pde = expressions.AdvDif(C0, D=5, V=10, dt=0.01, size=np.pi)
     v = expressions.Symbol('v')
     expr2 = pde(v)
-    for i in range(9):
-        expr2 = pde(expr2)
+    # for i in range(9):
+    #     expr2 = pde(expr2)
     conditions = {v: C0}
 
     B = reversemodeAD(expr2, conditions)
@@ -358,8 +358,8 @@ def plotpde():
     over_time_plot(size=np.pi, numpoints=100, endtime=1.5, dt=0.01, V=10, D=5)
 
 
-
 # plotpde()
+#plotpde()
 
 # print(pde1())
 
