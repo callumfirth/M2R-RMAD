@@ -33,8 +33,9 @@ def taylor_error_plot(expr, condition, eps, **kwargs):
     plt.plot(np.log10(np.array(eps)), np.log10(abs(np.array(result))), label='Taylor error')
     plt.gca().invert_xaxis()
     plt.plot([-2, -9], [-2, -16], linestyle='dashed', label=f'$O(\epsilon^2)$')
-    plt.xlabel("Log10 of Epsilon")
-    plt.ylabel("Log10 of Taylor error")
+    plt.xlabel(f"$\log_{{10}}$ of Epsilon")
+    plt.ylabel(f"$\log_{{10}}$ of Taylor error")
+    plt.legend()
     return fig
 
 

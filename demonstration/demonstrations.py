@@ -358,7 +358,6 @@ def plotpde():
     over_time_plot(size=np.pi, numpoints=100, endtime=1.5, dt=0.01, V=10, D=5)
 
 
-taylor_error_example()
 
 # plotpde()
 
