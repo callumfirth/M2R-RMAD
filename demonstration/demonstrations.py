@@ -2,11 +2,15 @@ from matplotlib import colors
 import numpy as np
 import time
 import matplotlib.pyplot as plt
+from pde.pde_solver import initial_C
 import rmad.expressions as expressions
 from rmad.reversemode import reversemodeAD
 from rmad.forwardmode import forwardmodeAD
 from demonstration.taylor_error import taylor_error, taylor_error_plot
 from demonstration.graph_drawer import draw_expression, draw_cluster
+from rmad.traversal import evalpostvisitor
+from pde.pde_solver import loop
+from pde.pde_solver import over_time_plot
 
 
 def timerm(expr, conditions):
@@ -242,6 +246,16 @@ def dag_example2():
     draw_expression(expr, "Example2")
 
 
+def dag_example2label():
+    x = expressions.Symbol('x')
+    y = expressions.Symbol('y')
+    sin = expressions.Sin()
+    exp = expressions.Exp()
+    x2 = x**2
+    expr = sin(y * x2) + exp(x2)
+    draw_expression(expr, "Example2label", xlab=True, numsymbol=2)
+
+
 def cluster_graph():
     sin = expressions.Sin()
     exp = expressions.Exp()
@@ -334,6 +348,43 @@ def heatmap(n, m, iterations):
     plt.show()
 
 
+def test():
+    x = expressions.Symbol('x')
+    y = expressions.Symbol('y')
+    sin = expressions.Sin()
+    expr = x*sin(x*y)
+    conditions = {x: 2, y: np.pi}
+    rm = reversemodeAD(expr, conditions)
+    draw_expression(expr, "Test", xlab=True, numsymbol=2)
+    return rm
+
+
+def pde1():
+    numpoints = 100
+    size = np.pi
+    C0 = initial_C(size, numpoints)
+    #Note C0 has now 1000 points and size 10*pi
+
+    pde = expressions.AdvDif()
+    v = expressions.Symbol('v')
+    expr2 = pde(v)
+    for i in range(9):
+        expr2 = pde(expr2)
+    conditions = {v: C0}
+
+    B = reversemodeAD(expr2, conditions)
+
+    return B
+
+
+def plotpde():
+    over_time_plot(size=np.pi, numpoints=100, endtime=1.5, dt=0.01, V=10, D=5)
+
+
+# plotpde()
+
+# print(pde1())
+
 # heatmap(25, 25, 10)
 
 # plottime(75, 1, 50)
@@ -358,6 +409,7 @@ def heatmap(n, m, iterations):
 
 # Cluster_Graph()
 
+# dag_example2label()
 
 def reproduce():
     rmx1()  # Unused: RM result on sin(x+y)*x x,y=1

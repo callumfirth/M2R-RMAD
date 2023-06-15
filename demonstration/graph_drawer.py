@@ -3,7 +3,7 @@ import numpy as np
 import rmad.expressions as expressions
 
 
-def exprpostvisitor(expr, graph, node="v", **kwargs):
+def exprpostvisitor(expr, graph, node="v", numsymbol=0, **kwargs):
     """Visit an expression in post-order applying a function."""
     stack = []
     if isinstance(expr, np.ndarray):
@@ -12,7 +12,7 @@ def exprpostvisitor(expr, graph, node="v", **kwargs):
     else:
         stack = [expr]
     visited = {}
-    id = 0
+    id = 0 if not numsymbol else -numsymbol
     while stack:
         element = stack.pop()
         unvisited_children = []
@@ -29,25 +29,27 @@ def exprpostvisitor(expr, graph, node="v", **kwargs):
                 name = element.value
             else:
                 name = element.symbol
-            graph.node(f'{node}_{id}', str(name))
+            graph.node(f'{node}_{id}', str(name), xlabel=f'<{node}<SUB>{id}</SUB>>')
+
             visited[element] = f'{node}_{id}'
             for operand in element.operands:
                 graph.edge(visited[element], visited[operand],
                            constraint='true', minlen='1.5')
 
 
-def draw_expression(expr, name):
+def draw_expression(expr, name, xlab=False, numsymbol=0):
 
     graph = gv.Digraph(engine='dot')
 
-    exprpostvisitor(expr, graph)
-
+    exprpostvisitor(expr, graph, numsymbol=2)
+    if not xlab:
+        graph.attr('node', xlab=None)
     graph.attr(margin="0")
     graph.format = 'pdf'
     graph.render(f'images/Graph_{name}', view=True)
 
 
-def draw_cluster(expr1, expr2, name):
+def draw_cluster(expr1, expr2, name, xlab=False, numsymbol=0):
 
     graph = gv.Digraph(engine='dot')
 
