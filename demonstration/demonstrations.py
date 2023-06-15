@@ -11,6 +11,7 @@ from demonstration.graph_drawer import draw_expression, draw_cluster
 from rmad.traversal import evalpostvisitor
 from pde.pde_solver import loop
 from pde.pde_solver import over_time_plot
+from rmad.expressions import sin, cos, exp, log
 
 
 def timerm(expr, conditions):
@@ -127,7 +128,6 @@ def plottime(n, m, iterations):
 
 def rmx1():
     x = expressions.Symbol('x')
-    sin = expressions.Sin()
     y = expressions.Symbol('y')
     expression = sin(x+y)*x
     conditions = {x: 1, y: 1}
@@ -136,7 +136,6 @@ def rmx1():
 
 def fmx1():
     x = expressions.Symbol('x')
-    sin = expressions.Sin()
     y = expressions.Symbol('y')
     expression = sin(x+y)*x
     conditions = {x: 1, y: 1}
@@ -145,8 +144,6 @@ def fmx1():
 
 def rmx2():
     x = expressions.Symbol('x')
-    sin = expressions.Sin()
-    cos = expressions.Cos()
     y = expressions.Symbol('y')
     expression = np.array([sin(x+y)*x, cos(x)])
     conditions = {x: 1, y: 1}
@@ -155,8 +152,6 @@ def rmx2():
 
 def fmx2():
     x = expressions.Symbol('x')
-    sin = expressions.Sin()
-    cos = expressions.Cos()
     y = expressions.Symbol('y')
     expression = np.array([sin(x+y)*x, cos(x)])
     conditions = {x: 1, y: 1}
@@ -164,9 +159,6 @@ def fmx2():
 
 
 def example_nparray():
-    sin = expressions.Sin()
-    exp = expressions.Exp()
-    log = expressions.Log()
     x = expressions.Symbol('x')
     y = expressions.Symbol('y')
     z = expressions.Symbol('z')
@@ -178,8 +170,6 @@ def example_nparray():
 
 
 def example_rm():
-    sin = expressions.Sin()
-    exp = expressions.Exp()
     x = expressions.Symbol('x')
     y = expressions.Symbol('y')
     x2 = x**2
@@ -191,7 +181,6 @@ def example_rm():
 def taylor_error_example():
     x = expressions.Symbol('x')
     y = expressions.Symbol('y')
-    sin = expressions.Sin()
 
     expr = x*sin(x + y)
     conditions = {x: 1, y: 1}
@@ -224,9 +213,6 @@ def taylor_error_example():
 
 
 def dag_example1():
-    sin = expressions.Sin()
-    exp = expressions.Exp()
-    log = expressions.Log()
     x = expressions.Symbol('x')
     y = expressions.Symbol('y')
     z = expressions.Symbol('z')
@@ -239,8 +225,6 @@ def dag_example1():
 def dag_example2():
     x = expressions.Symbol('x')
     y = expressions.Symbol('y')
-    sin = expressions.Sin()
-    exp = expressions.Exp()
     x2 = x**2
     expr = sin(y * x2) + exp(x2)
     draw_expression(expr, "Example2")
@@ -249,32 +233,24 @@ def dag_example2():
 def dag_example2label():
     x = expressions.Symbol('x')
     y = expressions.Symbol('y')
-    sin = expressions.Sin()
-    exp = expressions.Exp()
     x2 = x**2
     expr = sin(y * x2) + exp(x2)
     draw_expression(expr, "Example2label", xlab=True, numsymbol=2)
 
 
 def cluster_graph():
-    sin = expressions.Sin()
-    exp = expressions.Exp()
-    log = expressions.Log()
     x_1 = expressions.Symbol('x')
     x_2 = expressions.Symbol('x')
     x_3 = expressions.Symbol('x')
     y_1 = expressions.Symbol('y')
     z_1 = expressions.Symbol('z')
     expr1 = np.asarray([log(z_1)*exp(x_1**2), exp(x_3**2)+sin(x_2**2 * y_1)])
-    sin2 = expressions.Sin()
-    exp2 = expressions.Exp()
-    log2 = expressions.Log()
     x = expressions.Symbol('x')
     y = expressions.Symbol('y')
     z = expressions.Symbol('z')
     x2 = x**2
-    expx2 = exp2(x2)
-    expr2 = np.asarray([log2(z)*expx2, expx2+sin2(x2 * y)])
+    expx2 = exp(x2)
+    expr2 = np.asarray([log(z)*expx2, expx2+sin(x2 * y)])
     draw_cluster(expr1, expr2, "Cluster_1")
 
 
@@ -351,7 +327,6 @@ def heatmap(n, m, iterations):
 def test():
     x = expressions.Symbol('x')
     y = expressions.Symbol('y')
-    sin = expressions.Sin()
     expr = x*sin(x*y)
     conditions = {x: 2, y: np.pi}
     rm = reversemodeAD(expr, conditions)
@@ -360,12 +335,13 @@ def test():
 
 
 def pde1():
-    numpoints = 100
-    size = np.pi
-    C0 = initial_C(size, numpoints)
+    numpoints = 1000
+    size = 10*np.pi
+    func = lambda x: np.sin(x)**2 if np.pi < x < 2*np.pi else 0.0
+    C0 = initial_C(func, size, numpoints)
     #Note C0 has now 1000 points and size 10*pi
-
-    pde = expressions.AdvDif()
+    print(C0)
+    pde = expressions.AdvDif(C0, D=5, V=10, dt=0.01, size=np.pi)
     v = expressions.Symbol('v')
     expr2 = pde(v)
     for i in range(9):

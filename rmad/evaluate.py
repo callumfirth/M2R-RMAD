@@ -188,5 +188,5 @@ def _(expr, *o, **kwargs):
     size = expr.size
     numpoints = len(o[0])
     gridpoints = np.linspace(0, 10*size, numpoints)
-    M = time_step(o[0], gridpoints, dt, V, D)
+    M = time_step(gridpoints, dt, V, D)
     return [np.linalg.solve(M.T, o[0])]
