@@ -131,7 +131,10 @@ class Function(Operator):
         return self.symbol + "(" + str(self.operands[0]) + ")"
 
     def __call__(self, value):
-        return type(self)(value)
+        if isinstance(self, AdvDif):
+            return AdvDif(value, V=self.V, D=self.D, dt=self.dt, size=self.size)
+        else:
+            return type(self)(value)
 
     precedence = 3
 
@@ -204,8 +207,16 @@ class AdvDif(Function):
     """AdvectionDiffusion PDE."""
     symbol = "AdvDif"
     precedence = 4
-    
-    D = 5
-    V = 10
-    dt = 0.01
-    size = np.pi
+
+    def __init__(self, initialC, D, V, dt, size):
+        super().__init__(initialC)
+        self.D = D
+        self.V = V
+        self.dt = dt
+        self.size = size
+
+
+sin = Sin()
+cos = Cos()
+exp = Exp()
+log = Log()

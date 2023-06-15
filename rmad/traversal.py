@@ -50,7 +50,7 @@ def adjointprevisitor(expr, fn_adjoint=1, **kwargs):
     # Then visit the children of the parent node and set their adjoints
     adjoint = adjoint_evaluate(expr, *(o.storedvalue for o in expr.operands))
     for counter, operand in enumerate(expr.operands):
-        operand.adjoint += adjoint[counter] * expr.adjoint
+        operand.adjoint += adjoint[counter]
         adjointprevisitor(operand, operand.adjoint)
         if not isinstance(operand, Symbol):
             operand.adjoint = 0  # So that next pass the adjoints are set to 0

@@ -30,7 +30,7 @@ def second_deriv_matrix_maker(n, h):
     return array
 
 
-def time_step(C, gridpoints, dt=0.1, V=1, D=1):
+def time_step(gridpoints, dt=0.1, V=1, D=1):
     n = len(gridpoints)
     h = gridpoints[1] - gridpoints[0]
     A = first_deriv_matrix_maker(n, h)
@@ -40,7 +40,7 @@ def time_step(C, gridpoints, dt=0.1, V=1, D=1):
 
 
 def solve(C, gridpoints, dt, V, D):
-    M = time_step(C, gridpoints, dt, V, D)
+    M = time_step(gridpoints, dt, V, D)
     C = linalg.solve(M, C)
     return C
 
@@ -54,12 +54,10 @@ def loop(size, numpoints, endtime, dt, V=1, D=1):
     return C
 
 
-def initial_C(size=0.1, numpoints=100):
+def initial_C(func, size=1, numpoints=1000):
     gridpoints = np.linspace(0, size, numpoints)
-    C = np.sin(gridpoints)**2
-    C = np.append(C, np.zeros(8*numpoints))
-    C = np.append(np.zeros(numpoints), C)
-    return C
+    vfunc = np.vectorize(func)
+    return vfunc(gridpoints)
 
 
 def over_time_plot(size, numpoints, endtime, dt, V=1, D=1):
@@ -77,7 +75,7 @@ def over_time_plot(size, numpoints, endtime, dt, V=1, D=1):
     #    ims.append(im)
     for t in range(len(timepoints)):
         values_over_time = np.append(values_over_time, C)
-        m = time_step(C, gridpoints2, dt, V, D)
+        m = time_step(gridpoints2, dt, V, D)
         C = linalg.solve(m, C)
         if t % 10 == 0:
             im = ax.plot(gridpoints2, C, color="red", alpha=timepoints[t]/endtime)
