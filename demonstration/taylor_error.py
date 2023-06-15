@@ -19,9 +19,8 @@ def taylor_error(expr, condition, eps, **kwargs):
     condition_new[kwargs['var']] = condition_new[kwargs['var']] + (eps * vec)
     evalpostvisitor(expr, symbol_map=condition_new)
     Jdeltax = np.array(expr.storedvalue)
-    dJx = np.array(reversemodeAD(expr, condition)[kwargs['var']])
+    dJx = np.dot(np.array(reversemodeAD(expr, condition)[kwargs['var']]), vec)
     # Using taylor series expansion find O(eps^2)
-    print(Jdeltax - Jx)
     return np.abs(Jdeltax - Jx - dJx*eps)
 
 
@@ -36,6 +35,7 @@ def taylor_error_plot(expr, condition, eps, **kwargs):
     plt.xlabel(f"$\log_{{10}}$ of Epsilon")
     plt.ylabel(f"$\log_{{10}}$ of Taylor error")
     plt.legend()
+    plt.show()
     return fig
 
 
@@ -46,7 +46,7 @@ def convergence_table(expr, condition, eps, **kwargs):
     result = np.array(result)
     result_dif = result[1:]/result[:-1]
     eps_dif = np.array(eps)[1:]/np.array(eps)[:-1]
-    grads = np.log(abs(result_dif))/np.log(abs(eps_dif))
+    grads = np.log(abs(result_dif))/np.log(abs(eps_dif))[:,None]
     points = [f"{i+1}-{i+2}" for i in range(len(eps)-1)]
     d = dict(zip(points, grads))
     f = open("images\\rate_of_convergence.txt", 'w')
