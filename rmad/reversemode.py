@@ -9,15 +9,24 @@ def reversemodeAD(expr, conditions):
     except ZeroDivisionError:  # Not currently used i dont think
         raise Exception("Function not valid at initial condition")
 
+
     if isinstance(expr, np.ndarray):
+        if isinstance(expr[0].storedvalue, (np.ndarray, list)):
+            adjoint = np.ones(len(expr[0].storedvalue))
+        else:
+            adjoint = 1
         symbols = dict((symbol, []) for symbol in conditions)
         for expression in expr:
-            adjointprevisitor(expression)  # Backwards traverse the tree
+            adjointprevisitor(expression, fn_adjoint=adjoint)  # Backwards traverse the tree
             for symbol in conditions.keys():
                 symbols[symbol].append(symbol.adjoint)  # Store adjoint values
                 symbol.adjoint = 0  # So next pass, adjoints are set back to 0
     else:
-        adjointprevisitor(expr)  # Backwards traverse through the tree
+        if isinstance(expr.storedvalue, (np.ndarray, list)):
+            adjoint = np.ones(len(expr.storedvalue))
+        else:
+            adjoint = 1
+        adjointprevisitor(expr, fn_adjoint=adjoint)  # Backwards traverse through the tree
         # For each symbol, return the dict of the repsective adjoint
         symbols = dict((symbol, symbol.adjoint) for symbol in conditions)
     return symbols

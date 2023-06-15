@@ -339,19 +339,16 @@ def pde1():
     numpoints = 1000
     size = 10*np.pi
     func = lambda x: np.sin(x)**2 if np.pi < x < 2*np.pi else 0.0
+
     C0 = initial_C(func, size, numpoints)
-    #Note C0 has now 1000 points and size 10*pi
-    print(C0)
+
     pde = expressions.AdvDif(C0, D=5, V=10, dt=0.01, size=np.pi)
     v = expressions.Symbol('v')
     e = 100
-    expr2 = expressions.Pick(pde(v), e)
-    # for i in range(9):
-    #     expr2 = pde(expr2)
+    expr2 = pde(v)
     conditions = {v: C0}
 
     B = reversemodeAD(expr2, conditions)
-
 
     return B
 
@@ -360,9 +357,46 @@ def plotpde():
     over_time_plot(size=np.pi, numpoints=100, endtime=1.5, dt=0.01, V=10, D=5)
 
 
+def exampleforshow():
+    x = expressions.Symbol('x')
+    expr = x**2
+    conditions = {x: np.array([1, 2, 3])}
+    return reversemodeAD(expr, conditions)
+
+
+def exampleforshow2():
+    x = expressions.Symbol('x')
+    expr = np.array([x**2, x**3])
+    conditions = {x: np.array([1, 2, 3])}
+    return reversemodeAD(expr, conditions)
+
+
+def exampleforshow3():
+    x = expressions.Symbol('x')
+    expr = x * np.array([x**2, x**3])
+    conditions = {x: np.array([1, 2, 3])}
+    return reversemodeAD(expr, conditions)
+
+#print(exampleforshow())
+print(exampleforshow2())
+#print(exampleforshow3())
 # plotpde()
 
-print(pde1())
+#print(pde1())
+
+
+def ex222():
+    x = expressions.Symbol('x')
+    y = expressions.Symbol('y')
+    z = expressions.Symbol('z')
+    x2 = x**2
+    expx2 = exp(x2)
+    expression = [log(z)*expx2, expx2+sin(x2 * y)][0]
+    conditions = {x: 1, y: np.pi, z: 1}
+    return reversemodeAD(expression, conditions)
+
+
+#print(ex222())
 
 # heatmap(25, 25, 10)
 

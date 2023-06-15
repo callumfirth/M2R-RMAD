@@ -199,8 +199,6 @@ def _(expr, *o, **kwargs):
     numpoints = len(o[0])
     gridpoints = np.linspace(0, 10*size, numpoints)
     M = time_step(gridpoints, dt, V, D)
-    print(expr.adjoint)
-    print(o[0])
     return [np.linalg.solve(M.T, expr.adjoint)]
 
 
