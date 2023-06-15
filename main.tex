@@ -25,7 +25,11 @@
 
 \section{Introduction}
 
-When solving non-linear systems one method is Newton's method. Say the system is defined by
+Differentiation is required in a vast array of settings from training neural networks through gradient descent to solving systems of non-linear equations with Newton's method. These processes often require derivatives to be calculated thousands or millions of times and so having computational methods that compute derivatives both quickly and efficiently is crucial.
+
+One application of differentiation is the process of gradient descent which is a common training method for neural networks. In the context of neural networks, the goal of gradient descent is to find a local minimum of a cost function that measures the distance between the data predicted by the model and the observed results. It does this by computing the derivative of the cost function with respect to model parameters and then adjusting those parameters such that the derivative reduces in magnitude to get closer to the optimal model. Neural networks are can be controlled by thousands or millions of parameters.
+
+Solving non-linear systems is important when modelling anything in the real world as it is very unlikely that processes are linear. However, in general it is very difficult to directly solve these systems and so they have to be solved numerically. One such method is Newton's method. Say the system is defined by
 \begin{equation} \label{Fxy}
         F: \mathbb{R}^n \rightarrow \mathbb{R}^m \quad F(x_1, \cdots, x_n) = (y_1, \cdots, y_m)
 \end{equation}
@@ -42,7 +46,7 @@ where $F'(x_n)$ is the Jacobian of $F$ at $x_n$ defined by
     \end{bmatrix} \in \mathbb{R}^{m \times n}
 \end{equation}
 
-Hence finding the derivative of a function is essential for us to be able to solve our system. So we need to find a way of computing the derivative of a function with low cost. Computing the derivative of the function is also essential in the development of neural networks, especially in the area of Backpropogation, a method used to train neural nets. On these neural nets, one has many nodes connected by a series of weights, such that the change in one value affects the change in another, to optimise these weights we must use a method called gradient descent which requires us to find a derivative.
+Hence finding the derivative of a function is essential for us to be able to solve our system. So we need to find a way of computing the derivative of a function at low cost. Computing the derivative of the function is also essential in the development of neural networks, especially in the area of Backpropagation, a method used to train neural nets. On these neural nets, one has many nodes connected by a series of weights, such that the change in one value affects the change in another, to optimise these weights we must use a method called gradient descent which requires us to first find a derivative.
 
 From these examples and those stated in \cite{appad} we see the importance of implementation of quick derivative computation on computers.
 
@@ -56,7 +60,7 @@ The most common example of numerical differentiation is the finite differences m
 \end{equation*}
 This calculation for the derivative is approximate due to the error in the truncated Taylor series. The computational cost of calculating the Jacobian of $F$ in (\ref{jacobian}) is $n + 1$ times the cost of evaluating $F$ \cite{chem}. Thus, finite differences is unsuited for systems with a large number of unknowns.
 
-Symbolic differentiation involves taking an algebraic expression and computing its derivative with respect to a specified variable through repeated application of basic rules of calculus using computer algebra tools. It can be useful as, once the formula for the derivative is computed, finding the value of the derivative at a point is as simple as substituting it into the formula for the derivative.  Further, symbolic differentiation provides an explicit formula for the derivative which is beneficial from a mathematical point of view. However, it has the drawback that it can only be applied when the function to be differentiated exists in a closed form. For calculating the gradient of equation \ref{Fxy}, symbolic differentiation has a computational cost of $n$ times the cost of evaluating $F$ \cite{chem}. Thus, the computational cost for calculating the Jacobian of a set of equations would be prohibitively expensive.
+Symbolic differentiation involves taking an algebraic expression and computing its derivative with respect to a specified variable through repeated application of basic rules of calculus using computer algebra tools. It can be useful as, once the formula for the derivative is computed, finding the value of the derivative at a point is as simple as substituting it into the formula for the derivative.  Further, symbolic differentiation provides an explicit formula for the derivative which is beneficial from a mathematical point of view. However, it has the drawback that it can only be applied when the function to be differentiated exists in a closed form. For calculating the gradient of $F_i$ in Equation \ref{Fxy}, symbolic differentiation has a computational cost of $n$ times the cost of evaluating $F_i$ \cite{chem}. Hence, the computational cost for calculating the Jacobian of a set of equations, defined by $F$, would be prohibitively expensive at $mn$ times the cost of evaluating $F$.
 
 There are two forms of algorithmic differentiation: forward mode and reverse mode. Fundamental to AD is the application of the chain rule. Both have similar computational costs for the Jacobian but are suited to different types of functions. With forward mode algorithmic differentiation, this has computational cost proportional to $n$ times the cost of evaluating $F$. In contrast, the computational cost of $[F'(x)]^\top$ with reverse mode algorithmic differentiation is proportional to $m$ times the cost of evaluating $F$ \cite{falisse}. Hence, reverse mode is suited for functions $F$ where $n >> m$. We will see below that the reverse mode has an even better complexity error for calculating gradients compared to the alternatives. One drawback of reverse mode algorithmic differentiation over forward-mode is that it requires higher memory usage, due to the necessity to store intermediary values.
 
@@ -87,24 +91,26 @@ Using notation from \cite{evald}, let $F: \mathbb{R}^n \rightarrow \mathbb{R}^m$
 
 \begin{table}[h]
     \centering
-    \begin{tabular}{|c|c|}
+    \begin{tabular}{|lll|}
         \hline
-        Function & Derivative \\
+        Elementary Function $\varphi_i$ & $\partial / \partial {v}_1$ & $\partial / \partial {v}_2$ \\
         \hline
-        $\sin(u)$ & $\cos(u)$ \\
-        $\cos(u)$ & $-\sin(u)$ \\
-        $\exp(u) $ & $\exp(u)$ \\
-        $\log(u)$ & $1/u$ \\
-        $u^k$ & $k u^{k-1}$ \\
-        $f(u)g(u)$ & $f'(u)g(u) + f(u)g'(u)$ \\
-        $f(u) + g(u)$ & $f'(u) + g'(u)$ \\
+        $\varphi_i \equiv v_1+v_2$ & $1$ & $1$ \\
+        $\varphi_i \equiv v_1-v_2$ & $1$ & $-1$ \\
+        $\varphi_i \equiv v_1 \times v_2$ & $v_2$ & $v_1$ \\
+        $\varphi_i \equiv v_1 / v_2$ & $1/v_2$ & $-v_1/v_2^2$ \\
+        $\varphi_i \equiv {v_1}^{v_2}$ & $v_2{v_1}^{(v_2-1)}$ & ${v_1}^{v_2}\log(v_1)$ \\
+        $\varphi_i \equiv \sin(v_1)$ & $\cos(v_1)$ &  \\
+        $\varphi_i \equiv \cos(v_1)$ & $-\sin(v_1)$ &  \\
+        $\varphi_i \equiv \exp(v_1)$ & $\exp(v_1)$ &  \\
+        $\varphi_i \equiv \log(v_1)$ & $1/v_1$ &  \\
         \hline
     \end{tabular}
-    \caption{Derivatives of Elemental Functions}
+    \caption{Partial Derivatives of Elemental Functions $\varphi_i$ w.r.t. its dependants where ${v}_1 \prec \varphi_i$ and ${v}_2 \prec \varphi_i$}
     \label{tab:elemental}
 \end{table}
 
-The quantities calculated at each node of the graph during the function evaluation are numbered such that
+The quantities calculated at each node of the graph during the function evaluation are labelled such that
 \begin{equation*}
     [ \underbrace{v_{1-n}, \ldots, v_0}_{x} , v_1, \ldots, v_{l-m}, \underbrace{v_{l-m+1}, \ldots, v_l}_{y}]
 \end{equation*}
@@ -112,6 +118,8 @@ Using $j \prec i$ to show $v_i$ depends directly on $v_j$ and $j \prec i \Longri
 \begin{equation*}
     v_i = \varphi_i (v_j)_{j \prec i} \text{ for } \varphi_i : \mathbb{R}^{n_i} \longrightarrow \mathbb{R}
 \end{equation*}
+
+Where we denote $\mathbb{R}^{n_i}$ depends on $\varphi$. Usually here we have that $n=2$ or $n=1$ however later we consider examples where this may not be the case
 
 \subsection{Forward Mode}
 
@@ -127,11 +135,10 @@ As $y = F(x)$ we calculate the tangent $\dot{y}$ as
     \equiv \Dot{F}(x, \Dot{x})
 \end{equation*}
 Using the additional notation $u_i = (v_j)_{j \prec i}$ and $\Dot{u}_i = (\Dot{v}_j)_{j \prec i}$, the idea can be applied to an elemental function $\varphi_i : \mathbb{R}^{n_i} \longrightarrow \mathbb{R}$, $v_i = \varphi_i (u_i)$ to get the result
-\begin{equation*}
-    \label{tangentequ}
+\begin{equation} \label{tangentequ}
     \Dot{v_i} = \sum_{j \prec i} \left\{ \Dot{v}_j \cdot \frac{\partial}{\partial v_j} \varphi_i (u_i) \right\} 
     \equiv \Dot{\varphi}_i(u_i, \Dot{u}_i)
-\end{equation*}
+\end{equation}
 
 This can be summarised as the general evaluation procedure given in \cite{evald} and given in Table \ref{tab:gep}.
 
@@ -140,13 +147,10 @@ This can be summarised as the general evaluation procedure given in \cite{evald}
     \begin{tabular}{|lcll|}
         \hline
         $v_{i-n}$ & $\equiv$ & $x_i$ & $i = 1, \ldots, n$ \\
-        $\Dot{v}_{i-n}$ & $\equiv$ & $\Dot{x}_i$ & $i = 1, \ldots, n$ \\
         \hline
         $v_{i}$ & $\equiv$ & $v_i = \varphi_i (u_i)$ & $i = 1, \ldots, l$ \\
-        $\Dot{v}_{i}$ & $\equiv$ & $\sum_{j \prec i} \left\{ \Dot{v}_j \cdot \frac{\partial}{\partial v_j} \varphi_i (u_i) \right\}$ & $i = 1, \ldots, l$ \\
         \hline
         $v_{l-m+i}$ & $\equiv$ & $y_i$ & $i = 1, \ldots, m$ \\
-        $\Dot{v}_{l-m+i}$ & $\equiv$ & $\Dot{y}_i$ & $i = 1, \ldots, m$ \\
         \hline
     \end{tabular}
     \caption{General Evaluation Procedure}
@@ -154,6 +158,8 @@ This can be summarised as the general evaluation procedure given in \cite{evald}
 \end{table}
 
 When represented on a DAG, forward mode AD begins at the inputs and moves through the graph computing $F$ and $\Dot{F}$ together at each node. For this a concise version of Table \ref{tab:gep} is provided in Table \ref{tab:gtp}.
+
+Because in forward mode we can calculate both the values and the tangents of our elementary function at the same time we can get a more concise procedure for computing the tangents of our function. This is given in Table \ref{tab:gtp}
 
 \begin{table}[h]
     \centering
@@ -163,7 +169,7 @@ When represented on a DAG, forward mode AD begins at the inputs and moves throug
         \hline
         $[v_{i}, \Dot{v}_{i}]$ & $=$ & $[\varphi_i (u_i), \Dot{\varphi}_i(u_i, \Dot{u}_i)]$ & $i = 1, \ldots, l$ \\
         \hline
-        $[v_{l-m+1}, \Dot{v}_{l-m+1}]$ & $=$ & $[y_{i}, \Dot{y}_{i}]$ & $i = 1, \ldots, m$ \\
+        $[v_{l-m+i}, \Dot{v}_{l-m+i}]$ & $=$ & $[y_{i}, \Dot{y}_{i}]$ & $i = 1, \ldots, m$ \\
         \hline
     \end{tabular}
     \caption{General Tangent Procedure}
@@ -178,9 +184,13 @@ As in \cite{dhamarticle}, consider for the image of $F$ the hyperplane $\{ y \in
 \end{equation*}
 This calculation is provided $\Bar{x}^\top$ does not vanish.
 
-Using the additional notation $\Bar{u}_i = (\Bar{v}_j)_{j \prec i}$, we calculate the adjoint function for each elemental function $\varphi : \mathbb{R}^{n_i} \longrightarrow \mathbb{R}$ as
+Using the additional notation $\Bar{u}_i = (\Bar{v}_j)_{j \prec i}$, we calculate the adjoint function for each elemental function $\varphi_i : \mathbb{R}^{n_i} \longrightarrow \mathbb{R}$ as
 \begin{equation*}
     \Bar{u}_i += \Bar{v}_i \nabla \varphi_i (u_i)
+\end{equation*}
+
+\begin{equation*}
+    \Bar{v}_j = \sum_{i \succ j} \left\{ \Bar{v}_i \cdot \frac{\partial}{\partial v_j} \varphi(u_i) \right\}
 \end{equation*}
 
 In reverse mode, the tree is first traversed beginning at the inputs and finishing at the outputs, storing the value the elemental function takes at each node. Then, the tree is traversed in the other direction storing the value the adjoint function takes at each node. This produces a the adjoint procedure for computing the first derivative from \cite{dhamarticle}, given in Table \ref{tab:ap}.
@@ -206,7 +216,7 @@ In reverse mode, the tree is first traversed beginning at the inputs and finishi
         $\Bar{v}_{i-n}$ & $=$ & $\Bar{x}_i$ & $i = 1, \ldots, n$ \\
         \hline
     \end{tabular}
-    \caption{Adjoint Procedure}
+    \caption{General Adjoint Procedure}
     \label{tab:ap}
 \end{table}
 
@@ -233,17 +243,17 @@ Given $x \in \mathbb{R}^n$ and $\Bar{y} \in \mathbb{R}^m$ we attain an upper bou
 \end{equation}
 The memory usage is given in (\ref{rmem2}). Here we see the random access memory usage is the same as forward mode but the use of sequentially accessed memory creates an overall memory usage increase.
 \begin{equation} \label{rmem2}
-    \begin{tabular}{c}
-        $\text{RMEM}(\Bar{y} F'(x)) = 2 \cdot \text{RMEM}(F(x))$ \\ 
-        $\text{SMEM}(\Bar{y} F'(x)) \approx \text{OPS}(F(x))$
-    \end{tabular}
+    \begin{gathered}
+        \text{RMEM}(\Bar{y} F'(x)) = 2 \cdot \text{RMEM}(F(x)) \\ 
+        \text{SMEM}(\Bar{y} F'(x)) \approx \text{OPS}(F(x))
+    \end{gathered}
 \end{equation}
 
 \section{Applying Algorithmic Differentiation on Directed Acyclic Graphs}
 
-If we consider an expression represented by a DAG, then it is very easy to apply the concept of Forward and Reverse mode algorithmic differentiation. Here we can represent each Element/Node denoted $v_i$ as our elementary function $v_i = \varphi_i (v_j)_{j \prec i}$ where now we can view $j \prec i$ to mean that $v_i$ is an operand of $v_j$. Then to apply forward mode differentiation we can compute our tangents in (\ref{tangentequ}) by traversing this graph with post-order traversal, calculating both the values, $v_i$, and the tangent values, $\Dot{v_i}$ as we go along. So we can calculate the derivatives of all the output variables with respect to each input variable on each pass. Alternatively we can do reverse mode algorithmic differentiation by first traversing postorder traversal on the graph, computing all the values, $v_i$. Then we can preorder traverse the graph to compute the derivative of each output variable with respect to every input variable on each pass.
+If we consider an expression represented by a DAG, then it is very easy to apply the concept of Forward and Reverse mode algorithmic differentiation. Here we can represent each Element/Node denoted $v_i$ as our elementary function $v_i = \varphi_i (v_j)_{j \prec i}$ where now we can view $j \prec i$ to mean that $v_j$ is an operand of $v_i$. Then to apply forward mode differentiation we can compute our tangents in (\ref{tangentequ}) by traversing this graph with post-order traversal, calculating both the values, $v_i$, and the tangent values, $\Dot{v_i}$ as we go along. So we can calculate the derivatives of all the output variables with respect to each input variable on each pass. Alternatively we can do reverse mode algorithmic differentiation by first traversing postorder traversal on the graph, computing all the values, $v_i$. Then we can preorder traverse the graph to compute the derivative of each output variable with respect to every input variable on each pass.
 
-This gives us an idea of why forward mode has a computational cost proportional to $n$. As we require to have $n$ forward passes to compute the derivative. Similary we can see that reverse mode has a computational cost proportional to $m$. As we require to have $m$ reverse passes into order to calculate the derivative. Here we refer to a forward pass as the postorder traversal on a expression and a reverse pass as the preorder traversal on a expression.
+This gives us an idea of why forward mode has a computational cost proportional to $n$. As we require to have $n$ forward passes to compute the derivative. Similarly we can see that reverse mode has a computational cost proportional to $m$. As we require to have $m$ reverse passes into order to calculate the derivative. Here we refer to a forward pass as the postorder traversal on a expression and a reverse pass as the preorder traversal on a expression.
 
 For the examples below we will be considering the second output from the function given in (\ref{example1}).
 \begin{equation}
@@ -269,8 +279,8 @@ Say we want to apply our algorithm to (\ref{example2}) represented by the DAG in
 \begin{algorithmic}[1]
 \Procedure{ForwardmodeAD}{$expression,conditions$}
 \State dict = dict()\Comment{}
-\For{ each $symbol$ in conditions}
-    \For{ each node i in expression}\Comment{By postorder traversal, operands before element}
+\For{each $symbol$ in conditions}
+    \For{each node i in expression}\Comment{By postorder traversal, operands before element}
     \State Calculate $v_i$ and $\Dot{v_i}$ w.r.t its $\varphi_i(v_j)_{j \prec i}$ \verb|operands| and \verb|symbol|
     \State dict[symbol] = \verb|expression.adjoint|\Comment{Store the adjoint w.r.t the symbol}
     \EndFor
@@ -315,7 +325,7 @@ We then traverse the graph in postorder traversal, computing the value of each n
         \hline
         $v_{1}$ & $\equiv$ & $2$ & $=$ & 2 & $=$ & 2\\
         $v_{2}$ & $\equiv$ & ${v_{-1}}^{v_{1}}$ & $=$ & $ 2^2$ & $=$ & $4$\\
-        $v_{3}$ & $\equiv$ & $v_0 * v_2$ & $=$ & $ 2 * 4$ & $=$ & $8$\\
+        $v_{3}$ & $\equiv$ & $v_0 * v_2$ & $=$ & $ 2 \cdot 4$ & $=$ & $8$\\
         $v_{4}$ & $\equiv$ & $\sin(v_3)$ & $=$ & $\sin(8)$ & $\approx$ & $0.9894$\\
         $v_{5}$ & $\equiv$ & $e^{v_2}$ & $=$ & $ e^4$ & $\approx$ & $54.5982$\\
         \hline
@@ -331,12 +341,17 @@ We then traverse the graph in postorder traversal, computing the value of each n
     \centering
     \begin{tabular}{|lclllll|}
         \hline
-        $\Bar{v}_{-1}$ & $=$ & $\Bar{v_2}v_1 {v_{-1}}^{(v_{1}-1)}$ & $=$ & $(2\cos(8)+e^4) \cdot 2 \cdot 2^{2-1} = 8\cos(8)+4e^4$ & $\approx$ & $217.2286$\\
-        $\Bar{v}_{0}$ & $=$ & $\Bar{v_3}v_2$ & $=$ & $\cos(8)\cdot4 = 4\cos(8)$ & $\approx$ & $-0.5820$\\
+        $\Bar{v}_{-1}$ & $=$ & $\Bar{v_2}v_1 {v_{-1}}^{(v_{1}-1)}$ & $=$ & $(2\cos(8)+e^4) \cdot 2 \cdot 2^{2-1}$ & & \\
+         & & & $=$ & $8\cos(8)+4e^4$ & $\approx$ & $217.2286$ \\ 
+        $\Bar{v}_{0}$ & $=$ & $\Bar{v_3}v_2$ & $=$ & $\cos(8)\cdot4$ & & \\
+        & & & $=$ & $4\cos(8)$ & $\approx$ & $-0.5820$ \\
         \hline
-        $\Bar{v}_{1}$ & $=$ & $\Bar{v}_{2}{v_{-1}}^{v_{1}}\log(v_{-1})$ & $=$ & $(2\cos(8)+e^4) \cdot 2^2 \cdot \log(2) = 8\cos(8)\log(2) +4e^4\log(2)$ & $\approx$ & $63.1932$\\
-        $\Bar{v}_{2}$ & $=$ & $\Bar{v}_{3}v_0 + \Bar{v_5}e^{v_2}$ & $=$ & $\cos(8) \cdot 2 + 1 \cdot e^{4} = 2\cos(8)+e^4$ & $\approx$ & $54.3071$\\
-        $\Bar{v}_{3}$ & $=$ & $\Bar{v_4}\cos(v_3)$ & $=$ & $1 \cdot \cos(8) = \cos(8)$ & $\approx$ & $-0.1455$\\
+        $\Bar{v}_{1}$ & $=$ & $\Bar{v}_{2}{v_{-1}}^{v_{1}}\log(v_{-1})$ & $=$ & $(2\cos(8)+e^4) \cdot 2^2 \cdot \log(2)$ & & \\
+        & & & $=$ & $8\cos(8)\log(2) +4e^4\log(2)$ & $\approx$ & $63.1932$ \\
+        $\Bar{v}_{2}$ & $=$ & $\Bar{v}_{3}v_0 + \Bar{v_5}e^{v_2}$ & $=$ & $\cos(8) \cdot 2 + 1 \cdot e^{4}$ & & \\ 
+        & & & $=$ & $2\cos(8)+e^4$ & $\approx$ & $54.3071$ \\
+        $\Bar{v}_{3}$ & $=$ & $\Bar{v_4}\cos(v_3)$ & $=$ & $1 \cdot \cos(8) = \cos(8)$ & & \\
+        & & & $=$ & $\cos(8)$ & $\approx$ & $-0.1455$ \\
         $\Bar{v}_{4}$ & $=$ & $\Bar{v_6}$ & $=$ & $1$ & $=$ & $1$\\
         $\Bar{v}_{5}$ & $=$ & $\Bar{v_6}$ & $=$ & $1$ & $=$ & $1$\\
         \hline
@@ -452,19 +467,21 @@ Now we can test our implementation on the previous example given in Equation \re
 
 We can check the accuracy of our results using 2 methods, first, by using Taylor series we have the equation:
 \begin{equation}
-    F(x + \epsilon) = F(x) + \frac{dF}{dx} * \epsilon + O(\epsilon ^ 2)
+    F(x + \epsilon) = F(x) + \frac{dF}{dx} \cdot \epsilon + \mathcal{O}(\epsilon ^ 2)
 \end{equation}
-When we send $\epsilon$ to 0 the term $O(\epsilon)$ goes to 0 meaning we can find $O(\epsilon^2)$ by rearranging the equation to get:
+When we send $\epsilon$ to 0 the term $\mathcal{O}(\epsilon)$ goes to 0 meaning we can find $\mathcal{O}(\epsilon^2)$ by rearranging the equation to get:
 
 \begin{equation}
-    F(x + \epsilon) - F(x) - \frac{dF}{dx} * \epsilon
+    F(x + \epsilon) - F(x) - \frac{dF}{dx} \cdot \epsilon
 \end{equation}
 
-When we compute this we get a value for $O(\epsilon^2)$ which as $\epsilon \to 0$ $O(\epsilon^2) \to 0$ at a rate proportional to $\epsilon^2$
+When we compute this we get a value for $\mathcal{O}(\epsilon^2)$ which as $\epsilon \longrightarrow 0$ $\mathcal{O}(\epsilon^2) \to 0$ at a rate proportional to $\epsilon^2$.
 
-\begin{center}
+\begin{figure}[h!]
     \includegraphics[width=12cm]{images/taylor_error_1.pdf}
-\end{center}
+    \caption{Plot title}
+    \label{fig:taylorerror}
+\end{figure}
 
 When checking if our result is correct we need to calculate the rate of convergence, since we are finding $O(\epsilon^2)$ we expect our convergence to be at the rate of $\epsilon^2$. To check our rate of convergence we use the formula:
 
@@ -545,16 +562,16 @@ Which is what we would expect.
 
 
 
-
+\newpage
 \section{Difference in Runtime}
 
-Lets say we want to plot the time taken to compute various functions of $n$ unique input variables, as seen in Equation \ref{TimeFunc}. We can compare the difference in runtime between our Forward Mode AD and Reverse Mode AD. To give us a more robust plot we compute the average time taken over many iterations. The results of this test is seen in Figure \ref{fig:TimeDiff}
-\begin{equation} 
-    \label{TimeFunc}
-    \begin{split}
-        f_1(\textbf{x}) = \prod_{i=1}^n x_i & \quad f_2(\textbf{x}) = \prod_{i=1}^n \sin(x_i) \\
-        f_3(\textbf{x}) = \prod_{i=1}^n \exp(x_i) & \quad f_4(\textbf{x}) = \prod_{i=1}^n \log(x_i)
-    \end{split}
+Lets say we want to plot the time taken to compute various functions of $n$ unique input variables, as seen in Equation \ref{TimeFunc}. We can compare the difference in runtime between our Forward Mode AD and Reverse Mode AD. To give us a more robust plot we compute the average time taken over many iterations. The results of this test is seen in Figure \ref{fig:TimeDiff}.
+\begin{equation} \label{TimeFunc}
+    \begin{gathered}
+        f_i: \mathbb{R}^n \longrightarrow \mathbb{R} \quad x \in \mathbb{R}^n \\
+        f_1(x) = \prod_{i=1}^n x_i  \quad f_2(x) = \prod_{i=1}^n \sin(x_i) \\
+        f_3(x) = \prod_{i=1}^n \exp(x_i)  \quad f_4(x) = \prod_{i=1}^n \log(x_i)
+    \end{gathered}
 \end{equation}
 
 \begin{figure}[h]
@@ -566,13 +583,13 @@ Lets say we want to plot the time taken to compute various functions of $n$ uniq
 
 As expected, Forward Mode automatic differentiation grows around linearly on the number of unique input variables that we have. This further proves the importance of using Reverse Mode automatic differentiation when working with systems with large amounts of variables like neural networks.
 
-We can also see below the heatmap of the runtime when computing the derivative of a function, $f: \mathbb{R}^n \rightarrow \mathbb{R}^m$ listed in Equation \ref{func_nm}
+We can also see below the heatmap of the runtime when computing the derivative of a function, $F: \mathbb{R}^n \rightarrow \mathbb{R}^m$ listed in Equation \ref{func_nm}.
 
 \begin{equation}
-    f \begin{pmatrix}
-        x_1 \\ \vdots \\ x_i \\ \vdots \\ x_n
+    F \begin{pmatrix}
+        x_1 \\ \vdots \\ x_n
     \end{pmatrix} = \begin{pmatrix}
-        \sum_{i=1}^n x_i \\ \vdots \\ \sum_{i=1}^n j \cdot x_{i}^{j} \\ \vdots \\ \sum_{i=1}^n m \cdot x_{i}^{m}
+        \sum_{k=1}^n 1 \cdot x_k^1 \\ \sum_{k=1}^n 2 \cdot x_{k}^{2} \\ \vdots \\ \sum_{k=1}^n m \cdot x_{k}^{m}
     \end{pmatrix}
     \label{func_nm}
 \end{equation}
@@ -581,7 +598,7 @@ We can also see below the heatmap of the runtime when computing the derivative o
 \begin{figure}[h]
     \centering
     \includegraphics{images/Graph_HeatmapTimeDiff.pdf}
-    \caption{The heatmap of average time taken to compute the derivative of a function listed in Equation \ref{func_nm}}
+    \caption{Heatmap of mean time taken to compute the derivative of function in Equation \ref{func_nm}}
     \label{fig:heatmap}
 \end{figure}
 
@@ -589,51 +606,105 @@ Here we can see that for a function with a low number of input parameters and hi
 
 
 
+\newpage
 
+\section{Implementing PDE's into Reverse Mode}
 
-\section{Applications}
-\todo{Hello}
+Currently we have implemented basic reverse mode algorithmic differentiation for general expressions. However what if we want to have a more complicated expression, perhaps one where one of our operators is to compute some PDE. This is our next extension we will be looking at. Paticularly we will be looking at solving and implementing the Advection-Diffusion equation into our current system.
+
 \subsection{Advection Diffusion Equation}
 
-Consider the simplified 1 dimensional advection-diffusion equation given by Equation \ref{AdvectionDiffusion} where we are measuring the concentration of some liquid over time where we also account for velocity and diffusion.
+Consider the simplified 1 dimensional advection-diffusion equation given by Equation \ref{AdvectionDiffusion} where we are measuring the concentration of some liquid over time, also accounting for the velocity of the liquid, $V$, and the rate of diffusion, $D$.
 
 \begin{equation}
     \label{AdvectionDiffusion}
     \frac{\partial C}{\partial t} = - V\frac{\partial C}{\partial x} + D\frac{\partial^2 C}{\partial x^2}
 \end{equation}
 
-\subsubection{Implementation}
-
-If we model the concentration along 1 dimension as a simple function we can then sample a concentration at different distances. We have an example of sampling a function that shows concentration distributed as the standard-normal distribution:
-\begin{center}
-    \includegraphics[width=12cm]{images/show_sampling.png}
-\end{center}
-
-Now we have these points, using central difference equations, we can find approximations for our $\frac{\partial C}{\partial x}$ and our $\frac{\partial^2 C}{(\partial X)^2}$. If we number the nodes $C_1, C_2, C_3...$ then we get that:
-
-\begin{equation}
-    \frac{\partial C_i}{\partial x} \approx \frac{F(C_{i+1}) - F(C_{i-1})}{2h}
-\end{equation}
-\begin{equation}
-    \frac{\partial C_i}{\partial x} \approx \frac{F(C_{i+1}) -2F(C_i) + F(C_{i-1})}{h^2}
-\end{equation}
-
-Where $h$ is the distance between each sample point. If we want to generalize this for all points we can use the matrices:
-
-\begin{center}
-    \begin{pmatrix}
-    0 & 1 & 0 & ...\\
-    -1 & 0 & 1 & ...\\
-    0 & -1 & 0 & ...\\
-    . & . & . & ...
-    \end{pmatrix}
-\end{center}
-
-
+If we model concentration along the 1-dimension as a simple function of distance we can then interpolate the concentration across the domain. We have an example of interpolation of a function that denotes concentration distributed by the standard-normal distribution in Figure \ref{sampling:
 \begin{figure}
+\centering
+    \includegraphics[width=12cm]{images/show_sampling.png}
+    \caption{Difference between true function and sampled function}
+    \label{fig:sampling}
+\end{figure}
+
+Now we have these points, using central difference equations, we can find approximations for $\frac{\partial C}{\partial x}$ and $\frac{\partial^2 C}{\partial x^2}$. If we number the nodes $C_1, \ldots , C_n$ then we get that:
+
+\begin{equation}
+    \frac{\partial C_i}{\partial x} \approx \frac{C_{i+1} - C_{i-1}}{2h}
+\end{equation}
+\begin{equation}
+    \frac{\partial^2 C_i}{\partial x^2} \approx \frac{C_{i+1} -2C_i + C_{i-1}}{h^2}
+\end{equation}
+
+Where $h$ is the distance between each sample point. If we want to generalise this for all points we can use matrices like so:
+
+\begin{equation} \label{CentralDifference}
+    \begin{gathered}
+        \underbrace{\frac{1}{2h}
+        \begin{bmatrix}
+        0 & 0 &  & & \\
+        -1 & 0 & 1 & &\text{\huge{$0$}} & \\
+         & -1 & 0 & \ddots &\\
+         & & \ddots & \ddots & 1 \\
+         & \text{\huge{$0$}} & & -1 & 0 & 1 \\
+         & & & & 0 & 0
+        \end{bmatrix}}_\text{\large{A}}
+        \begin{bmatrix}
+            C_1 \\ \vdots \\ C_n
+        \end{bmatrix}
+        \approx
+        \begin{bmatrix}
+            \frac{\partial C_1}{\partial x} \\ \vdots \\ \frac{\partial C_n}{\partial x}
+        \end{bmatrix} \\
+        \underbrace{\frac{1}{h^2}
+        \begin{bmatrix}
+        0 & 0 &  & & \\
+        1 & -2 & 1 & &\text{\huge{$0$}} & \\
+         & -1 & -2 & \ddots &\\
+         & & \ddots & \ddots & 1 \\
+         & \text{\huge{$0$}} & & -1 & -2 & 1 \\
+         & & & & 0 & 0
+        \end{bmatrix}}_\text{\large{B}}
+        \begin{bmatrix}
+            C_1 \\ \vdots \\ C_n
+        \end{bmatrix} \approx
+        \begin{bmatrix}
+            \frac{\partial^2 C_1}{\partial x^2} \\ \vdots \\ \frac{\partial^2 C_n}{\partial x^2}
+        \end{bmatrix}
+    \end{gathered}
+\end{equation}
+
+Where the first and last row in the central difference matrix is all zeros as the derivative is 0 for the boundary conditions.
+We denote the matrix for the first derivative as $A$ and the matrix for the second derivative as $B$. By stepping forward in time we get the equation.
+
+\begin{equation}
+    C_{new} = C_{old} + \Delta t \frac{\partial C_{new}}{\partial t}
+    \label{newC}
+\end{equation}
+
+We can approximate $\frac{\partial C}{\partial t}$ in Equation \ref{AdvectionDiffusion} by using $A, B$ denoted in Equation \ref{CentralDifference} and, then further plug this approximation into Equation \ref{newC} to get.
+\begin{equation}
+    \begin{split}
+        & \frac{\partial C}{\partial t} \approx -VA + DB \\
+        \Longrightarrow \ & C_{new} = C_{old} + \Delta t (-VA + DB) C_{new} \\
+        \Longrightarrow \ & [I + \Delta t(VA - DB)]C_{new} = C_{old}
+    \end{split}
+\end{equation}
+Then defining $M$ as
+\begin{equation}
+    \begin{split}
+        & M := I + \Delta t(VA - DB) \\
+        \Longrightarrow \ &  C_{new} = M^{-1} C_{old}
+    \end{split}
+\end{equation}
+Now solving this equation gives us a way of modelling the concentration in 1-dimension over time. Implementing this in Python and making use of the \verb|numpy.linalg| module we can easily do this.
+
+\begin{figure}[h]
     \centering
-    \includegraphics{Figure_1_ODE.pdf}
-    \caption{Plot of Equation \ref{AdvectionDiffusion} with V=5, D=0.35, plotting from t=0 to t=2 at timesteps 0.1}
+    \includegraphics{images/Figure_1_ODE2.pdf}
+    \caption{Plot of Equation \ref{AdvectionDiffusion} with V=10, D=5, plotting from t=0 to t=1.5 at timesteps of 0.1. Dotted line is value at t=0}
     \label{fig:ODE}
 \end{figure}
 
