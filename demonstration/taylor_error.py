@@ -7,14 +7,16 @@ import rmad.expressions as expressions
 
 def taylor_error(expr, condition, eps, **kwargs):
     condition_new = dict(condition)
-    condition_new[kwargs['var']] = condition_new[kwargs['var']] + eps
     evalpostvisitor(expr, symbol_map=condition)
-    Jx = expr.storedvalue
+    Jx = np.array(list(expr.storedvalue))
+    n = len(Jx)
+    vec = np.random.rand(n)
+    condition_new[kwargs['var']] = condition_new[kwargs['var']] + (eps * vec)
     evalpostvisitor(expr, symbol_map=condition_new)
-    Jdeltax = expr.storedvalue
-    dJx = reversemodeAD(expr, condition)
+    Jdeltax = np.array(list(expr.storedvalue))
+    dJx = np.array(list(reversemodeAD(expr, condition)[kwargs['var']]))
     # Using taylor series expansion find O(eps^2)
-    return abs(Jdeltax - Jx - dJx[kwargs['var']]*eps)
+    return np.abs(Jdeltax - Jx - dJx*eps)
 
 
 def taylor_error_plot(expr, condition, eps, **kwargs):
