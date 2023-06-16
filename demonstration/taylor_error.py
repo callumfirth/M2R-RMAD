@@ -40,7 +40,7 @@ def taylor_error_plot(expr, condition, eps, **kwargs):
     for e in eps:
         result.append(taylor_error(expr, condition, e, **kwargs))
     fig = plt.figure()
-    plt.plot(np.log10(np.array(eps)), np.log10(abs(np.array(result))), label='Taylor error')
+    plt.plot(np.log10(np.array(eps)), np.log10(abs(np.mean(np.array(result), axis=1))), label='Taylor error')
     plt.gca().invert_xaxis()
     plt.plot([-2, -9], [-2, -16], linestyle='dashed', label=f'$O(\epsilon^2)$')
     plt.xlabel(f"$\log_{{10}}$ of Epsilon")
