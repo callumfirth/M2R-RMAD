@@ -35,10 +35,12 @@
 % Mention theory why we care about the neural network stuff
 % Talk about neural networks maybe application on backpropagation, reducing loss func, optimising weights etc
 
-\begin{frame}{Table of Contents}
-    \frametitle{Table of Contents}
-    \tableofcontents
+\AtBeginSection[Introduction]
+{
+\begin{frame}{Outline}
+    \tableofcontents[currentsection]
 \end{frame}
+}
 
 \section{Introduction}
 
@@ -57,30 +59,50 @@ Three common ways to differentiate a function on a computer
 \end{itemize}
 \end{frame}
 
+\begin{frame}{Function Definition}
+    \begin{equation*}
+            F: \mathbb{R}^n \longrightarrow \mathbb{R}^m \qquad
+            F(x_1, \ldots, x_n) = (y_1, \ldots, y_m)
+    \end{equation*}
+    We will compare the computational costs of the Jacobian of $F$
+    \begin{equation*} \label{jacobian}
+        F'(x) = \begin{bmatrix}
+            \frac{\partial y_1}{\partial x_1} & \cdots & \frac{\partial y_1}{\partial x_n} \\
+            \vdots & \ddots & \vdots \\
+            \frac{\partial y_m}{\partial x_1} & \cdots & \frac{\partial y_m}{\partial x_n}
+        \end{bmatrix} \in \mathbb{R}^{m \times n}
+    \end{equation*}
+    Cost to compute $F$ is $\mathcal{O}(\mu)$
+\end{frame}
+
+
 \begin{frame}{Finite Differences}
+    \begin{equation*}
+        \frac{\partial F_i (p)}{\partial x_j} \approx \frac{F_i(p+he_j) - F_i(p)}{h}
+    \end{equation*}
     \begin{itemize}
-        \item Uses a truncated Taylor expansion
-        \item For $F: \mathbb{R}^n \longrightarrow \mathbb{R}^m$
-            \begin{equation*}
-            \frac{\partial F_i (p)}{\partial x_j} \approx \frac{F_i(p+he_j) - F_i(p)}{h}
-            \end{equation*}
+        \item Uses a truncated Taylor expansion 
         \item Returns \alert{approximate} value
-        \item Expensive to compute Jacobian
-            \begin{itemize}
-                \item $\mathcal{O}(n \mu)$, $\mu$ is order of $F$
-            \end{itemize}
-    \end{itemize}  
+        \item Low computational costs
+        \begin{itemize}
+            \item $\mathcal{O}(n \mu)$
+        \end{itemize}
+    \end{itemize}
 \end{frame}
 
 \begin{frame}{Symbolic Differentiation}
     \begin{itemize}
         \item Uses computer algebra packages to take derivatives
+        \begin{itemize}
+            \item Application of chain rule
+        \end{itemize}
+        \item Calculates derivative at all $x \in \mathbb{R}^n$
         \item Once solution found any value can be plugged in
         \item Returns \alert{exact} value
-        \item Forward mode more expensive than reverse mode
-            \begin{itemize}
-                \item $\mathcal{O}(n \mu)$
-            \end{itemize}
+        \item Very high computational cost
+        \begin{itemize}
+            \item $\mathcal{O}(nm \mu)$
+        \end{itemize}
     \end{itemize}
 \end{frame}
 
@@ -92,7 +114,8 @@ Three common ways to differentiate a function on a computer
                 \item Reverse mode - we will focus on reverse mode
             \end{itemize}
         \item Application of chain rule
-        \item Returns \alert{exact} value
+        \item Calculates derivative at specified $x \in \mathbb{R}^n$
+        \item Returns \alert{exact} value up to machine precision
         \item Low computational costs
             \begin{itemize}
                 \item $\mathcal{O}(n \mu)$ with forward mode
@@ -101,27 +124,29 @@ Three common ways to differentiate a function on a computer
     \end{itemize}
 \end{frame}
 
-\section{Reverse Mode Algorithmic Differentiation}
-
-
-\begin{frame}{Reverse Mode AD}
-    \begin{itemize}
-        \item Output variable to be differentiated is fixed
-        \item Quantity of interest is the \alert{adjoint}, $\Bar{v}_i$
-        \item Start at output variables and end at input variables
-    \end{itemize}
-    \begin{equation*}
-        \Bar{v}_j = \sum_{i \succ j} \left\{ \Bar{v}_i \cdot \frac{\partial v_i}{\partial v_j} \right\} \quad i \succ j  \text{ if } v_i \text{ depends directly on } v_j
-    \end{equation*} 
+\AtBeginSection[Reverse Mode Algorithmic Differentiation]
+{
+\begin{frame}{Outline}
+    \tableofcontents[currentsection]
 \end{frame}
+}
+
+\section{Reverse Mode Algorithmic Differentiation}
 
 \begin{frame}{Expressions as Trees}
 \frametitle{Expressions as Trees}
-Simple maybe 3 input 1 output
+Simple maybe 3 inputs 1 output
 \end{frame}
 
 \begin{frame}{Expressions as Directed Acylic Graphs}
     \frametitle{Expressions as Directed Acylic Graphs}
+\end{frame}
+
+\begin{frame}{Reverse Mode AD}
+    \begin{equation*}
+            f: \mathbb{R} \longrightarrow \mathbb{R} \qquad
+            f(x) = (y)
+    \end{equation*}
 \end{frame}
 
 \begin{frame}{Reverse Mode Algorithmic Differentiation on DAGs/Trees}

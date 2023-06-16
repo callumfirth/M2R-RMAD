@@ -1,5 +1,6 @@
 \documentclass{article}
 
+\usepackage{setspace} \doublespacing % doublespacing this is required for submission dont change this
 \usepackage{floatrow}
 \usepackage{graphicx} % Required for inserting images
 \usepackage[a4paper, total={6in, 8in}]{geometry}
@@ -15,14 +16,14 @@
 
 \title{Reverse Mode Algorithmic Differentiation}
 \author{Callum Firth, Maximilian Fricker, Alexander Le Marchant, Samuel Murdoch} % alphabetical
-\date{}
+\date{June 2023}
 
 \begin{document}
 
 \maketitle
 
 \tableofcontents
-\newpage
+
 
 \section{Introduction}
 
@@ -32,7 +33,7 @@ Algorithmic differentiation is essential to the training of neural networks. Neu
 
 During the computation of computer models and simulations, it is often necessary to solve non-linear systems of equations as the vast majority of real-world systems are not linear. However, in general, it is very difficult to directly solve these systems and so they have to be solved numerically. One such method is Newton's method which relies on calculating derivatives. Say the system is defined by
 \begin{equation} \label{Fxy}
-        F: \mathbb{R}^n \rightarrow \mathbb{R}^m \quad F(x_1, \cdots, x_n) = (y_1, \cdots, y_m)
+        F: \mathbb{R}^n \rightarrow \mathbb{R}^m \qquad F(x_1, \cdots, x_n) = (y_1, \cdots, y_m)
 \end{equation}
 then given $x_0 \in \mathbb{R}^n$ the iterates are calculated by
 \begin{equation}
@@ -61,7 +62,7 @@ The most common example of numerical differentiation is the finite differences m
 \end{equation}
 This calculation for the derivative is approximate due to the error in the truncated Taylor series. The computational cost of calculating the Jacobian of $F$ in \eqref{jacobian} is $n + 1$ times the cost of evaluating $F$ \cite{chem}. Thus, finite differences is unsuited for systems with a large number of unknowns.
 
-Symbolic differentiation involves taking an algebraic expression and computing its derivative with respect to a specified variable through repeated application of basic rules of calculus using computer algebra tools. It can be useful as, once the formula for the derivative is computed, finding the value of the derivative at a point is as simple as substituting it into the formula for the derivative.  Furthermore, symbolic differentiation provides an explicit formula for the derivative which is beneficial from a mathematical point of view. However, it has the drawback that it can only be applied when the function to be differentiated exists in a closed form. For calculating the gradient of $F_i$ in \eqref{Fxy}, symbolic differentiation has a computational cost of $n$ times the cost of evaluating $F_i$ \cite{chem}. Hence, the computational cost for calculating the Jacobian of a set of equations, defined by $F$, would be prohibitively expensive at $mn$ times the cost of evaluating $F$.
+Symbolic differentiation involves taking an algebraic expression and computing its derivative with respect to a specified variable through repeated application of basic rules of calculus using computer algebra tools. It can be useful as, once the formula for the derivative is computed, finding the value of the derivative at a point is as simple as substituting it into the formula for the derivative.  Furthermore, symbolic differentiation provides an explicit formula for the derivative which is beneficial from a mathematical point of view. However, it has the drawback that it can only be applied when the function to be differentiated exists in a closed form. For calculating the gradient of $F_i$ in \eqref{Fxy}, symbolic differentiation has a computational cost of $n$ times the cost of evaluating $F_i$ \cite{chem}. Hence, the computational cost for calculating the Jacobian of a set of equations, defined by $F$, would be prohibitively expensive at $nm$ times the cost of evaluating $F$.
 
 There are two forms of algorithmic differentiation: forward mode and reverse mode. Fundamental to AD is the application of the chain rule. Both have similar computational costs for the Jacobian but are suited to different types of functions. With forward mode algorithmic differentiation, this has computational cost proportional to $n$ times the cost of evaluating $F$. In contrast, the computational cost of $[F'(x)]^\top$ with reverse mode algorithmic differentiation is proportional to $m$ times the cost of evaluating $F$ \cite{falisse}. Hence, reverse mode is suited for functions $F$ where $n >> m$. We will see below that the reverse mode has an even better complexity error for calculating gradients compared to the alternatives. One drawback of reverse mode algorithmic differentiation over forward-mode is that it requires higher memory usage, due to the necessity to store intermediary values.
 
@@ -120,8 +121,7 @@ Using $j \prec i$ to show $v_i$ depends directly on $v_j$ and $j \prec i \Longri
 \begin{equation}
     v_i = \varphi_i (v_j)_{j \prec i} \text{ for } \varphi_i : \mathbb{R}^{n_i} \longrightarrow \mathbb{R}
 \end{equation}
-
-Where we denote $\mathbb{R}^{n_i}$ depends on $\varphi$. Usually here we have that $n=2$ or $n=1$ however later we consider examples where this may not be the case
+Here $n_i$ depends on $\varphi_i$. Usually $n_i=2$ or $n_i=1$, however later we consider examples where this may not be the case
 
 \subsection{Forward Mode}
 
@@ -141,7 +141,6 @@ Using the additional notation $u_i = (v_j)_{j \prec i}$ and $\Dot{u}_i = (\Dot{v
     \Dot{v_i} = \sum_{j \prec i} \left\{ \Dot{v}_j \cdot \frac{\partial}{\partial v_j} \varphi_i (u_i) \right\} 
     \equiv \Dot{\varphi}_i(u_i, \Dot{u}_i)
 \end{equation}
-
 This can be summarised as the general evaluation procedure given in \cite{evald} and given in Table \ref{tab:gep}.
 This shows the assignment for all the input, intermediate and output variables
 
@@ -189,10 +188,11 @@ Using the additional notation $\Bar{u}_i = (\Bar{v}_j)_{j \prec i}$, we calculat
 \begin{equation}
     \Bar{u}_i += \Bar{v}_i \nabla \varphi_i (u_i)
 \end{equation}
-
+In notation similar to \eqref{tangentequ}
 \begin{equation}
-    \Bar{v}_j = \sum_{i \succ j} \left\{ \Bar{v}_i \cdot \frac{\partial}{\partial v_j} \varphi(u_i) \right\}
+    \Bar{v}_i = \sum_{j \succ i} \left\{ \Bar{v}_j \cdot \frac{\partial}{\partial v_i} \varphi(u_j) \right\}
 \end{equation}
+where $j \succ i$ denotes we are summing over the parents of $i$.
 
 In reverse mode, the tree is first traversed beginning at the inputs and finishing at the outputs, storing the value the elemental function takes at each node. Then, the tree is traversed in the other direction storing the value the adjoint function takes at each node. This produces a the adjoint procedure for computing the first derivative from \cite{dhamarticle}, given in Table \ref{tab:ap}.
 
@@ -229,24 +229,24 @@ Below we will use notation and results from \cite{dhamarticle} for the number of
 
 Given $x, \Dot{x} \in \mathbb{R}^n$ we attain an upper bounded for calculating the number of operations required to compute $F'(x) \Dot{x}$ given in \eqref{ops1}. Given an upper bound on the time taken to compute one operation calculation on the bounded for the time taken to compute $F'(x) \Dot{x}$ is simple.
 \begin{equation} \label{ops1}
-    \text{OPS}(F'(x) \Dot{x}) \leq 3 \cdot \text{OPS}(F(x))
+    \text{OPS}(F'(x) \cdot \Dot{x}) \leq 3 \cdot \text{OPS}(F(x))
 \end{equation}
 Further, we get an exact value for the memory requirement in \eqref{rmem1}.
 \begin{equation} \label{rmem1}
-    \text{RMEM}(F'(x) \Dot{x}) = 2 \cdot \text{RMEM}(F(x))
+    \text{RMEM}(F'(x) \cdot \Dot{x}) = 2 \cdot \text{RMEM}(F(x))
 \end{equation}
 
 \subsection{Reverse Mode}
 
 Given $x \in \mathbb{R}^n$ and $\Bar{y} \in \mathbb{R}^m$ we attain an upper bound for calculating the number of operations required to compute $\Bar{y}^\top F'(x)$ given in \eqref{ops2}. Similarly to before, an upper bound for the time taken to compute $\Bar{y}^\top F'(x)$ can be calculated provided we know the time taken to compute one operation.
 \begin{equation} \label{ops2}
-    \text{OPS}(\Bar{y} F'(x)) \leq 4 \cdot \text{OPS}(F(x))
+    \text{OPS}(\Bar{y} \cdot F'(x)) \leq 4 \cdot \text{OPS}(F(x))
 \end{equation}
 The memory usage is given in \eqref{rmem2}. Here we see the random access memory usage is the same as forward mode but the use of sequentially accessed memory creates an overall memory usage increase.
 \begin{equation} \label{rmem2}
     \begin{gathered}
-        \text{RMEM}(\Bar{y} F'(x)) = 2 \cdot \text{RMEM}(F(x)) \\ 
-        \text{SMEM}(\Bar{y} F'(x)) \approx \text{OPS}(F(x))
+        \text{RMEM}(\Bar{y} \cdot F'(x)) = 2 \cdot \text{RMEM}(F(x)) \\ 
+        \text{SMEM}(\Bar{y} \cdot F'(x)) \approx \text{OPS}(F(x))
     \end{gathered}
 \end{equation}
 
@@ -364,7 +364,7 @@ From Table \ref{tab:example1RP} we get expressions for the partial derivatives g
     \end{gathered}
 \end{equation}
 
-\newpage
+
 \section{Implementation of Scalar Reverse Mode in Python}
 
 To implement reverse mode AD in Python we used the symbolic language that we defined in \cite{PoPBook} as a template. This allowed us to have a symbolic language that we could use to easily construct our expressions. It does this by operator overloading our elementary operators so we can easily create an expression that we can traverse. Here we added additional elementary functions Sin, Cos, Exp and Log. So that they can exist in expressions we create and behave correctly. We also modified our base Expression class to contain the following attributes
@@ -383,7 +383,7 @@ We also modified the \verb|evaluate()| function from \cite{PoPBook} to include e
         return np.sin(o[0])
 \end{verbatim}
 
-Then we have to create an algorithm for traversing and evaluating the DAG at each node. Note here we need to traverse the DAG in postorder traversal, where we visit the operands before we visit the element. Note in implementation we keep a dictionary of the expression and the stored value so we can avoid unnecessary calculation and to make the traversal non-recursive. The idea of the algorithm is seen in algorithm \ref{EvaluatePostvisitor}
+Then we have to create an algorithm for traversing and evaluating the DAG at each node. Note here we need to traverse the DAG in postorder traversal, where we visit the operands before we visit the element. Note in implementation we keep a dictionary of the expression and the stored value so we can avoid unnecessary calculation and make the traversal non-recursive. The idea of the algorithm is seen in algorithm \ref{EvaluatePostvisitor}
 
 \begin{algorithm}[h!]
 \caption{EvaluatePostvisitor function}\label{EvaluatePostvisitor}
@@ -452,8 +452,6 @@ Now we have populated all the elements with their respective adjoints and so we 
 Now we can test our implementation on the previous example given in \eqref{example2} represented by the DAG in Figure \ref{fig:DAGgraph}. To do this we run the code below. We see our output is exactly the same as we calculated previously.
 
 \begin{verbatim}
-    sin = expressions.Sin()
-    exp = expressions.Exp()
     x = expressions.Symbol('x')
     y = expressions.Symbol('y')
     x2 = x**2
@@ -480,7 +478,6 @@ When we send $\epsilon$ to 0 the term $\mathcal{O}(\epsilon)$ goes to 0 meaning 
 When we compute this we get a value for $\mathcal{O}(\epsilon^2)$ which as $\epsilon \longrightarrow 0$ $\mathcal{O}(\epsilon^2) \to 0$ at a rate proportional to $\epsilon^2$.
 
 \begin{figure}[h!]
-    \cite{finite}
     \includegraphics[width=12cm]{images/taylor_error_1.pdf}
     \caption{Plot of Taylor error against epsilon.}
     \label{fig:taylorerror}
@@ -489,10 +486,10 @@ When we compute this we get a value for $\mathcal{O}(\epsilon^2)$ which as $\eps
 When checking if our result is correct we need to calculate the rate of convergence, since we are finding $O(\epsilon^2)$ we expect our convergence to be at the rate of $\epsilon^2$. To check our rate of convergence we use the formula:
 
 \begin{equation}
-    \frac{\log{\frac{\|u_1 - u\|}{\|u_2 - u\|}}}{\log{\frac{|h_1|}{|h_2|}}} = \frac{\log\|u_1 - u\| - \log\|u_2 - u\|}{\log|h_1| - \log|h_2|}
+    \cite{finite} \frac{\log{\frac{\|u_1 - u\|}{\|u_2 - u\|}}}{\log{\frac{|h_1|}{|h_2|}}} = \frac{\log\|u_1 - u\| - \log\|u_2 - u\|}{\log|h_1| - \log|h_2|}
 \end{equation}
 
-Where $u_1, u_2$ are our approximations using $F(x + \epsilon) - F(x)$, $u$ is our calculated derivative using Reverse Mode AD, and $h_1, h_2$ are the corresponding $\epsilon$ for $u_1, u_2$. This value should give us the power of $\epsilon$ to which we are converging at. In our case we got:
+Where $u_1, u_2$ are our approximations using $F(x + \epsilon) - F(x)$, $u$ is our calculated derivative using Reverse Mode AD, and $h_1, h_2$ are the corresponding $\epsilon$ for $u_1, u_2$. This value should give us the power of $\epsilon$ to which we are converging at. In our case, we got:
 
 \begin{center}
     \pgfplotstabletypeset[
@@ -515,7 +512,7 @@ As you can see at nearly all points we got values significantly close to 2. So w
 
 \section{Extension and Implementation into NumPy Arrays}
 
-Now we consider our expression as being a function of $F: \mathbb{R}^n \longrightarrow \mathbb{R}^m$. We cannot do this with our current implementation. Instead, we need to represent our expression as a NumPy 1 x m array, where each element of our array consists of the corresponding output. We can now change our algorithms for evaluation of the value and adjoint so they work correctly, this involves simply running our reversemode algorithm for each subexpression in our array, and making sure to record the adjoints of each of the symbols at each subexpresion. The modified algorithms are seen in Algorithm \ref{reverseADArr} and \ref{EvaluatePostvisitorArr}. Noting that our postvisitor traversal we use is still non-recursive.
+Now we consider our expression as being a function of $F: \mathbb{R}^n \longrightarrow \mathbb{R}^m$. We cannot do this with our current implementation. Instead, we need to represent our expression as a NumPy 1 x m array, where each element of our array consists of the corresponding output. We can now change our algorithms for evaluation of the value and adjoint so they work correctly, this involves simply running our reversemode algorithm for each subexpression in our array, and making sure to record the adjoints of each of the symbols at each subexpression. The modified algorithms are seen in Algorithm \ref{reverseADArr} and \ref{EvaluatePostvisitorArr}. Noting that our postvisitor traversal we use is still non-recursive.
 
 \begin{algorithm}[h]
 \caption{ReversemodeAD algorithm for arrays}\label{reverseADArr}
@@ -547,9 +544,6 @@ Now we consider our expression as being a function of $F: \mathbb{R}^n \longrigh
 Now we can compute the adjoints of our DAG in Figure \ref{fig:DAGgraph2} for \eqref{example1} using our modified code. Here we get the following result for initial conditions $x=1$, $y=\pi$, $z=1$:
 
 \begin{verbatim}
-    sin = expressions.Sin()
-    exp = expressions.Exp()
-    log = expressions.Log()
     x = expressions.Symbol('x')
     y = expressions.Symbol('y')
     z = expressions.Symbol('z')
@@ -565,10 +559,10 @@ Which is what we would expect.
 
 
 
-\newpage
+
 \section{Difference in Runtime}
 
-Lets say we want to plot the time taken to compute various functions of $n$ unique input variables, as seen in \eqref{TimeFunc}. We can compare the difference in runtime between our Forward Mode AD and Reverse Mode AD. To give us a more robust plot we compute the average time taken over many iterations. The results of this test is seen in Figure \ref{fig:TimeDiff}.
+Lets say we want to plot the time taken to compute various functions of $n$ unique input variables, as seen in \eqref{TimeFunc}. We can compare the difference in runtime between our Forward Mode AD and Reverse Mode AD. To give us a more robust plot we compute the average time taken over many iterations. The results of this test are seen in Figure \ref{fig:TimeDiff}.
 \begin{equation} \label{TimeFunc}
     \begin{gathered}
         f_i: \mathbb{R}^n \longrightarrow \mathbb{R} \quad x \in \mathbb{R}^n \\
@@ -609,7 +603,7 @@ Here we can see that for a function with a low number of input parameters and hi
 
 
 
-\newpage
+
 
 \section{Implementing PDEs into Reverse Mode}
 
@@ -643,8 +637,7 @@ Now we have these points, using central difference equations, we can find approx
 
 Where $h$ is the distance between each sample point. If we want to generalise this for all points we can use matrices like so:
 
-\begin{equation} \label{CentralDifference}
-    \begin{gathered}
+\begin{equation} \label{CentralDifference1}
         \underbrace{\frac{1}{2h}
         \begin{bmatrix}
         0 & 0 &  & & \\
@@ -660,7 +653,10 @@ Where $h$ is the distance between each sample point. If we want to generalise th
         \approx
         \begin{bmatrix}
             \frac{\partial C_1}{\partial x} \\ \vdots \\ \frac{\partial C_n}{\partial x}
-        \end{bmatrix} \\
+        \end{bmatrix}
+\end{equation}
+
+\begin{equation}
         \underbrace{\frac{1}{h^2}
         \begin{bmatrix}
         0 & 0 &  & & \\
@@ -676,7 +672,6 @@ Where $h$ is the distance between each sample point. If we want to generalise th
         \begin{bmatrix}
             \frac{\partial^2 C_1}{\partial x^2} \\ \vdots \\ \frac{\partial^2 C_n}{\partial x^2}
         \end{bmatrix}
-    \end{gathered}
 \end{equation}
 
 Where the first and last row in the central difference matrix is all zeros as the derivative is 0 for the boundary conditions.
@@ -711,7 +706,19 @@ Now solving this equation gives us a way of modelling the concentration in 1-dim
     \label{fig:ODE}
 \end{figure}
 
-\newpage
+\subsection{Implementation}
+
+To implement PDEs into our
+
+\subsection{Multivariate Taylor error}
+
+In section 8 we discussed how to find errors when we were given 1 adjoint value per variable. When working with our PDEs however we are given an array with dimension equal to the number of sampling points. In this case, we will use the equation for a multivariate Taylor Test:
+
+\begin{equation}
+    F(x + \epsilon \cdot V) - F(x) - \epsilon \frac{\delta F}{\delta x} \cdot V = \mathcal{O}(\epsilon^2)
+\end{equation}
+
+In this case, $V$ is the direction in which we take our derivative. So if we randomize $V$ then we can be certain our test is accurate.
 
 \bibliography{thebibliography}
 
