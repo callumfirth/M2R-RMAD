@@ -133,6 +133,8 @@ class Function(Operator):
     def __call__(self, value):
         if isinstance(self, AdvDif):
             return AdvDif(value, V=self.V, D=self.D, dt=self.dt, size=self.size)
+        elif isinstance(self, Pick):
+            return Pick(value, e=self.e)
         else:
             return type(self)(value)
 
@@ -216,8 +218,8 @@ class AdvDif(Function):
         self.size = size
 
 
-class Pick(Operator):
-    """Pick the ith element in array"""
+class Pick(Function):
+    """Pick the ith element of array"""
     symbol = "pick"
     precendence = 4
 

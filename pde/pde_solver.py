@@ -5,10 +5,11 @@ import matplotlib.animation as animation
 
 
 def first_deriv_matrix_maker(n, h):
+    """Creates 1st derivative matrix."""
     array = []
     for i in range(n):
         arr = np.zeros(n)
-        if i != 0 and i != n-1:
+        if i != 0 and i != n-1:  # Note 1st and Last row is 0 so derivative 0
             arr = np.zeros(n)
             arr[i-1] = -1
             arr[i+1] = 1
@@ -18,10 +19,11 @@ def first_deriv_matrix_maker(n, h):
 
 
 def second_deriv_matrix_maker(n, h):
+    """Creates 2nd derivative matrix."""
     array = []
     for i in range(n):
         arr = np.zeros(n)
-        if i != 0 and i != n-1:
+        if i != 0 and i != n-1:  # Note 1st and Last row is 0 so derivative 0
             arr[i-1] = 1
             arr[i] = -2
             arr[i+1] = 1
@@ -30,7 +32,8 @@ def second_deriv_matrix_maker(n, h):
     return array
 
 
-def time_step(gridpoints, dt=0.1, V=1, D=1):
+def matrixM(gridpoints, dt=0.01, V=1, D=1):
+    """Create matrix M to use in our solve method."""
     n = len(gridpoints)
     h = gridpoints[1] - gridpoints[0]
     A = first_deriv_matrix_maker(n, h)
@@ -40,12 +43,14 @@ def time_step(gridpoints, dt=0.1, V=1, D=1):
 
 
 def solve(C, gridpoints, dt, V, D):
-    M = time_step(gridpoints, dt, V, D)
+    """Solve one time step."""
+    M = matrixM(gridpoints, dt, V, D)
     C = linalg.solve(M, C)
     return C
 
 
 def loop(size, numpoints, endtime, dt, V=1, D=1):
+    """Runs PDE till endtime, solving each time step."""
     C = initial_C(size, numpoints)
     gridpoints = np.linspace(0, 10*size, 10*numpoints)
     timepoints = np.arange(0, endtime, dt)
@@ -55,12 +60,14 @@ def loop(size, numpoints, endtime, dt, V=1, D=1):
 
 
 def initial_C(func, size=1, numpoints=1000):
+    """Create initial condition array using lambda func."""
     gridpoints = np.linspace(0, size, numpoints)
     vfunc = np.vectorize(func)
     return vfunc(gridpoints)
 
 
 def over_time_plot(size, numpoints, endtime, dt, V=1, D=1):
+    """Plot animation for our PDE."""
     ims = []
     gridpoints = np.linspace(0, size, numpoints)
     C = np.sin(gridpoints)**2
@@ -71,8 +78,8 @@ def over_time_plot(size, numpoints, endtime, dt, V=1, D=1):
     values_over_time = [np.array(C)]
     fig, ax = plt.subplots()
     im = ax.plot(gridpoints2, C, "--r")
-    #for i in range(25):
-    #    ims.append(im)
+    for i in range(25):
+        ims.append(im)
     for t in range(len(timepoints)):
         values_over_time = np.append(values_over_time, C)
         m = time_step(gridpoints2, dt, V, D)
@@ -81,9 +88,9 @@ def over_time_plot(size, numpoints, endtime, dt, V=1, D=1):
             im = ax.plot(gridpoints2, C, color="red", alpha=timepoints[t]/endtime)
             ims.append(im)
 
-    #ani = animation.ArtistAnimation(fig, ims, interval=10, blit=True,
-    #                                repeat_delay=100)
-    #
-    #ani.save('images/animation.mp4', fps=15)
-    #plt.imsave("images/timeplot.pdf")
+    ani = animation.ArtistAnimation(fig, ims, interval=10, blit=True,
+                                    repeat_delay=100)
+
+    ani.save('images/animation.mp4', fps=15)
+    plt.imsave("images/timeplot.pdf")
     plt.show()

@@ -2,7 +2,7 @@ from functools import singledispatch
 import rmad.expressions as expressions
 import numpy as np
 from pde.pde_solver import solve
-from pde.pde_solver import time_step
+from pde.pde_solver import matrixM
 
 @singledispatch
 def evaluate(expr, *o, **kwargs):
@@ -94,20 +94,13 @@ def _(expr, *o, **kwargs):
     dt = expr.dt
     size = expr.size
     numpoints = len(o[0])
-    gridpoints = np.linspace(0, 10*size, numpoints)
+    gridpoints = np.linspace(0, size, numpoints)
     return solve(o[0], gridpoints, dt, V, D)
 
 
 @evaluate.register(expressions.Pick)
 def _(expr, *o, **kwargs):
     return o[0][expr.e]
-
-def _closeto0(value):
-    if isinstance(value, np.ndarray):
-        value[np.isclose(value, 0, atol=1e-12)] = 0
-    elif isinstance(value, int) and np.isclose(value, 0, atol=1e-15):
-        value = 0
-    return value
 
 
 @singledispatch
@@ -197,8 +190,8 @@ def _(expr, *o, **kwargs):
     dt = expr.dt
     size = expr.size
     numpoints = len(o[0])
-    gridpoints = np.linspace(0, 10*size, numpoints)
-    M = time_step(gridpoints, dt, V, D)
+    gridpoints = np.linspace(0, size, numpoints)
+    M = matrixM(gridpoints, dt, V, D)
     return [np.linalg.solve(M.T, expr.adjoint)]
 
 

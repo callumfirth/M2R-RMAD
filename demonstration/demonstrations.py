@@ -177,16 +177,6 @@ def example_rm():
     conditions = {x: 2, y: 2}
     return reversemodeAD(expression, conditions)
 
-def taylor_test_test():
-    x = expressions.Symbol('x')
-    x2 = x**2
-    expression = sin(x2) + (x2)
-    w = np.array([1, 2, 3, 4])
-    conditions = {x: w}
-    eps = [10**(-(i+1)) for i in range(10)]
-    return taylor_error_plot(expression, conditions, eps, var=x)
-
-#print(taylor_test_test())
 
 def taylor_error_example():
     x = expressions.Symbol('x')
@@ -349,12 +339,10 @@ def pde1():
     numpoints = 1000
     size = 10*np.pi
     func = lambda x: np.sin(x)**2 if np.pi < x < 2*np.pi else 0.0
-
     C0 = initial_C(func, size, numpoints)
 
-    pde = expressions.AdvDif(C0, D=5, V=10, dt=0.01, size=np.pi)
+    pde = expressions.AdvDif(C0, D=5, V=10, dt=0.01, size=10*np.pi)
     v = expressions.Symbol('v')
-    e = 100
     expr2 = pde(v)
     conditions = {v: C0}
 
@@ -386,28 +374,6 @@ def exampleforshow3():
     expr = x * np.array([x**2, x**3])
     conditions = {x: np.array([1, 2, 3])}
     return reversemodeAD(expr, conditions)
-
-#print(exampleforshow())
-#print(exampleforshow2())
-#print(exampleforshow3())
-# plotpde()
-
-
-numpoints = 1000
-size = 10*np.pi
-func = lambda x: np.sin(x)**2 if np.pi < x < 2*np.pi else 0.0
-
-C0 = initial_C(func, size, numpoints)
-
-pde = expressions.AdvDif(C0, D=5, V=10, dt=0.01, size=np.pi)
-v = expressions.Symbol('v')
-e = 100
-expr2 = pde(v)
-conditions = {v: C0}
-eps = [10**(-(i+1)) for i in range(10)]
-
-
-taylor_error_plot(expr2, conditions, eps, var=v)
 
 
 def ex222():
@@ -461,3 +427,42 @@ def reproduce():
     cluster_graph()  # Cluster graph figure for comparison
 
 # reproduce() #Please dont run yet, run ones individually above for testing
+
+
+def PDEtaylor():
+    """Simple test for PDE adjoint values"""
+    # Number of points
+    numpoints = 1000
+    # Setting the size
+    size = 10*np.pi
+    # Setting the function up
+    func = lambda x: np.sin(x)**2 if np.pi < x < 2*np.pi else 0.0
+    # Create initial C, from original func
+    C0 = initial_C(func, size, numpoints)
+    # Our PDE that we want to use
+    pde = expressions.AdvDif(C0, D=5, V=10, dt=0.01, size=np.pi)
+    # Our symbol
+    v = expressions.Symbol('v')
+    # Create our expression we want to find adjoint of
+    expr2 = pde(v)
+    # Setup values for symbol (we have C0 is array here)
+    conditions = {v: C0}
+    # Epsilon values for our taylor error
+    eps = [10**(-(i+1)) for i in range(10)]
+    # Plot our taylor error
+    taylor_error_plot(expr2, conditions, eps, var=v)
+
+
+def taylor_test_test():
+    """Simple test for taylor test"""
+    x = expressions.Symbol('x')
+    x2 = x**2
+    expression = sin(x2) + (x2)
+    w = np.array([1, 2, 3, 4])
+    conditions = {x: w}
+    eps = [10**(-(i+1)) for i in range(10)]
+    return taylor_error_plot(expression, conditions, eps, var=x)
+
+
+# print(taylor_test_test())
+print(PDEtaylor())

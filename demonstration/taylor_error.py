@@ -6,20 +6,31 @@ import rmad.expressions as expressions
 
 
 def taylor_error(expr, condition, eps, **kwargs):
+    # Copy the condition array
     condition_new = dict(condition)
+    # Evaluate our expr
     evalpostvisitor(expr, symbol_map=condition)
+    # Get our evaluating our expr output
     Jx = expr.storedvalue
+    # If our output is a np array get the dimension
     if isinstance(Jx, np.ndarray):
         n = len(Jx)
     else:
         n = 1
+    # Turn Jx into an array regardless
     Jx = np.array(Jx)
+    # Create a random direction vector and normalise this
     vec = np.random.rand(n)
+    # Multiply by our epsilon value
     vec = eps * vec/np.linalg.norm(vec)
-    condition_new[kwargs['var']] = condition_new[kwargs['var']] + (vec)
-    evalpostvisitor(expr, symbol_map=condition_new)
-    Jdeltax = np.array(expr.storedvalue)
+    # Now calculate derivative of our initial conditions
     dJx = np.array(reversemodeAD(expr, condition)[kwargs['var']]) * vec
+    # Add this new normalised direction vector (of epsilon size) to our initial conditions
+    condition_new[kwargs['var']] = condition_new[kwargs['var']] + (vec)
+    # Evaluate expression with these new conditions
+    evalpostvisitor(expr, symbol_map=condition_new)
+    # Put this evaluated expr into a new array
+    Jdeltax = np.array(expr.storedvalue)
     # Using taylor series expansion find O(eps^2)
     return np.abs(Jdeltax - Jx - dJx)
 
@@ -51,14 +62,3 @@ def convergence_table(expr, condition, eps, **kwargs):
     d = dict(zip(points, grads))
     f = open("images\\rate_of_convergence.txt", 'w')
     return d
-
-
-#x = expressions.Symbol('x')
-#y = expressions.Symbol('y')
-#sin = expressions.Sin()
-
-#expr = x*sin(x + y)
-#conditions = {x: 1, y: 1}
-#eps = [10**(-(i+1)) for i in range(10)]
-
-#print(convergence_table(expr, conditions, eps, var=x))
