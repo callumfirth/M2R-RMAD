@@ -143,15 +143,40 @@ Simple maybe 3 inputs 1 output
 \end{frame}
 
 \begin{frame}{Reverse Mode AD}
-    \begin{equation*}
+    \begin{equation*} \label{1df}
             f: \mathbb{R} \longrightarrow \mathbb{R} \qquad
             f(x) = (y)
     \end{equation*}
+    \begin{figure}
+        \centering
+        \includegraphics[width=10cm]{images/1d_func_sketch.jpg}
+    \end{figure}
+    Applying chain rule
+    \begin{equation*}
+        \begin{split}
+            \frac{\partial y}{\partial x} & = \frac{\partial y}{\partial w_{1}} \frac{\partial w_{1}}{\partial x} \\
+            \onslide<2->{& = \frac{\partial y}{\partial w_{2}} \frac{\partial w_{2}}{\partial w_{1}} \frac{\partial w_{1}}{\partial x}} \\
+            \onslide<3->{& = \ldots \\
+            & = \frac{\partial y}{\partial w_{n-1}} \frac{\partial w_{n-1}}{\partial w_{n-2}} \cdots \frac{\partial w_2}{\partial w_1} \frac{\partial w_1}{\partial x}}
+        \end{split}
+    \end{equation*}
 \end{frame}
 
-\begin{frame}{Reverse Mode Algorithmic Differentiation on DAGs/Trees}
-\frametitle{Reverse Mode Algorithmic Differentiation on DAGs/Trees}
-On DAGs
+\begin{frame}{Reverse Mode AD}
+    Quantity of importance is the \alert{adjoint} $\Bar{w}_i$
+    \begin{equation*}
+        \Bar{w}_i = \frac{\partial y}{\partial w_i}
+    \end{equation*}
+    Calculation from previous slide can be rewritten as
+    \begin{equation*}
+        \begin{split}
+            \frac{\partial y}{\partial x} & = \Bar{w}_1 \frac{\partial w_{1}}{\partial x} \\
+            \onslide<2->{& = \Bar{w}_2 \left( \frac{\partial w_{2}}{\partial w_{1}} \frac{\partial w_{1}}{\partial x} \right) } \\
+            \onslide<3->{& = \ldots \\
+            & = \Bar{w}_{n-1} \left( \frac{\partial w_{n-1}}{\partial w_{n-2}} \cdots \frac{\partial w_2}{\partial w_1} \frac{\partial w_1}{\partial x} \right)}
+        \end{split}
+    \end{equation*}
+    \onslide<4->{As we traverse the graph we store the adjoints}
 \end{frame}
 
 \begin{frame}{Adjoints of Standard Functions}
