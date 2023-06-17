@@ -6,6 +6,7 @@ import rmad.expressions as expressions
 
 
 def taylor_error(expr, condition, eps, **kwargs):
+
     # Copy the condition array
     condition_new = dict(condition)
     # Evaluate our expr
@@ -13,24 +14,20 @@ def taylor_error(expr, condition, eps, **kwargs):
     # Get our evaluating our expr output
     Jx = expr.storedvalue
     # If our output is a np array get the dimension
-    if isinstance(Jx, np.ndarray):
-        n = len(Jx)
-    else:
-        n = 1
-    # Turn Jx into an array regardless
-    Jx = np.array(Jx)
+    n = len(condition[kwargs['var']])
     # Create a random direction vector and normalise this
     vec = np.random.rand(n)
+    vec = np.ones(n)
     # Multiply by our epsilon value
-    vec = eps * vec/np.linalg.norm(vec)
-    # Now calculate derivative of our initial conditions
-    dJx = np.array(reversemodeAD(expr, condition)[kwargs['var']]) * vec
+
     # Add this new normalised direction vector (of epsilon size) to our initial conditions
-    condition_new[kwargs['var']] = condition_new[kwargs['var']] + (vec)
+    condition_new[kwargs['var']] = condition_new[kwargs['var']] + (vec*eps)
+    # Now calculate derivative of our initial conditions
+    dJx = np.dot(reversemodeAD(expr, condition)[kwargs['var']], vec*eps)
     # Evaluate expression with these new conditions
     evalpostvisitor(expr, symbol_map=condition_new)
     # Put this evaluated expr into a new array
-    Jdeltax = np.array(expr.storedvalue)
+    Jdeltax = expr.storedvalue
     # Using taylor series expansion find O(eps^2)
     return np.abs(Jdeltax - Jx - dJx)
 

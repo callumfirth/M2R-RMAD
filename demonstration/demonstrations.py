@@ -12,6 +12,7 @@ from rmad.traversal import evalpostvisitor
 from pde.pde_solver import loop
 from pde.pde_solver import over_time_plot
 from rmad.expressions import sin, cos, exp, log
+from rmad.traversal import adjoint
 
 
 def timerm(expr, conditions):
@@ -340,10 +341,10 @@ def pde1():
     size = 10*np.pi
     func = lambda x: np.sin(x)**2 if np.pi < x < 2*np.pi else 0.0
     C0 = initial_C(func, size, numpoints)
-
     pde = expressions.AdvDif(C0, D=5, V=10, dt=0.01, size=10*np.pi)
+    pick = expressions.Pick(None, e=120)
     v = expressions.Symbol('v')
-    expr2 = pde(v)
+    expr2 = pick(pde(v))
     conditions = {v: C0}
 
     B = reversemodeAD(expr2, conditions)
@@ -436,15 +437,16 @@ def PDEtaylor():
     # Setting the size
     size = 10*np.pi
     # Setting the function up
-    func = lambda x: np.sin(x)**2 if np.pi < x < 2*np.pi else 0.0
+    func = lambda x: np.sin(x)**2 if np.pi <= x <= 2*np.pi else 0.0
     # Create initial C, from original func
     C0 = initial_C(func, size, numpoints)
     # Our PDE that we want to use
-    pde = expressions.AdvDif(C0, D=5, V=10, dt=0.01, size=np.pi)
+    pick = expressions.Pick(None, e=130)
+    pde = expressions.AdvDif(C0, D=5, V=10, dt=0.01, size=size)
     # Our symbol
     v = expressions.Symbol('v')
     # Create our expression we want to find adjoint of
-    expr2 = pde(v)
+    expr2 = pick(pde(v))
     # Setup values for symbol (we have C0 is array here)
     conditions = {v: C0}
     # Epsilon values for our taylor error
@@ -457,12 +459,23 @@ def taylor_test_test():
     """Simple test for taylor test"""
     x = expressions.Symbol('x')
     x2 = x**2
-    expression = sin(x2) + (x2)
+    pick = expressions.Pick(None, 0)
+    expression = pick(2*(x2) + (x2))
     w = np.array([1, 2, 3, 4])
     conditions = {x: w}
     eps = [10**(-(i+1)) for i in range(10)]
     return taylor_error_plot(expression, conditions, eps, var=x)
 
+def pick_test():
+    """Simple test for taylor test"""
+    x = expressions.Symbol('x')
+    x2 = x**2
+    pick = expressions.Pick(None, 0)
+    expression = pick(2*(x2) + (x2))
+    w = np.array([1, 2, 3, 4])
+    conditions = {x: w}
+    return reversemodeAD(expression, conditions)
 
-# print(taylor_test_test())
-taylor_error_example()
+print(pick_test())
+print(taylor_test_test())
+print(PDEtaylor())

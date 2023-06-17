@@ -47,7 +47,7 @@ def draw_expression(expr, name, xlab=False, numsymbol=0):
     graph = gv.Digraph(engine='dot')
     exprpostvisitor(expr, graph, numsymbol=2, xlab=xlab)
     graph.attr(margin="0")
-    graph.format = 'png'
+    graph.format = 'pdf'
     graph.render(f'images/Graph_{name}', view=True)
 
 

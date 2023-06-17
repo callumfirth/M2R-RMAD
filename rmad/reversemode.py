@@ -13,14 +13,8 @@ def reversemodeAD(expr, conditions):
         symbols = dict((symbol, []) for symbol in conditions)
         for expression in expr:
 
-            # If output of our value is nparray
-            if isinstance(expr.storedvalue, np.ndarray):
-                adjoint = np.ones(len(expr.storedvalue))
-            else:
-                adjoint = 1
-
             # Backward traverse the tree (previsitor)
-            adjointprevisitor(expression, fn_adjoint=adjoint)
+            adjointprevisitor(expression, fn_adjoint=1)
             for symbol in conditions.keys():
                 symbols[symbol].append(symbol.adjoint)  # Store adjoint values
                 symbol.adjoint = 0  # So next pass, adjoints are set back to 0
@@ -28,13 +22,7 @@ def reversemodeAD(expr, conditions):
     else:  # If we have only 1 output, i.e. m=1
         # Backward traverse the tree
 
-        #If output of our value is nparray
-        if isinstance(expr.storedvalue, np.ndarray):
-            adjoint = np.ones(len(expr.storedvalue))
-        else:
-            adjoint = 1
-
-        adjointprevisitor(expr, fn_adjoint=adjoint)
+        adjointprevisitor(expr, fn_adjoint=1)
         # For each symbol, return the dict of the repsective adjoint
         symbols = dict((symbol, symbol.adjoint) for symbol in conditions)
     return symbols

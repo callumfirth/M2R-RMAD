@@ -102,7 +102,6 @@ def _(expr, *o, **kwargs):
 def _(expr, *o, **kwargs):
     return o[0][expr.e]
 
-
 @singledispatch
 def adjoint_evaluate(expr, *o, **kwargs):
     """
@@ -194,9 +193,20 @@ def _(expr, *o, **kwargs):
     M = matrixM(gridpoints, dt, V, D)
     return [np.linalg.solve(M.T, expr.adjoint)]
 
+# What has been tried for adjointeval (for taylortest of np.ones()):
+# np.linalg.inv(M.T) @ expr.adjoint // Gives flat line at bottom
+# np.linalg.inv(M) @ expr.adjoint // Gives us straight line w gradient 1 below theory
+# np.linalg.inv(M) @ expr.storedvalue // Straight line gradient 1, above theory
+# np.linalg.inv(M.T) @ expr.storedvalue // Same as above
+# np.linalg.inv(M.T) @ o[0] // Same as above
+# np.linalg.inv(M.T) @ o[0] // Same as above
+# M.T @ expr.adjoint // Same as above
+# M @ expr.adjoint // Same as above
+# M @ expr.storedvalue // Same as above
+
 
 @adjoint_evaluate.register(expressions.Pick)
 def _(expr, *o, **kwargs):
     zeros = np.zeros(len(o[0]))
-    zeros[expr.e] = 1
-    return [zeros * expr.adjoint]
+    zeros[expr.e] = expr.adjoint
+    return [zeros]

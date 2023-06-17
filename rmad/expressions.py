@@ -220,7 +220,7 @@ class AdvDif(Function):
 
 class Pick(Function):
     """Pick the ith element of array"""
-    symbol = "pick"
+    symbol = "Pick"
     precendence = 4
 
     def __init__(self, operands, e):
