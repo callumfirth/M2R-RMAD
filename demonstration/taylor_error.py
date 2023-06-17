@@ -16,8 +16,8 @@ def taylor_error(expr, condition, eps, **kwargs):
     # If our output is a np array get the dimension
     n = len(condition[kwargs['var']])
     # Create a random direction vector and normalise this
-    vec = np.random.rand(n)
-    vec = np.ones(n)
+    # vec = np.random.rand(n) + 1
+    vec = np.ones(n)  # Using ones just for testing
     # Multiply by our epsilon value
 
     # Add this new normalised direction vector (of epsilon size) to our initial conditions
