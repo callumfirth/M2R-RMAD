@@ -45,7 +45,6 @@
 \section{Introduction}
 
 \begin{frame}{Why are Derivatives important?}
-\frametitle{Why do we want to differentiate computer programs?}
 \begin{itemize}
     \item Neural Networks
     \begin{itemize}
@@ -72,7 +71,6 @@ Three common ways to differentiate a function on a computer
     \end{equation*}
 
     \begin{itemize}
-        \item Cost to compute $F$ is $\mathcal{O}(\mu)$ \\
         \item We will compare the computational costs of the Jacobian of $F$
     \end{itemize}
     
@@ -95,7 +93,7 @@ Three common ways to differentiate a function on a computer
         \item Returns \alert{approximate} value
         \item Low computational costs
         \begin{itemize}
-            \item $\mathcal{O}(n \mu)$
+            \item $\mathcal{O}(n) \cdot \mathrm{Cost}(F)$
         \end{itemize}
     \end{itemize}
 \end{frame}
