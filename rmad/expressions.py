@@ -1,6 +1,6 @@
 """Module to represent mathematical expressions."""
 from numbers import Number as Num
-import numpy as np
+
 
 class Expression:
     """Main expression class."""
@@ -132,7 +132,11 @@ class Function(Operator):
 
     def __call__(self, value):
         if isinstance(self, AdvDif):
-            return AdvDif(value, V=self.V, D=self.D, dt=self.dt, size=self.size)
+            return AdvDif(value,
+                          V=self.V,
+                          D=self.D,
+                          dt=self.dt,
+                          size=self.size)
         elif isinstance(self, Pick):
             return Pick(value, e=self.e)
         else:

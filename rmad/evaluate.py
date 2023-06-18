@@ -4,6 +4,7 @@ import numpy as np
 from pde.pde_solver import solve
 from pde.pde_solver import matrixM
 
+
 @singledispatch
 def evaluate(expr, *o, **kwargs):
     """Evaluate an expression node.
@@ -102,6 +103,7 @@ def _(expr, *o, **kwargs):
 def _(expr, *o, **kwargs):
     return o[0][expr.e]
 
+
 @singledispatch
 def adjoint_evaluate(expr, *o, **kwargs):
     """
@@ -124,12 +126,12 @@ def adjoint_evaluate(expr, *o, **kwargs):
 
 @adjoint_evaluate.register(expressions.Number)
 def _(expr, *o, **kwargs):
-    return [1 * expr.adjoint]  # Essentially redundant as numbers have no operands
+    return [1 * expr.adjoint]
 
 
 @adjoint_evaluate.register(expressions.Symbol)
 def _(expr, *o, **kwargs):
-    return [1 * expr.adjoint]  # Essentially redundant as symbols have no operands
+    return [1 * expr.adjoint]
 
 
 @adjoint_evaluate.register(expressions.Add)
@@ -192,17 +194,6 @@ def _(expr, *o, **kwargs):
     gridpoints = np.linspace(0, size, numpoints)
     M = matrixM(gridpoints, dt, V, D)
     return [np.linalg.solve(M.T, expr.adjoint)]
-
-# What has been tried for adjointeval (for taylortest of np.ones()):
-# np.linalg.inv(M.T) @ expr.adjoint // Gives flat line at bottom
-# np.linalg.inv(M) @ expr.adjoint // Gives us straight line w gradient 1 below theory
-# np.linalg.inv(M) @ expr.storedvalue // Straight line gradient 1, above theory
-# np.linalg.inv(M.T) @ expr.storedvalue // Same as above
-# np.linalg.inv(M.T) @ o[0] // Same as above
-# np.linalg.inv(M.T) @ o[0] // Same as above
-# M.T @ expr.adjoint // Same as above
-# M @ expr.adjoint // Same as above
-# M @ expr.storedvalue // Same as above
 
 
 @adjoint_evaluate.register(expressions.Pick)

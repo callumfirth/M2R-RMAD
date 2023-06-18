@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import numpy.linalg as linalg
-import matplotlib.animation as animation
 
 
 def first_deriv_matrix_maker(n, h):
@@ -88,10 +87,6 @@ def over_time_plot(size, numpoints, endtime, dt, V=1, D=1):
             im = ax.plot(gridpoints2, C, color="red",
                          alpha=timepoints[t]/endtime)
             ims.append(im)
-
-    ani = animation.ArtistAnimation(fig, ims, interval=10, blit=True,
-                                    repeat_delay=100)
-
-    ani.save('images/animation.mp4', fps=15)
-    plt.imsave("images/timeplot.pdf")
+    ax.set_xlabel("$x$: Distance")
+    ax.set_ylabel("$C$: Concentration")
     plt.show()

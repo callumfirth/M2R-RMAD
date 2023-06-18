@@ -6,13 +6,10 @@ from pde.pde_solver import initial_C
 import rmad.expressions as expressions
 from rmad.reversemode import reversemodeAD
 from rmad.forwardmode import forwardmodeAD
-from demonstration.taylor_error import taylor_error, taylor_error_plot, convergence_table
+from demonstration.taylor_error import pde_taylor_error, taylor_error, taylor_error_plot
 from demonstration.graph_drawer import draw_expression, draw_cluster
-from rmad.traversal import evalpostvisitor
-from pde.pde_solver import loop
-from pde.pde_solver import over_time_plot
+from pde.pde_solver import over_time_plot, solve
 from rmad.expressions import sin, cos, exp, log
-from rmad.traversal import adjoint
 
 
 def timerm(expr, conditions):
@@ -34,7 +31,6 @@ def generatex(n):
 
 
 def generatew(n, m):
-    np.random.seed(0)
     return [np.random.randn(m) for i in range(n)]
 
 
@@ -94,7 +90,7 @@ def plottime(n, m, iterations):
     timelines2 /= iterations
     timelines3 /= iterations
     timelines4 /= iterations
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(15, 10))
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(7.5, 5))
 
     fm, = ax1.plot(nrange, timelines1[:, 0], label="Forward Mode")
     rm, = ax1.plot(nrange, timelines1[:, 1], label="Reverse Mode")
@@ -108,17 +104,17 @@ def plottime(n, m, iterations):
     fm, = ax4.plot(nrange, timelines4[:, 0], label="Forward Mode")
     rm, = ax4.plot(nrange, timelines4[:, 1], label="Reverse Mode")
 
-    ax1.set_title("Plotting the time to compute derivative of fn_1")
-    ax2.set_title("Plotting the time to compute derivative of fn_2")
-    ax3.set_title("Plotting the time to compute derivative of fn_3")
-    ax4.set_title("Plotting the time to compute derivative of fn_4")
+    ax1.set_title("Time to compute derivative of $F_1$")
+    ax2.set_title("Time to compute derivative of $F_2$")
+    ax3.set_title("Time to compute derivative of $F_3$")
+    ax4.set_title("Time to compute derivative of $F_4$")
 
     plt.plot()
 
-    ax1.set_ylabel("t: Time taken to compute derivative")
-    ax3.set_ylabel("t: Time taken to compute derivative")
-    ax3.set_xlabel("n: Number of input variables")
-    ax4.set_xlabel("n: Number of input variables")
+    ax1.set_ylabel("$t$: Average time taken")
+    ax3.set_ylabel("$t$: Average time taken")
+    ax3.set_xlabel("$n$: # of input variables")
+    ax4.set_xlabel("$n$: # of input variables")
     plt.legend()
     fig.align_labels()
     fig.tight_layout()
@@ -267,7 +263,7 @@ def func_nm(n, m):
             else:
                 subexpr += j*x[i]**j
         expression = np.append(expression, subexpr)
-    conditions = dict(zip(x, generatew(n, 1)))
+    conditions = dict(zip(x, generatew(n, 2000)))
     return expression, conditions
 
 
@@ -305,8 +301,8 @@ def heatmap(n, m, iterations):
     fm = ax2.matshow(fmarr,
                      cmap="hot", origin="lower", interpolation="nearest")
 
-    norm = colors.Normalize(vmin=min(np.min(rmarr), np.min(fmarr)),
-                            vmax=max(np.max(rmarr), np.max(fmarr)))
+    norm = colors.CenteredNorm(vcenter=0.0085)
+    norm = colors.LogNorm(vmin=0.00005, vmax=0.25)
     rm.set_norm(norm)
     fm.set_norm(norm)
     cbar = plt.colorbar(fm, ax=(ax1, ax2), location="bottom")
@@ -388,11 +384,11 @@ def ex222():
     return reversemodeAD(expression, conditions)
 
 
-#print(ex222())
+# print(ex222())
 
-# heatmap(25, 25, 10)
+# heatmap(15, 15, 20)
 
-# plottime(75, 1, 50)
+# plottime(50, 20, 25)
 
 # print(rmx1())
 
@@ -430,7 +426,7 @@ def reproduce():
 # reproduce() #Please dont run yet, run ones individually above for testing
 
 
-def PDEtaylor():
+def PDEtaylor_error():
     """Simple test for PDE adjoint values"""
     # Number of points
     numpoints = 1000
@@ -442,29 +438,46 @@ def PDEtaylor():
     C0 = initial_C(func, size, numpoints)
     # Our PDE that we want to use
     pick = expressions.Pick(None, e=130)
-    pde = expressions.AdvDif(C0, D=5, V=10, dt=0.01, size=size)
+    
     # Our symbol
     v = expressions.Symbol('v')
     # Create our expression we want to find adjoint of
-    expr2 = pick(pde(v))
+    # expr2 = pick(pde(v))
     # Setup values for symbol (we have C0 is array here)
-    conditions = {v: C0}
+    # conditions = {v: C0}
     # Epsilon values for our taylor error
     eps = [10**(-(i+1)) for i in range(10)]
     # Plot our taylor error
-    taylor_error_plot(expr2, conditions, eps, var=v)
+    vals = []
+    for ep in eps:
+        pde = expressions.AdvDif(C0, D=5, V=10, dt=ep, size=size)
+        Jx = C0[130]
+        Jdeltax = solve(C0, np.linspace(0, size, numpoints), dt=ep, V=10, D=5)[130]
+        dJx = (reversemodeAD(pick(pde(v)), {v: C0})[v])[130]*ep
+        vals.append(Jdeltax-Jx-dJx)
+    fig = plt.figure()
+    plt.plot(np.log10(np.array(eps)),
+             np.log10(abs(np.array(vals))), label='Taylor error')
+    plt.gca().invert_xaxis()
+    plt.plot([-2, -9], [-2, -16], linestyle='dashed', label='$O(\epsilon^2)$')
+    plt.xlabel("$\log_{{10}}$ of Epsilon")
+    plt.ylabel("$\log_{{10}}$ of Taylor error")
+    plt.legend()
+    plt.show()
 
 
 def taylor_test_test():
     """Simple test for taylor test"""
     x = expressions.Symbol('x')
     x2 = x**2
+    exp = expressions.Exp()
     pick = expressions.Pick(None, 0)
-    expression = pick(2*(x2) + (x2))
-    w = np.array([1, 2, 3, 4])
+    expression = pick(2*(x2) + cos(x)*(x2)+exp(x))
+    w = np.array([1, 2, 5])
     conditions = {x: w}
     eps = [10**(-(i+1)) for i in range(10)]
     return taylor_error_plot(expression, conditions, eps, var=x)
+
 
 def pick_test():
     """Simple test for taylor test"""
@@ -472,12 +485,11 @@ def pick_test():
     x2 = x**2
     pick = expressions.Pick(None, 0)
     expression = pick(2*(x2) + (x2))
-    w = np.array([1, 2, 3, 4])
+    w = np.array([3, 5, 3, 7])
     conditions = {x: w}
     return reversemodeAD(expression, conditions)
 
-print(pick_test())
-print(taylor_test_test())
-print(PDEtaylor())
 
-taylor_test_test()
+# print(pick_test())
+# print(taylor_test_test())
+# print(PDEtaylor())
