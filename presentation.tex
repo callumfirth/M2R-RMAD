@@ -45,8 +45,14 @@
 \section{Introduction}
 
 \begin{frame}{Why are Derivatives important?}
-\frametitle{Why are Derivatives Important?}
-Motivation, neural networks, gradient descent
+\frametitle{Why do we want to differentiate computer programs?}
+\begin{itemize}
+    \item Neural Networks
+    \begin{itemize}
+        \item Loss function / Gradient descent
+    \end{itemize}
+    \item Systems of non linear equations
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Types of Differentiation}
@@ -64,7 +70,12 @@ Three common ways to differentiate a function on a computer
             F: \mathbb{R}^n \longrightarrow \mathbb{R}^m \qquad
             F(x_1, \ldots, x_n) = (y_1, \ldots, y_m)
     \end{equation*}
-    We will compare the computational costs of the Jacobian of $F$
+
+    \begin{itemize}
+        \item Cost to compute $F$ is $\mathcal{O}(\mu)$ \\
+        \item We will compare the computational costs of the Jacobian of $F$
+    \end{itemize}
+    
     \begin{equation*} \label{jacobian}
         F'(x) = \begin{bmatrix}
             \frac{\partial y_1}{\partial x_1} & \cdots & \frac{\partial y_1}{\partial x_n} \\
@@ -72,7 +83,6 @@ Three common ways to differentiate a function on a computer
             \frac{\partial y_m}{\partial x_1} & \cdots & \frac{\partial y_m}{\partial x_n}
         \end{bmatrix} \in \mathbb{R}^{m \times n}
     \end{equation*}
-    Cost to compute $F$ is $\mathcal{O}(\mu)$
 \end{frame}
 
 
@@ -97,8 +107,8 @@ Three common ways to differentiate a function on a computer
             \item Application of chain rule
         \end{itemize}
         \item Calculates derivative at all $x \in \mathbb{R}^n$
-        \item Once solution found any value can be plugged in
-        \item Returns \alert{exact} value
+        \item Once a solution is found any value can be plugged in
+        \item Returns \alert{exact} value up to machine precision
         \item Very high computational cost
         \begin{itemize}
             \item $\mathcal{O}(nm \mu)$
@@ -124,6 +134,25 @@ Three common ways to differentiate a function on a computer
     \end{itemize}
 \end{frame}
 
+
+\begin{frame}{Representing expressions}
+    \frametitle{How we can represent expressions}
+    \begin{equation} \label{example1}
+        F \begin{pmatrix}
+            x \\ y \\ z
+        \end{pmatrix} = \begin{pmatrix}
+            \sin (x^2 y) + e^{x^2} \\ e^{x^2} \log z
+        \end{pmatrix}
+    \end{equation}
+    \begin{figure}
+        \centering
+        \includegraphics[width=10cm]{images/Graph_Cluster_1.pdf}
+        \caption{}
+        \label{fig:clusterdag}
+    \end{figure}
+\end{frame}
+
+
 \AtBeginSection[Reverse Mode Algorithmic Differentiation]
 {
 \begin{frame}{Outline}
@@ -133,15 +162,6 @@ Three common ways to differentiate a function on a computer
 
 \section{Reverse Mode Algorithmic Differentiation}
 
-\begin{frame}{Expressions as Trees}
-\frametitle{Expressions as Trees}
-Simple maybe 3 inputs 1 output
-\end{frame}
-
-\begin{frame}{Expressions as Directed Acylic Graphs}
-    \frametitle{Expressions as Directed Acylic Graphs}
-\end{frame}
-
 \begin{frame}{Reverse Mode AD}
     \begin{equation*} \label{1df}
             f: \mathbb{R} \longrightarrow \mathbb{R} \qquad
@@ -149,119 +169,309 @@ Simple maybe 3 inputs 1 output
     \end{equation*}
     \begin{figure}
         \centering
-        \includegraphics[width=10cm]{images/1d_func_sketch.jpg}
+        \includegraphics[width=10cm]{images/Graph_simple_expr.pdf}
     \end{figure}
     Applying chain rule
     \begin{equation*}
         \begin{split}
-            \frac{\partial y}{\partial x} & = \frac{\partial y}{\partial w_{1}} \frac{\partial w_{1}}{\partial x} \\
-            \onslide<2->{& = \frac{\partial y}{\partial w_{2}} \frac{\partial w_{2}}{\partial w_{1}} \frac{\partial w_{1}}{\partial x}} \\
-            \onslide<3->{& = \ldots \\
-            & = \frac{\partial y}{\partial w_{n-1}} \frac{\partial w_{n-1}}{\partial w_{n-2}} \cdots \frac{\partial w_2}{\partial w_1} \frac{\partial w_1}{\partial x}}
+            \frac{\partial y}{\partial x} 
+            & = \frac{\partial y}{\partial v_{1}} \frac{\partial v_{1}}{\partial x} \\
+            \onslide<2->{& = \left( \frac{\partial y}{\partial v_{2}} \frac{\partial v_{2}}{\partial v_{1}} \right) \frac{\partial v_{1}}{\partial x}} \\
+            \onslide<3->{& = \cdots \\
+            & = \left( \left( \left( \frac{\partial y}{\partial v_{n-1}} \frac{\partial v_{n-1}}{\partial v_{n-2}} \right) \cdots \right) \frac{\partial v_2}{\partial v_1} \right) \frac{\partial v_1}{\partial x}}
         \end{split}
     \end{equation*}
 \end{frame}
 
 \begin{frame}{Reverse Mode AD}
-    Quantity of importance is the \alert{adjoint} $\Bar{w}_i$
-    \begin{equation*}
-        \Bar{w}_i = \frac{\partial y}{\partial w_i}
-    \end{equation*}
-    Calculation from previous slide can be rewritten as
-    \begin{equation*}
-        \begin{split}
-            \frac{\partial y}{\partial x} & = \Bar{w}_1 \frac{\partial w_{1}}{\partial x} \\
-            \onslide<2->{& = \Bar{w}_2 \left( \frac{\partial w_{2}}{\partial w_{1}} \frac{\partial w_{1}}{\partial x} \right) } \\
-            \onslide<3->{& = \ldots \\
-            & = \Bar{w}_{n-1} \left( \frac{\partial w_{n-1}}{\partial w_{n-2}} \cdots \frac{\partial w_2}{\partial w_1} \frac{\partial w_1}{\partial x} \right)}
-        \end{split}
-    \end{equation*}
-    \onslide<4->{As we traverse the graph we store the adjoints}
+    \begin{itemize}
+        \item Quantity of importance is the \alert{adjoint} $\Bar{v}_i$
+            \begin{equation*}
+                \Bar{v}_i = \frac{\partial y}{\partial v_i}
+            \end{equation*}
+        \item<2-> Traverse graph forwards computing node values
+        \item<3-> Traverse graph backwards computing adjoints
+        \item<4-> Rearrange $\Bar{v}_i$ with chain rule
+            \begin{equation*}
+                \Bar{v}_i = \frac{\partial y}{\partial v_{i+1}} \frac{\partial v_{i+1}}{\partial v_i} = \Bar{v}_{i+1} \frac{\partial v_{i+1}}{\partial v_i}
+            \end{equation*}
+        \item<5-> Calculate $\Bar{v}_i$ using stored values from forward pass
+    \end{itemize}
 \end{frame}
 
-\begin{frame}{Adjoints of Standard Functions}
-    \begin{table}[h!]
-    \centering
-    \begin{tabular}{|lll|}
-        \hline
-        Function & $\Bar{x}$ & $\Bar{y}$ \\
-        \hline
-        $x+y$ & $1$ & $1$ \\
-        $x-y$ & $1$ & $-1$ \\
-        $x \times y$ & $y$ & $x$ \\
-        $x / y$ & $1/y$ & $-x/y^2$ \\
-        $x^y$ & $y{x}^{(y-1)}$ & ${x}^{y}\log(x)$ \\
-        $\sin(x)$ & $\cos(x)$ &  \\
-        $\cos(x)$ & $-\sin(x)$ &  \\
-        $\exp(x)$ & $\exp(x)$ &  \\
-        $\log(x)$ & $1/x$ &  \\
-        \hline
-    \end{tabular}
-    \label{tab:Adjelementals}
-    \end{table}
+\begin{frame}{Adjoint}
+    \begin{figure}
+        \centering
+        \includegraphics[width=6cm]{images/Graph_simple_parent.pdf}
+    \end{figure}
+    If $\Bar{v}_1$ has two parents then
+    \begin{equation*}
+        \Bar{v}_i = \Bar{v}_{i+1} \frac{\partial v_{i+1}}{\partial v_i} + \Bar{v}_{i+2} \frac{\partial v_{i+2}}{\partial v_i}
+    \end{equation*}
+    \onslide<2->{In general form
+    \begin{equation*}
+        \Bar{v}_i = \sum_{j \in \{\text{parents of } i\}} \Bar{v}_j \frac{\partial v_j}{\partial v_i}
+    \end{equation*}
+    }
 \end{frame}
+
+
+\AtBeginSection[Example]{\begin{frame}{Outline}
+    \tableofcontents[currentsection]
+\end{frame}}
+\section{Example}
 
 \begin{frame}{Forward Pass}
 \frametitle{Forward Pass}
-DAG gif forward pass
+Function: $F(x, y) = \sin(x^2 y) + \exp(x^2)$
+
+Conditions: ${x:1, y:2}$
+\begin{figure}[h!]
+    \includegraphics[width=3cm]{images/Graph_simple_example.pdf}
+    \label{fig:DAGgraph}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Forward Pass}
+
+Function: $F(x, y) = \sin(x^2 y) + \exp(x^2)$
+
+Conditions: ${x:1, y:2}$
+\begin{center}
+        \includegraphics[width=4cm]{DAG_gif_images/fwd_1_fix_1.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Forward Pass}
+
+Function: $F(x, y) = \sin(x^2 y) + \exp(x^2)$
+
+Conditions: ${x:1, y:2}$
+\begin{center}
+        \includegraphics[width=4cm]{DAG_gif_images/fwd_1_fix_2.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Forward Pass}
+
+Function: $F(x, y) = \sin(x^2 y) + \exp(x^2)$
+
+Conditions: ${x:1, y:2}$
+\begin{center}
+        \includegraphics[width=4cm]{DAG_gif_images/fwd_1_fix_3.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Forward Pass}
+
+Function: $F(x, y) = \sin(x^2 y) + \exp(x^2)$
+
+Conditions: ${x:1, y:2}$
+\begin{center}
+        \includegraphics[width=4cm]{DAG_gif_images/fwd_1_fix_4.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Forward Pass}
+
+Function: $F(x, y) = \sin(x^2 y) + \exp(x^2)$
+
+Conditions: ${x:1, y:2}$
+\begin{center}
+        \includegraphics[width=4cm]{DAG_gif_images/fwd_1_fix_5.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Forward Pass}
+
+Function: $F(x, y) = \sin(x^2 y) + \exp(x^2)$
+
+Conditions: ${x:1, y:2}$
+\begin{center}
+        \includegraphics[width=4cm]{DAG_gif_images/fwd_1_fix_6.png}
+\end{center}
 \end{frame}
 
 \begin{frame}{Reverse Pass}
 \frametitle{Reverse Pass}
-DAG gif reverse pass
+
+Function: $F(x, y) = \sin(x^2 y) + \exp(x^2)$
+
+Conditions: ${x:1, y:2}$
+\begin{center}
+    \includegraphics[width=4cm]{DAG_gif_images/rv_1_fix_1.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Reverse Pass}
+\frametitle{Reverse Pass}
+
+Function: $F(x, y) = \sin(x^2 y) + \exp(x^2)$
+
+Conditions: ${x:1, y:2}$
+\begin{center}
+    \includegraphics[width=4cm]{DAG_gif_images/rv_1_fix_2.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Reverse Pass}
+\frametitle{Reverse Pass}
+
+Function: $F(x, y) = \sin(x^2 y) + \exp(x^2)$
+
+Conditions: ${x:1, y:2}$
+\begin{center}
+    \includegraphics[width=4cm]{DAG_gif_images/rv_1_fix_3.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Reverse Pass}
+\frametitle{Reverse Pass}
+
+Function: $F(x, y) = \sin(x^2 y) + \exp(x^2)$
+
+Conditions: ${x:1, y:2}$
+\begin{center}
+    \includegraphics[width=4cm]{DAG_gif_images/rv_1_fix_4.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Reverse Pass}
+\frametitle{Reverse Pass}
+
+Function: $F(x, y) = \sin(x^2 y) + \exp(x^2)$
+
+Conditions: ${x:1, y:2}$
+\begin{center}
+    \includegraphics[width=4cm]{DAG_gif_images/rv_1_fix_5.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Reverse Pass}
+\frametitle{Reverse Pass}
+
+Function: $F(x, y) = \sin(x^2 y) + \exp(x^2)$
+
+Conditions: ${x:1, y:2}$
+\begin{center}
+    \includegraphics[width=4cm]{DAG_gif_images/rv_1_fix_6.png}
+\end{center}
 \end{frame}
 
 \begin{frame}{Time Complexity}
-\frametitle{??Time complexity?? demo??}
-Difference in FM and RM?
+\frametitle{Time Efficiency}
+For 4 functions $F: \mathbb{R}^n \rightarrow \mathbb{R}$
+here are 4 graphs of $n$ against the time taken for both Forward and Backward modes.
+\begin{center}
+    \includegraphics[width=8cm]{images/Graph_TimeDiff.pdf}
+\end{center}
+
+As you can see Forward mode (in blue) becomes far less time efficient as n increases, regardless of the function, as predicted.
 \end{frame}
 
-\begin{frame}{Demo}
-\frametitle{Demo 1}
-Demo that what we have works
-\end{frame}
 
-\begin{frame}{Numpy Demo}
-\frametitle{What if we want more than 1 output}
-Show new DAG
-Numpy arr implemenentation talk
-\end{frame}
+\AtBeginSection[Extensions and accuracy]{\begin{frame}{Outline}
+    \tableofcontents[currentsection]
+\end{frame}}
+\section{Extensions and accuracy}
 
-\begin{frame}
-\frametitle{??Time complexity?? Demo??}
-Time difference in FM and RM
-\end{frame}
 
-\begin{frame}{Further Applications}
-\frametitle{Further Applications}
-If we want to solve adjoint of PDE
+\begin{frame}{Taylor Tests}
+\frametitle{Taylor Tests}
+Get an estimate for $\mathcal{O}(\epsilon ^ 2)$ by using the equation:
+\begin{center}
+    $F(x + \epsilon) = F(x) + \frac{dF}{dx} \cdot \epsilon + \mathcal{O}(\epsilon ^ 2)$
+\end{center}
+
+\begin{center}
+    \includegraphics[width=5cm]{images/taylor_error_1.pdf}
+\end{center}
+
+Take the gradient using the equation: $\frac{\log{\frac{\|u_1 - u\|}{\|u_2 - u\|}}}{\log{\frac{|h_1|}{|h_2|}}} = \frac{\log\|u_1 - u\| - \log\|u_2 - u\|}{\log|h_1| - \log|h_2|}$
 \end{frame}
 
 \begin{frame}
 \frametitle{Advection Diffusion Equation}
-Talk about initial setup
+
+To demonstrate the use of our code we will use it to solve a PDE. For this, we are using the 1 Dimensional Advection Diffusion equation.
+
+\begin{center}
+    $\frac{\partial C}{\partial t} = - V\frac{\partial C}{\partial x} + D\frac{\partial^2 C}{\partial x^2}$
+\end{center}
+
+Given initial conditions as C as a function of F:
+
+\begin{figure}
+\centering
+    \includegraphics[width=5cm]{images/show_sampling.png}
+    \label{fig:sampling}
+\end{figure}
+
 \end{frame}
 
 \begin{frame}
 \frametitle{More: Advection diffusion equation}
-Maybe show gif or picture of the graph over time
-This show implementations
-How do we know we are correct
+
+Defining A to be a first-order central differences matrix and B to be a second-order central differences matrix. Then our equation reduces to:
+\begin{center}
+    $C^{t+1} = C^{t} + \Delta t (-VA + DB) C^{t+1}$
+\end{center}
+
+Which rearranges to:
+
+\begin{center}
+    $C^{t+1} = M^{-1} C^{t}$
+    
+    $M := I + \Delta t(VA - DB)$
+\end{center}
+
 \end{frame}
+
+
+\begin{frame}
+\frametitle{More: Advection diffusion equation}
+
+Using this time-stepping method we can iterate and plot our results to get:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=6cm]{images/Figure_1_ODE2.pdf}
+    \caption{Plot of ADE with V=10, D=5, plotting from t=0 to t=1.5 at timesteps of 0.1. Dotted line is value at t=0}
+    \label{fig:ODE}
+\end{figure}
+
+\end{frame}
+
 
 \begin{frame}
 \frametitle{Adjoint of this}
-Now the adjoint of this
+
+When stepping forward in time we have that:
+
+\begin{center}
+    $C^{t+1} = M^{-1} C^{t}$
+\end{center}
+
+When working with matrices the adjoint function is always the transpose, so we get that:
+
+\begin{center}
+    $\Bar{C}^{t} = M^{-T} \Bar{C}^{t+1}$
+\end{center}
+
 \end{frame}
 
-\begin{frame}
-\frametitle{Demo}
-How does this work with our code/work
-\end{frame}
+\begin{frame}{Uses of calculating the Adjoint}
 
-\begin{frame}
-\frametitle{??Conclusion??}
-How does this work with our code/work
+When calculating the Adjoint of these we output $\frac{\partial C}{\partial t}$ as an array with the derivative at each $C_i$. These values show us how much of an effect changing each point will have on the final outcome.
+
+\begin{center}
+    $[\frac{\partial C_0}{\partial t}, \frac{\partial C_1}{\partial t}, \frac{\partial C_2}{\partial t}, ..., \frac{\partial C_{n-1}}{\partial t}]$
+\end{center}
+
+
+This can be useful for modeling pollution to figure out how increasing pollution in one area will affect the surrounding areas later on.
+
 \end{frame}
 
 \end{document}
