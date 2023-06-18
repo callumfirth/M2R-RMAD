@@ -78,3 +78,15 @@ def symbolnodes(tree, nodes):  # Not currently used
         nodes.append(tree)
     for child in tree.operands:
         symbolnodes(child, nodes)
+
+
+def set0(tree):
+    """
+    Set adjoints and storedvalue to 0.
+
+    Useful for testing and to see the adjoint at each expressions/operator.
+    """
+    tree.adjoint = 0
+    tree.storedvalue = 0
+    for child in tree.operands:
+        set0(child)
