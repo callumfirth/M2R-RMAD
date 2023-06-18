@@ -479,3 +479,5 @@ def pick_test():
 print(pick_test())
 print(taylor_test_test())
 print(PDEtaylor())
+
+taylor_test_test()

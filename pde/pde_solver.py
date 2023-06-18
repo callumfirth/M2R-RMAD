@@ -82,10 +82,11 @@ def over_time_plot(size, numpoints, endtime, dt, V=1, D=1):
         ims.append(im)
     for t in range(len(timepoints)):
         values_over_time = np.append(values_over_time, C)
-        m = time_step(gridpoints2, dt, V, D)
+        m = matrixM(gridpoints2, dt, V, D)
         C = linalg.solve(m, C)
         if t % 10 == 0:
-            im = ax.plot(gridpoints2, C, color="red", alpha=timepoints[t]/endtime)
+            im = ax.plot(gridpoints2, C, color="red",
+                         alpha=timepoints[t]/endtime)
             ims.append(im)
 
     ani = animation.ArtistAnimation(fig, ims, interval=10, blit=True,

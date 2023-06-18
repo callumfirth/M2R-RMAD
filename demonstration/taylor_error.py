@@ -14,7 +14,10 @@ def taylor_error(expr, condition, eps, **kwargs):
     # Get our evaluating our expr output
     Jx = expr.storedvalue
     # If our output is a np array get the dimension
-    n = len(condition[kwargs['var']])
+    if isinstance(condition[kwargs['var']], np.ndarray):
+        n = len(condition[kwargs['var']])
+    else:
+        n = 1
     # Create a random direction vector and normalise this
     # vec = np.random.rand(n) + 1
     vec = np.ones(n)  # Using ones just for testing
@@ -58,4 +61,6 @@ def convergence_table(expr, condition, eps, **kwargs):
     points = [f"{eps[i]}-{eps[i+1]}" for i in range(len(eps)-1)]
     d = dict(zip(points, grads))
     f = open("images\\rate_of_convergence.txt", 'w')
-    return d
+    for k, v in d.items():
+        f.write(("{:<15} {:<15}".format(k, v[0])))
+        f.write("\n")
