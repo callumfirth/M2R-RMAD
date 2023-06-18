@@ -41,7 +41,8 @@ def adjointprevisitor(expr, fn_adjoint=1, **kwargs):
     Traverses the tree in preorder, where we visit the children after parent
     then recursively calls itself. Here we visit the parent node and
     then calculates the adjoint to give to each of its children using
-    adjoint_evaluate method. Then loops through operands and add the respective adjoint.
+    adjoint_evaluate method. Then loops through operands and adds
+    the respective adjoint.
 
     Parameters
     ----------
