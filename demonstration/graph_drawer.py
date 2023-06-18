@@ -1,10 +1,11 @@
 import graphviz as gv
+from matplotlib.pyplot import xlabel
 import numpy as np
 import rmad.expressions as expressions
 
 
-def exprpostvisitor(expr, graph, node="v", numsymbol=0, **kwargs):
-    """Visit an expression in post-order applying a function."""
+def exprpostvisitor(expr, graph, node="v", numsymbol=0, xlab=False, **kwargs):
+    """Setup edges and nodes to be drawn as a DAG."""
     stack = []
     if isinstance(expr, np.ndarray):
         for expression in expr:
@@ -29,7 +30,11 @@ def exprpostvisitor(expr, graph, node="v", numsymbol=0, **kwargs):
                 name = element.value
             else:
                 name = element.symbol
-            graph.node(f'{node}_{id}', str(name), xlabel=f'<{node}<SUB>{id}</SUB>>')
+            if xlab:
+                label = f'<{node}<SUB>{id}</SUB>>'
+            else:
+                label = ""
+            graph.node(f'{node}_{id}', str(name), xlabel=label)
 
             visited[element] = f'{node}_{id}'
             for operand in element.operands:
@@ -38,19 +43,16 @@ def exprpostvisitor(expr, graph, node="v", numsymbol=0, **kwargs):
 
 
 def draw_expression(expr, name, xlab=False, numsymbol=0):
-
+    """Draw expression as a DAG."""
     graph = gv.Digraph(engine='dot')
-
-    exprpostvisitor(expr, graph, numsymbol=2)
-    if not xlab:
-        graph.attr('node', xlab=None)
+    exprpostvisitor(expr, graph, numsymbol=2, xlab=xlab)
     graph.attr(margin="0")
     graph.format = 'pdf'
     graph.render(f'images/Graph_{name}', view=True)
 
 
 def draw_cluster(expr1, expr2, name, xlab=False, numsymbol=0):
-
+    """Draw two expressions side by side."""
     graph = gv.Digraph(engine='dot')
 
     with graph.subgraph(name='cluster_DAG') as cluster1:
