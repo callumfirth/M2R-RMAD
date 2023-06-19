@@ -6,7 +6,7 @@ from pde.pde_solver import initial_C
 import rmad.expressions as expressions
 from rmad.reversemode import reversemodeAD
 from rmad.forwardmode import forwardmodeAD
-from demonstration.taylor_error import pde_taylor_error, taylor_error, taylor_error_plot
+from demonstration.taylor_error import taylor_error, taylor_error_plot
 from demonstration.graph_drawer import draw_expression, draw_cluster
 from pde.pde_solver import over_time_plot, solve
 from rmad.expressions import sin, cos, exp, log
@@ -332,45 +332,37 @@ def test():
     return rm
 
 
-def pde1():
+def pde1_adjoint():
     numpoints = 1000
     size = 10*np.pi
     func = lambda x: np.sin(x)**2 if np.pi < x < 2*np.pi else 0.0
     C0 = initial_C(func, size, numpoints)
     pde = expressions.AdvDif(C0, D=5, V=10, dt=0.01, size=10*np.pi)
-    pick = expressions.Pick(None, e=120)
+    pick = expressions.Pick(None, e=300)
     v = expressions.Symbol('v')
-    expr2 = pick(pde(v))
+    expr = pde(v)
+    expr2 = pick(expr)
     conditions = {v: C0}
+    B = reversemodeAD(expr2, conditions)[v]
+    points = np.linspace(0, size, numpoints)
+    fig, ax = plt.subplots()
+    ax.plot(points, B, "--r", label="")
+    for j in range(0, 200, 10):
+        print(j)
+        expr = pde(expr)
+        expr2 = pick(expr)
+        B = reversemodeAD(expr2, conditions)[v]
+        ax.plot(points, B, alpha=j/200, color="red")
 
-    B = reversemodeAD(expr2, conditions)
+    ax.set_xlabel("$x$: Distance")
+    ax.set_ylabel("$C$: Concentration")
 
+    plt.show()
     return B
 
 
 def plotpde():
     over_time_plot(size=np.pi, numpoints=100, endtime=1.5, dt=0.01, V=10, D=5)
-
-
-def exampleforshow():
-    x = expressions.Symbol('x')
-    expr = x**2
-    conditions = {x: np.array([1, 2, 3])}
-    return reversemodeAD(expr, conditions)
-
-
-def exampleforshow2():
-    x = expressions.Symbol('x')
-    expr = np.array([x**2, x**3])
-    conditions = {x: np.array([1, 2, 3])}
-    return reversemodeAD(expr, conditions)
-
-
-def exampleforshow3():
-    x = expressions.Symbol('x')
-    expr = x * np.array([x**2, x**3])
-    conditions = {x: np.array([1, 2, 3])}
-    return reversemodeAD(expr, conditions)
 
 
 def ex222():
@@ -384,9 +376,100 @@ def ex222():
     return reversemodeAD(expression, conditions)
 
 
+def PDEtaylor_error_new():
+    """Simple test for PDE adjoint values"""
+    # Number of points
+    numpoints = 1000
+    # Setting the size
+    size = 10*np.pi
+    # Setting the function up
+    func = lambda x: np.sin(x)**2 if np.pi <= x <= 2*np.pi else 0.0
+    # Create initial C, from original func
+    C0 = initial_C(func, size, numpoints)
+    # Our PDE that we want to use
+    pick = expressions.Pick(None, e=130)
+    
+    # Our symbol
+    v = expressions.Symbol('v')
+    # Create our expression we want to find adjoint of
+    # expr2 = pick(pde(v))
+    # Setup values for symbol (we have C0 is array here)
+    # conditions = {v: C0}
+    # Epsilon values for our taylor error
+    eps = [10**(-(i+1)) for i in range(10)]
+    # Plot our taylor error
+    vals = []
+    for ep in eps:
+        pde = expressions.AdvDif(C0, D=5, V=10, dt=0.01, size=size)
+        expr2 = pick(pde(v))
+        gridpoints = np.linspace(0, size, numpoints)
+        Jdeltax = solve(solve(C0, gridpoints, dt=ep, V=10, D=5), gridpoints, dt=0.01, V=10, D=5)[130]
+        dJx = (reversemodeAD(expr2, {v: C0})[v])[130]*ep
+        Jx = expr2.storedvalue
+        vals.append(Jdeltax-Jx-dJx)
+    fig = plt.figure()
+    plt.plot(np.log10(np.array(eps)),
+             np.log10(abs(np.array(vals))), label='Taylor error')
+    plt.gca().invert_xaxis()
+    plt.plot([-2, -9], [-2, -16], linestyle='dashed', label='$O(\epsilon^2)$')
+    plt.xlabel("$\log_{{10}}$ of Epsilon")
+    plt.ylabel("$\log_{{10}}$ of Taylor error")
+    plt.legend()
+    plt.show()
+
+
+def PDEtaylor_error_old():
+    """Simple test for PDE adjoint values"""
+    # Number of points
+    numpoints = 1000
+    # Setting the size
+    size = 10*np.pi
+    # Setting the function up
+    func = lambda x: np.sin(x)**2 if np.pi <= x <= 2*np.pi else 0.0
+    # Create initial C, from original func
+    C0 = initial_C(func, size, numpoints)
+    # Our PDE that we want to use
+    pick = expressions.Pick(None, e=130)
+    pde = expressions.AdvDif(C0, D=5, V=10, dt=0.01, size=size)
+    # Our symbol
+    v = expressions.Symbol('v')
+    # Create our expression we want to find adjoint of
+    expr2 = pick(pde(v))
+    # Setup values for symbol (we have C0 is array here)
+    conditions = {v: C0}
+    # Epsilon values for our taylor error
+    eps = [10**(-(i+1)) for i in range(10)]
+    # Plot our taylor error
+    return taylor_error_plot(expr2, conditions, eps, var=v)
+
+
+def taylor_test_test():
+    """Simple test for taylor test"""
+    x = expressions.Symbol('x')
+    x2 = x**2
+    exp = expressions.Exp()
+    pick = expressions.Pick(None, 0)
+    expression = pick(2*(x2) + cos(x)*(x2)+exp(x))
+    w = np.array([1, 2, 5])
+    conditions = {x: w}
+    eps = [10**(-(i+1)) for i in range(10)]
+    return taylor_error_plot(expression, conditions, eps, var=x)
+
+
+def pick_test():
+    """Simple test for taylor test"""
+    x = expressions.Symbol('x')
+    x2 = x**2
+    pick = expressions.Pick(None, 0)
+    expression = pick(2*(x2) + (x2))
+    w = np.array([3, 5, 3, 7])
+    conditions = {x: w}
+    return reversemodeAD(expression, conditions)
+
+
 # print(ex222())
 
-# heatmap(15, 15, 20)
+# heatmap(20, 20, 25)
 
 # plottime(50, 20, 25)
 
@@ -424,72 +507,3 @@ def reproduce():
     cluster_graph()  # Cluster graph figure for comparison
 
 # reproduce() #Please dont run yet, run ones individually above for testing
-
-
-def PDEtaylor_error():
-    """Simple test for PDE adjoint values"""
-    # Number of points
-    numpoints = 1000
-    # Setting the size
-    size = 10*np.pi
-    # Setting the function up
-    func = lambda x: np.sin(x)**2 if np.pi <= x <= 2*np.pi else 0.0
-    # Create initial C, from original func
-    C0 = initial_C(func, size, numpoints)
-    # Our PDE that we want to use
-    pick = expressions.Pick(None, e=130)
-    
-    # Our symbol
-    v = expressions.Symbol('v')
-    # Create our expression we want to find adjoint of
-    # expr2 = pick(pde(v))
-    # Setup values for symbol (we have C0 is array here)
-    # conditions = {v: C0}
-    # Epsilon values for our taylor error
-    eps = [10**(-(i+1)) for i in range(10)]
-    # Plot our taylor error
-    vals = []
-    for ep in eps:
-        pde = expressions.AdvDif(C0, D=5, V=10, dt=ep, size=size)
-        Jx = C0[130]
-        Jdeltax = solve(C0, np.linspace(0, size, numpoints), dt=ep, V=10, D=5)[130]
-        dJx = (reversemodeAD(pick(pde(v)), {v: C0})[v])[130]*ep
-        vals.append(Jdeltax-Jx-dJx)
-    fig = plt.figure()
-    plt.plot(np.log10(np.array(eps)),
-             np.log10(abs(np.array(vals))), label='Taylor error')
-    plt.gca().invert_xaxis()
-    plt.plot([-2, -9], [-2, -16], linestyle='dashed', label='$O(\epsilon^2)$')
-    plt.xlabel("$\log_{{10}}$ of Epsilon")
-    plt.ylabel("$\log_{{10}}$ of Taylor error")
-    plt.legend()
-    plt.show()
-
-
-def taylor_test_test():
-    """Simple test for taylor test"""
-    x = expressions.Symbol('x')
-    x2 = x**2
-    exp = expressions.Exp()
-    pick = expressions.Pick(None, 0)
-    expression = pick(2*(x2) + cos(x)*(x2)+exp(x))
-    w = np.array([1, 2, 5])
-    conditions = {x: w}
-    eps = [10**(-(i+1)) for i in range(10)]
-    return taylor_error_plot(expression, conditions, eps, var=x)
-
-
-def pick_test():
-    """Simple test for taylor test"""
-    x = expressions.Symbol('x')
-    x2 = x**2
-    pick = expressions.Pick(None, 0)
-    expression = pick(2*(x2) + (x2))
-    w = np.array([3, 5, 3, 7])
-    conditions = {x: w}
-    return reversemodeAD(expression, conditions)
-
-
-# print(pick_test())
-# print(taylor_test_test())
-# print(PDEtaylor())

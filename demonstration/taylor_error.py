@@ -27,9 +27,10 @@ def taylor_error(expr, condition, eps, **kwargs):
     evalpostvisitor(expr, symbol_map=condition_new)
     # Put this evaluated expr into a new array
     Jdeltax = expr.storedvalue
-    
+    adjoint = reversemodeAD(expr, condition)[kwargs['var']]
+
     # Now calculate derivative of our initial conditions
-    dJx = np.dot(reversemodeAD(expr, condition)[kwargs['var']], vec*eps)
+    dJx = np.dot(adjoint, vec*eps)
     # Evaluate expression with these new conditions
     # Using taylor series expansion find O(eps^2)
     return np.abs(Jdeltax - Jx - dJx)
