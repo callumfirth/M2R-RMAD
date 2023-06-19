@@ -1,21 +1,7 @@
 # M2R-RMAD
 
-Rough Todo List:
+This github is for Imperial's Mathematics Year 2 project, based on Reverse Mode Algorithmic Differentiation supervised by Dr David A. Ham.
 
-Paper:
-1. Create table for example in Section on Applying AD to DAG's: Example of FM
-2. Tidy up and expand Section on Applying AD to DAG's
-3. Tidy up Section on Implementation of scalar AD
-4. Tidy up Section on Implementation of multi dim AD
-5. Section on difference in runtime, change image, maybe compare not just scalar but multi dim AD too
-6. Finish/Start initial type up of implementation of our Advection Diffusion Equation
+In this project, we have set out to implement Reverse Mode Algorithmic Differentiation, and using our implementation, demonstrate why and how it is used in preference to other methods. We start off by creating Directed Acyclic Graphs (DAGs) from the functions we want to differentiate. We created evaluation functions, traversing the tree, applying the mathematical functions to give us a single output, then traversed backward through the tree and evaluated the adjoint at each elementary operation, in other words, we took the derivative of each elementary operation and multiplied through to, using the chain rule, give us our final derivatives of our original expression.
 
-Implementation:
-1. If all previous done and enough time, start to try and implement Matrix multiplication as Ax. Would be like sin and only take one operand which is x. And the operator will have a value A that it applies to? Can do this as we dont care about the adjoint of A?
-2. ODE Advection Diffusion Equation
-3. Merge all demonstrations, examples and output to one section
-
-Oral:
-1. Work out how to use Beamer (put presentation into own folder on git)
-2. Get rough plan of the slides and the general flow of the presentation
-3. Get rough plan of the demo we are going to use and what we will show
+From there we both proved the accuracy of our code, using a Taylor Test and demonstrated the time efficiency of our algorithm by comparing it to how long the forward mode algorithmic differentiation code to run. We then look at extensions of our implementation and also looking at how we can implement PDEs into our expressions. Notably, the one-dimensional Advection-Diffusion equation. We created time steps to implement an iterative method, using central differences to approximate our derivatives. Then used reverse mode algorithmic differentiation to differentiate the algorithm of our time step.
