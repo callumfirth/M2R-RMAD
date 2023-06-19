@@ -93,7 +93,7 @@ Three common ways to differentiate a function on a computer
         \item Returns \alert{approximate} value
         \item Low computational costs
         \begin{itemize}
-            \item $\mathcal{O}(n) \cdot \mathrm{Cost}(F)$
+            \item $\mathcal{O}(n) \cdot \text{Cost}(F)$
         \end{itemize}
     \end{itemize}
 \end{frame}
@@ -109,7 +109,7 @@ Three common ways to differentiate a function on a computer
         \item Returns \alert{exact} value up to machine precision
         \item Very high computational cost
         \begin{itemize}
-            \item $\mathcal{O}(nm \mu)$
+            \item $\mathcal{O}(nm) \cdot \text{Cost}(F)$
         \end{itemize}
     \end{itemize}
 \end{frame}
@@ -126,22 +126,23 @@ Three common ways to differentiate a function on a computer
         \item Returns \alert{exact} value up to machine precision
         \item Low computational costs
             \begin{itemize}
-                \item $\mathcal{O}(n \mu)$ with forward mode
-                \item $\mathcal{O}(m \mu)$ with reverse mode
+                \item $\mathcal{O}(n) \cdot \text{Cost}(F)$ with forward mode
+                \item $\mathcal{O}(m) \cdot \text{Cost}(F)$ with reverse mode
             \end{itemize}
+        \item<2-> Blah Blah
     \end{itemize}
 \end{frame}
 
 
 \begin{frame}{Representing expressions}
     \frametitle{How we can represent expressions}
-    \begin{equation} \label{example1}
+    \begin{equation*} \label{example1}
         F \begin{pmatrix}
             x \\ y \\ z
         \end{pmatrix} = \begin{pmatrix}
             \sin (x^2 y) + e^{x^2} \\ e^{x^2} \log z
         \end{pmatrix}
-    \end{equation}
+    \end{equation*}
     \begin{figure}
         \centering
         \includegraphics[width=10cm]{images/Graph_Cluster_1.pdf}
@@ -379,10 +380,12 @@ As you can see Forward mode (in blue) becomes far less time efficient as n incre
 \frametitle{Taylor Tests}
 Get an estimate for $\mathcal{O}(\epsilon ^ 2)$ by using the equation:
 \begin{center}
-    $F(x + \epsilon) = F(x) + \frac{dF}{dx} \cdot \epsilon + \mathcal{O}(\epsilon ^ 2)$
+    $F(x + \epsilon V) = F(x) + \frac{dF}{dx} \cdot \epsilon V + \mathcal{O}(\epsilon ^ 2)$
 \end{center}
 
 \begin{center}
+    $F(x, y) = x*sin(x+y)$
+    
     \includegraphics[width=5cm]{images/taylor_error_1.pdf}
 \end{center}
 
@@ -392,7 +395,7 @@ Take the gradient using the equation: $\frac{\log{\frac{\|u_1 - u\|}{\|u_2 - u\|
 \begin{frame}
 \frametitle{Advection Diffusion Equation}
 
-To demonstrate the use of our code we will use it to solve a PDE. For this, we are using the 1 Dimensional Advection Diffusion equation.
+1 Dimensional Advection Diffusion equation.
 
 \begin{center}
     $\frac{\partial C}{\partial t} = - V\frac{\partial C}{\partial x} + D\frac{\partial^2 C}{\partial x^2}$
@@ -402,7 +405,7 @@ Given initial conditions as C as a function of F:
 
 \begin{figure}
 \centering
-    \includegraphics[width=5cm]{images/show_sampling.png}
+    \includegraphics[width=7cm]{images/show_sampling.png}
     \label{fig:sampling}
 \end{figure}
 
@@ -430,11 +433,9 @@ Which rearranges to:
 \begin{frame}
 \frametitle{More: Advection diffusion equation}
 
-Using this time-stepping method we can iterate and plot our results to get:
-
 \begin{figure}[h]
     \centering
-    \includegraphics[width=6cm]{images/Figure_1_ODE2.pdf}
+    \includegraphics[width=8cm]{images/Figure_1_ODE2.pdf}
     \caption{Plot of ADE with V=10, D=5, plotting from t=0 to t=1.5 at timesteps of 0.1. Dotted line is value at t=0}
     \label{fig:ODE}
 \end{figure}
