@@ -146,10 +146,12 @@ class ReverseMode:
 x = expressions.Symbol("x")
 y = expressions.Symbol("y")
 
-matrix = np.array([[x, 1], [1, 0]])
+# matrix = np.array([[x, 1], [1, 0]])
 
-vec = np.array([x**2 + y, x])
+# vec = np.array([x**2 + y, x])
 
-vec_expr = matrix@vec
+# vec_expr = matrix@vec
 
-print(VectorReverseMode(vec_expr, {"x": 1, "y": 2}).compute_partial_derivatives())
+expr = np.array([expressions.Sin(x**2 * y) + expressions.Exp(x**2)])
+
+print(VectorReverseMode(expr, {"x": 1, "y": 2}).compute_partial_derivatives())
